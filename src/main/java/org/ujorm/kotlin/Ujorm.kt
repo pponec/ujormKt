@@ -4,8 +4,8 @@ import kotlin.reflect.KClass
 
 interface Operator {}
 
-interface Criterion<D : Any, out V : Any> {
-    val operator: ValueOperator
+interface Criterion<D : Any, O : Operator, out V : Any> {
+    val operator: O
     fun eval(domain : D) : Boolean
 }
 
@@ -17,7 +17,7 @@ interface Key<D : Any, V : Any> {
     /** Get value */
     fun of(domain : D) : V
 
-    fun operate(operator : ValueOperator, value : V) : Criterion<D, V> {
+    fun operate(operator : ValueOperator, value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
     }
 
@@ -67,8 +67,35 @@ public enum class BinaryOperator : Operator {
     NOT;
 }
 
-open class ValueCriterion<D : Any, out V : Any> : Criterion<D, V> {
+open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any>> {
+    val left : Criterion<D, Operator, Criterion<D, Operator, Any>>
+    val right : Criterion<D, Operator, Criterion<D, Operator, Any>>
+    override val operator: BinaryOperator
+        get() = field
 
+    constructor(
+        left: Criterion<D, Operator, Criterion<D, Operator, Any>>,
+        operator: BinaryOperator
+        right: Criterion<D, Operator, Criterion<D, Operator, Any>>
+    ) {
+        this.left = left
+        this.operator = operator
+        this.right = right
+    }
+
+    override fun eval(domain: D): Boolean {
+        return when(operator) {
+            BinaryOperator.AND -> left.eval(domain) && right.eval(domain)
+            BinaryOperator.OR -> left.eval(domain) || right.eval(domain)
+            BinaryOperator.NOT -> ! left.eval(domain)
+            else -> {
+                throw UnsupportedOperationException("Unsupported operator: $operator")
+            }
+        }
+    }
+}
+
+open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
     val key : Key<D, out V>
     val value : V
     override val operator: ValueOperator
@@ -84,10 +111,10 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, V> {
         return true;
     }
 
-    public infix fun <V : Any> AND(to: Criterion<D,out V>): Criterion<D, Criterion<D, out Any>> {
-        throw UnsupportedOperationException();
+    public infix fun <V : Any> AND(to: Criterion<D, Operator, out V>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND, to);
     }
-    public infix fun <V : Any>  OR (to: Criterion<D,out V>): Criterion<D, Criterion<D, out Any>> {
-        throw UnsupportedOperationException();
+    public infix fun <V : Any>  OR (to: Criterion<D, Operator, out V>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR, to);
     }
 }
