@@ -28,10 +28,6 @@ interface Key<D : Any, V : Any> {
     public infix fun GT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.GT, value)
     }
-
-    public infix fun LT(value : V) : ValueCriterion<D, V> {
-        return ValueCriterion(this, ValueOperator.LT, value)
-    }
 }
 
 open class KeyImpl<D : Any, V : Any> : Key<D, V> {
@@ -59,24 +55,27 @@ public enum class ValueOperator : Operator {
     GT,
     LTE,
     GTE,
+    ALL,
+    NONE
 }
 
 public enum class BinaryOperator : Operator {
     AND,
     OR,
-    NOT;
+    AND_NOT,
+    OR_NOT;
 }
 
 open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any>> {
-    val left : Criterion<D, Operator, Criterion<D, Operator, Any>>
-    val right : Criterion<D, Operator, Criterion<D, Operator, Any>>
+    val left : Criterion<D, Operator, out Any>
+    val right : Criterion<D, Operator, out Any>
     override val operator: BinaryOperator
         get() = field
 
     constructor(
-        left: Criterion<D, Operator, Criterion<D, Operator, *>>,
+        left: Criterion<D, out Operator, out Any>,
         operator: BinaryOperator,
-        right: Criterion<D, Operator, Criterion<D, Operator, *>>
+        right: Criterion<D, out Operator, out Any>
     ) {
         this.left = left
         this.operator = operator
@@ -87,7 +86,8 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         return when(operator) {
             BinaryOperator.AND -> left.eval(domain) && right.eval(domain)
             BinaryOperator.OR -> left.eval(domain) || right.eval(domain)
-            BinaryOperator.NOT -> ! left.eval(domain)
+            BinaryOperator.AND_NOT -> left.eval(domain) && !right.eval(domain)
+            BinaryOperator.OR_NOT -> left.eval(domain) || !right.eval(domain)
             else -> {
                 throw UnsupportedOperationException("Unsupported operator: $operator")
             }
@@ -108,17 +108,31 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 
     override fun eval(domain: D): Boolean {
-        return true;
+        return when(operator) {
+            ValueOperator.ALL -> true
+            ValueOperator.NONE -> false
+            ValueOperator.EQ -> key.of(domain) == value
+            ValueOperator.GT ->  {
+                val v1 : V = value
+//                val v2 : V = key.of(domain)
+//                return if (v1 is Comparable<*>) compareValues(v1, v2) < 0 else false
+                return false
+            }
+            ValueOperator.LT -> false
+            else -> throw java.lang.UnsupportedOperationException("Unsupported operator $operator")
+        }
     }
 
     public infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
-//        val x : Criterion<D, Operator, Any> = this
-//        val y : Criterion<D, Operator, Any> = crn
-//        return BinaryCriterion(x, BinaryOperator.AND, y);
-        TODO("Implement it")
+        return BinaryCriterion(this, BinaryOperator.AND, crn);
     }
     public infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-//        return BinaryCriterion(this, BinaryOperator.OR, crn);
-        TODO("Implement it")
+        return BinaryCriterion(this, BinaryOperator.OR, crn);
+    }
+    public infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND_NOT, crn);
+    }
+    public infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR_NOT, crn);
     }
 }
