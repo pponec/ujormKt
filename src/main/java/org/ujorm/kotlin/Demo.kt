@@ -1,4 +1,4 @@
-package demo
+package org.ujorm.kotlin
 
 import java.time.LocalDate
 

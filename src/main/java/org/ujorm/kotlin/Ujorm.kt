@@ -1,10 +1,13 @@
-package demo
+package org.ujorm.kotlin
 
-import java.lang.UnsupportedOperationException
-import java.time.LocalDate
 import kotlin.reflect.KClass
 
+interface Operator {}
 
+interface Criterion<D : Any, out V : Any> {
+    val operator: ValueOperator
+    fun eval(domain : D) : Boolean
+}
 
 interface Key<D : Any, V : Any> {
     val name : String
@@ -14,20 +17,20 @@ interface Key<D : Any, V : Any> {
     /** Get value */
     fun of(domain : D) : V
 
-    fun operate(operator : ValueOperatoor, value : V) : Criterion<D, V> {
-        return Criterion(this, operator, value)
+    fun operate(operator : ValueOperator, value : V) : Criterion<D, V> {
+        return ValueCriterion(this, operator, value)
     }
 
-    public infix fun EQ(value : V) : Criterion<D, V> {
-        return Criterion(this, ValueOperatoor.EQ, value)
+    public infix fun EQ(value : V) : ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperator.EQ, value)
     }
 
-    public infix fun GT(value : V) : Criterion<D, V> {
-        return Criterion(this, ValueOperatoor.GT, value)
+    public infix fun GT(value : V) : ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperator.GT, value)
     }
 
-    public infix fun LT(value : V) : Criterion<D, V> {
-        return Criterion(this, ValueOperatoor.LT, value)
+    public infix fun LT(value : V) : ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperator.LT, value)
     }
 }
 
@@ -50,7 +53,7 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
         get() = field
 }
 
-public enum class ValueOperatoor {
+public enum class ValueOperator : Operator {
     EQ,
     LT,
     GT,
@@ -58,20 +61,26 @@ public enum class ValueOperatoor {
     GTE,
 }
 
-public enum class BinaryOperatoor {
+public enum class BinaryOperator : Operator {
     AND,
     OR,
     NOT;
 }
 
-open class Criterion<D : Any, out V : Any> constructor (
-    val key : Key<D, out V>,
-    val operator : ValueOperatoor,
-    val value : V,
-) {
+open class ValueCriterion<D : Any, out V : Any> : Criterion<D, V> {
 
-    /** Evalueate domain object */
-    fun eval(domain : D) : Boolean {
+    val key : Key<D, out V>
+    val value : V
+    override val operator: ValueOperator
+        get() = field
+
+    constructor(key: Key<D, out V>, operator: ValueOperator, value: V) {
+        this.key = key
+        this.operator = operator
+        this.value = value
+    }
+
+    override fun eval(domain: D): Boolean {
         return true;
     }
 
