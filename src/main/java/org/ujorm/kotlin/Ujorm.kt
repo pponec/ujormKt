@@ -4,8 +4,8 @@ import kotlin.reflect.KClass
 
 interface Operator {}
 
-interface Criterion<D : Any, O : Operator, out V : Any> {
-    val operator: O
+interface Criterion<D : Any, out OP : Operator, out V : Any> {
+    val operator: OP
     fun eval(domain : D) : Boolean
 }
 
@@ -74,9 +74,9 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         get() = field
 
     constructor(
-        left: Criterion<D, Operator, Criterion<D, Operator, Any>>,
-        operator: BinaryOperator
-        right: Criterion<D, Operator, Criterion<D, Operator, Any>>
+        left: Criterion<D, Operator, Criterion<D, Operator, *>>,
+        operator: BinaryOperator,
+        right: Criterion<D, Operator, Criterion<D, Operator, *>>
     ) {
         this.left = left
         this.operator = operator
