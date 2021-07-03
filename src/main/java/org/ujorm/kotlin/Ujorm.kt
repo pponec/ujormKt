@@ -111,10 +111,14 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         return true;
     }
 
-    public infix fun <V : Any> AND(to: Criterion<D, Operator, out V>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.AND, to);
+    public infix fun <V : Any> AND(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
+//        val x : Criterion<D, Operator, Any> = this
+//        val y : Criterion<D, Operator, Any> = crn
+//        return BinaryCriterion(x, BinaryOperator.AND, y);
+        TODO("Implement it")
     }
-    public infix fun <V : Any>  OR (to: Criterion<D, Operator, out V>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.OR, to);
+    public infix fun <V : Any>  OR (crn: Criterion<D, Operator, V>): BinaryCriterion<D> {
+//        return BinaryCriterion(this, BinaryOperator.OR, crn);
+        TODO("Implement it")
     }
 }
