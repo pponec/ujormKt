@@ -5,8 +5,8 @@ import kotlin.reflect.KClass
 interface Operator
 
 interface Criterion<D : Any, out OP : Operator, out V : Any> {
+    val domainClass : KClass<D>
     val operator: OP
-    val domainClass : KClass<*>
     fun eval(domain : D) : Boolean
     fun not() = BinaryCriterion(this, BinaryOperator.NOT, this)
     /** Plain text expression */
@@ -107,7 +107,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     val left : Criterion<D, Operator, out Any>
     val right : Criterion<D, Operator, out Any>
     override val operator: BinaryOperator
-    override val domainClass: KClass<*> get() = left.domainClass
+    override val domainClass: KClass<D> get() = left.domainClass
 
     constructor(
         left: Criterion<D, out Operator, out Any>,
@@ -146,7 +146,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     val key : Key<D, out V>
     val value : V
     override val operator: ValueOperator
-    override val domainClass: KClass<*> get() = key.domainClass
+    override val domainClass: KClass<D> get() = key.domainClass
 
     constructor(key: Key<D, out V>, operator: ValueOperator, value: V) {
         this.key = key
