@@ -14,8 +14,11 @@ interface Key<D : Any, V : Any> {
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
 
-    /** Get value */
+    /** Get a value from the domain object */
     fun of(domain : D) : V
+
+    /** Set a value to the domain object */
+    fun set(domain: D, value: V) : Unit
 
     fun operate(operator : ValueOperator, value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -37,7 +40,13 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
         this.valueClass = valueClass
     }
 
+    /** Get a value from the domain object */
     override fun of(domain: D): V {
+        TODO("Not yet implemented")
+    }
+
+    /** Set a value to the domain object */
+    override fun set(domain: D, value: V) {
         TODO("Not yet implemented")
     }
 
