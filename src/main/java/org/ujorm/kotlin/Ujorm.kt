@@ -26,6 +26,9 @@ interface Key<D : Any, V : Any> : CharSequence {
         return ValueCriterion(this, operator, value)
     }
 
+    /** key() */
+    operator fun invoke(): String = name
+
     /** Value operator */
     infix fun EQ(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.EQ, value)

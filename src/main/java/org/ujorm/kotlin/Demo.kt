@@ -17,8 +17,11 @@ fun main(args: Array<String>) {
     val userName : String = _user.name.of(user)
     val id : Int = _user.id.of(user)
     //val parent : String = _user.name.parent.of(user) // TODO
-
     println("Valid: $isValid, name=$userName, id=$id")
+
+    val nameId1 : String = _user.id.toString()
+    val nameId2 : String = _user.id()
+    println("NameId: $nameId1 , $nameId2")
 }
 
 /** Domain object */
@@ -49,7 +52,7 @@ open class _User {
         domainClass = User::class,
         valueClass = User::class,
         setter = { d : User, v : User -> d.parent = v },
-        getter = { d : User -> d.parent })
+        getter = { d : User -> d.parent!! }) // TODO
 }
 
 /** Provider of meta-models */
