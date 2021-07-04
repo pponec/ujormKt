@@ -26,13 +26,12 @@
             <artifactId>kotlin-stdlib-jdk8</artifactId>
             <version>${kotlin.version}</version>
         </dependency>
-
-        <!-- -.->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
             <version>1.5.20-RC</version>
         </dependency>
+        <!-- -.->
         <dependency>
             <groupId>org.funktionale</groupId>
             <artifactId>funktionale-all</artifactId>
@@ -71,6 +70,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>
