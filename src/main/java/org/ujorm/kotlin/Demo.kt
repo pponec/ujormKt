@@ -52,6 +52,6 @@ open class _User {
 }
 
 /** Provider of meta-models */
-object ModelProvier {
+object ModelProvier : AbstractMetaModel {
     val user = _User()
 }

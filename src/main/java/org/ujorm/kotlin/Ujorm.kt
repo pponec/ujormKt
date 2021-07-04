@@ -150,3 +150,8 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
 }
+
+/** Interface of meta-model */
+interface AbstractMetaModel {
+
+}
