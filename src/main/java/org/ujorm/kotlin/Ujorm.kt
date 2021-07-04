@@ -55,8 +55,8 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     override val domainClass: KClass<D>
     override val valueClass: KClass<V>
     // var type : KType = typeOf<Int?>() // TODO: how to check nullable values?
-    val setter: (D, V) -> Unit
-    val getter: (D) -> V
+    private val setter: (D, V) -> Unit
+    private val getter: (D) -> V
 
     constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: (D, V) -> Unit, getter: (D) -> V) {
         this.name = name
