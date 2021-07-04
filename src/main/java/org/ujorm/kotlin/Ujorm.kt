@@ -7,6 +7,7 @@ interface Operator
 interface Criterion<D : Any, out OP : Operator, out V : Any> {
     val operator: OP
     fun eval(domain : D) : Boolean
+    fun not() = BinaryCriterion(this, BinaryOperator.NOT, this)
 }
 
 interface Key<D : Any, V : Any> {
@@ -78,6 +79,7 @@ enum class ValueOperator : Operator {
 enum class BinaryOperator : Operator {
     AND,
     OR,
+    NOT,
     AND_NOT,
     OR_NOT;
 }
