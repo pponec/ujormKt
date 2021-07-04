@@ -211,5 +211,10 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 
 /** Interface of meta-model */
 interface AbstractMetaModel {
+}
 
+/** Meta-model of the domain object will be a generated class in the feature */
+interface DomainModel {
+    /** Domain class */
+    val _domainClass : KClass<*>
 }
