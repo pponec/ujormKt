@@ -15,17 +15,19 @@ assert(crn1.toString() == "User {name EQ \"Pavel\"}")
 assert(crn2.toString() == "User {id GT 1}")
 
 val user = User(id = 11, name = "Xaver", born = LocalDate.now())
+val noValid : Boolean = crn1.eval(user)
 val isValid : Boolean = crn4.eval(user)
 val userName : String = _user.name.of(user)
 val userId : Int = _user.id.of(user)
-assert(isValid, { "crn4.eval(user)" })
-assert(userName == "Xaver", { "Wrong userName" })
-assert(userId == 11, { "Wrong userId" })
+assert(!noValid, { "crn1.eval(user)" })
+assert( isValid, { "crn4.eval(user)" })
+assert(userName == "Xaver", { "userName" })
+assert(userId == 11, { "userId" })
 
 val nameId1 : String = _user.id.toString()
 val nameId2 : String = _user.id()
-assert(nameId1 == "id", { "Wrong nameId1" } )
-assert(nameId2 == "id", { "Wrong nameId2" } )
+assert(nameId1 == "id", { "nameId1" } )
+assert(nameId2 == "id", { "nameId2" } )
 ``````
 
 
