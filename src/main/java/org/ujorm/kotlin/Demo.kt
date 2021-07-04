@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
     assert(crn1.toString() == "User(name EQ \"Pavel\")")
     assert(crn2.toString() == "User(id GT 1)")
 
-    val user = User(11, "Xaver", LocalDate.now(), null)
+    val user = User(11, "Xaver", LocalDate.now())
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val userId : Int = _user.id.of(user)
@@ -35,7 +35,7 @@ data class User constructor (
     var id: Int,
     var name: String,
     var born: LocalDate,
-    var parent: User?)
+    var parent: User? = null)
 
 /** Meta-model of the domain object will be a generated class in the feature */
 open class _User : DomainModel{
