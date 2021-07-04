@@ -30,10 +30,10 @@ data class User constructor (
 
 /** Meta-model of the domain object */
 open class _User {
-    val id : Key<User, Int> = KeyImpl("id", User::class, Int::class)
-    val name : Key<User, String> = KeyImpl("name", User::class, String::class)
-    val born : Key<User, LocalDate> = KeyImpl("name", User::class, LocalDate::class)
-    val parent : Key<User, User> = KeyImpl("name", User::class, User::class)
+    val id : Key<User, Int> = KeyImpl("id", User::class, Int::class, Any(), Any())
+    val name : Key<User, String> = KeyImpl("name", User::class, String::class, Any(), Any())
+    val born : Key<User, LocalDate> = KeyImpl("name", User::class, LocalDate::class, Any(), Any())
+    val parent : Key<User, User> = KeyImpl("name", User::class, User::class, Any(), Any())
 }
 
 /** Provider of meta-models */

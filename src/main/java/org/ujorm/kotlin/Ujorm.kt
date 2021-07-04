@@ -13,6 +13,8 @@ interface Key<D : Any, V : Any> {
     val name : String
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
+    val setter : Any
+    val getter : Any
 
     /** Get a value from the domain object */
     fun of(domain : D) : V
@@ -31,13 +33,19 @@ interface Key<D : Any, V : Any> {
     public infix fun GT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.GT, value)
     }
+
+    public infix fun LT(value : V) : ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperator.LT, value)
+    }
 }
 
 open class KeyImpl<D : Any, V : Any> : Key<D, V> {
-    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>) {
+    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: Any, getter: Any) {
         this.name = name
         this.domainClass = domainClass
         this.valueClass = valueClass
+        this.setter = setter
+        this.getter = getter
     }
 
     /** Get a value from the domain object */
@@ -55,6 +63,10 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     override val domainClass: KClass<D>
         get() = field
     override val valueClass: KClass<V>
+        get() = field
+    override val setter: Any
+        get() = field
+    override val getter: Any
         get() = field
 }
 
