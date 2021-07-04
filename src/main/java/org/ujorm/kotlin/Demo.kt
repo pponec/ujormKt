@@ -11,6 +11,7 @@ fun main(args: Array<String>) {
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
+    //val crn5 = crn1.not() OR (crn2 AND crn3) // TODO
 
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
