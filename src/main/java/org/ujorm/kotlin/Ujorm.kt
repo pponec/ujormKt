@@ -11,7 +11,7 @@ interface Criterion<D : Any, out OP : Operator, out V : Any> {
     fun not() = BinaryCriterion(this, BinaryOperator.NOT, this)
 }
 
-interface Key<D : Any, V : Any> {
+interface Key<D : Any, V : Any> : CharSequence {
     val name : String
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
@@ -28,20 +28,30 @@ interface Key<D : Any, V : Any> {
         return ValueCriterion(this, operator, value)
     }
 
+    /** Value operator */
     infix fun EQ(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.EQ, value)
     }
 
+    /** Value operator */
     infix fun GT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.GT, value)
     }
 
+    /** Value operator */
     infix fun LT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.LT, value)
     }
 }
 
 open class KeyImpl<D : Any, V : Any> : Key<D, V> {
+
+    override val name: String
+    override val domainClass: KClass<D>
+    override val valueClass: KClass<V>
+    override val setter: Any
+    override val getter: Any
+
     constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: Any, getter: Any) {
         this.name = name
         this.domainClass = domainClass
@@ -60,11 +70,17 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
         TODO("Not yet implemented")
     }
 
-    override val name: String
-    override val domainClass: KClass<D>
-    override val valueClass: KClass<V>
-    override val setter: Any
-    override val getter: Any
+    /** For a CharSequence implementation */
+    override val length: Int get() = name.length
+
+    /** For a CharSequence implementation */
+    override fun get(index: Int): Char = name[index]
+
+    /** For a CharSequence implementation */
+    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = name.subSequence(startIndex, endIndex)
+
+    /** For a CharSequence implementation */
+    override fun toString(): String = name
 }
 
 enum class ValueOperator : Operator {
