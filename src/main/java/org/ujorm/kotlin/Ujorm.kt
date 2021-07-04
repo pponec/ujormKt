@@ -1,7 +1,7 @@
 package org.ujorm.kotlin
 
-import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 interface Operator
 
@@ -50,6 +50,7 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     override val name: String
     override val domainClass: KClass<D>
     override val valueClass: KClass<V>
+    // var type : KType = typeOf<Int?>() // TODO: how to check nullable values?
     val setter: (D, V) -> Unit
     val getter: (D) -> V
 
@@ -124,6 +125,10 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
             }
         }
     }
+
+    override fun toString(): String {
+        return "($left) $operator ($right))"
+    }
 }
 
 open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
@@ -175,6 +180,16 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
     infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
+    }
+
+    override fun toString(): String {
+        val separator = stringSeparator()
+        return "$key $operator $separator$value$separator"
+    }
+
+    /** A separator for String values */
+    private fun stringSeparator() : String {
+        return if (value is CharSequence) "\"" else "";
     }
 }
 

@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
     val _user = ModelProvier.user
     val user = User(11, "Pavel", LocalDate.now(), null)
 
-    val crn1 = _user.name EQ "Pavel"
+    val crn1 = _user.name EQ "Xaver"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
