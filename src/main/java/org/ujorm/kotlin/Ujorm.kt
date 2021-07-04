@@ -15,8 +15,6 @@ interface Key<D : Any, V : Any> : CharSequence {
     val name : String
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
-    val setter : Any
-    val getter : Any
 
     /** Get a value from the domain object */
     fun of(domain : D) : V
@@ -49,10 +47,10 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     override val name: String
     override val domainClass: KClass<D>
     override val valueClass: KClass<V>
-    override val setter: Any
-    override val getter: Any
+    val setter: (D, V) -> Unit
+    val getter: (D) -> V
 
-    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: Any, getter: Any) {
+    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: (D, V) -> Unit, getter: (D) -> V) {
         this.name = name
         this.domainClass = domainClass
         this.valueClass = valueClass
@@ -61,14 +59,10 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     }
 
     /** Get a value from the domain object */
-    override fun of(domain: D): V {
-        TODO("Not yet implemented")
-    }
+    override fun of(domain: D): V = getter(domain)
 
     /** Set a value to the domain object */
-    override fun set(domain: D, value: V) {
-        TODO("Not yet implemented")
-    }
+    override fun set(domain: D, value: V) = setter(domain, value)
 
     /** For a CharSequence implementation */
     override val length: Int get() = name.length
