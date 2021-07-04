@@ -2,7 +2,7 @@ package org.ujorm.kotlin
 
 import kotlin.reflect.KClass
 
-interface Operator {}
+interface Operator
 
 interface Criterion<D : Any, out OP : Operator, out V : Any> {
     val operator: OP
@@ -26,15 +26,15 @@ interface Key<D : Any, V : Any> {
         return ValueCriterion(this, operator, value)
     }
 
-    public infix fun EQ(value : V) : ValueCriterion<D, V> {
+    infix fun EQ(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.EQ, value)
     }
 
-    public infix fun GT(value : V) : ValueCriterion<D, V> {
+    infix fun GT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.GT, value)
     }
 
-    public infix fun LT(value : V) : ValueCriterion<D, V> {
+    infix fun LT(value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.LT, value)
     }
 }
@@ -59,18 +59,13 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
     }
 
     override val name: String
-        get() = field
     override val domainClass: KClass<D>
-        get() = field
     override val valueClass: KClass<V>
-        get() = field
     override val setter: Any
-        get() = field
     override val getter: Any
-        get() = field
 }
 
-public enum class ValueOperator : Operator {
+enum class ValueOperator : Operator {
     EQ,
     LT,
     GT,
@@ -80,7 +75,7 @@ public enum class ValueOperator : Operator {
     NONE
 }
 
-public enum class BinaryOperator : Operator {
+enum class BinaryOperator : Operator {
     AND,
     OR,
     AND_NOT,
@@ -91,7 +86,6 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     val left : Criterion<D, Operator, out Any>
     val right : Criterion<D, Operator, out Any>
     override val operator: BinaryOperator
-        get() = field
 
     constructor(
         left: Criterion<D, out Operator, out Any>,
@@ -120,7 +114,6 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     val key : Key<D, out V>
     val value : V
     override val operator: ValueOperator
-        get() = field
 
     constructor(key: Key<D, out V>, operator: ValueOperator, value: V) {
         this.key = key
@@ -144,16 +137,16 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         }
     }
 
-    public infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.AND, crn);
+    infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND, crn)
     }
-    public infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.OR, crn);
+    infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR, crn)
     }
-    public infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.AND_NOT, crn);
+    infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND_NOT, crn)
     }
-    public infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.OR_NOT, crn);
+    infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
 }
