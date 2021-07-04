@@ -50,9 +50,9 @@ open class _User {
         getter = { d : User -> d.born })
     val parent : Key<User, User> = KeyImpl("name",
         domainClass = User::class,
-        valueClass = User::class,
+        valueClass = User::class, // TODO: How to use the type: User?::class
         setter = { d : User, v : User -> d.parent = v },
-        getter = { d : User -> d.parent!! }) // TODO
+        getter = { d : User -> d.parent!! }) // TODO: return a nullable value
 }
 
 /** Provider of meta-models */
