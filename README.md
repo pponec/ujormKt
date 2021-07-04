@@ -11,8 +11,8 @@ val crn1 = _user.name EQ "Pavel"
 val crn2 = _user.id GT 1
 val crn3 = _user.id LT 99
 val crn4 = crn1 OR (crn2 AND crn3)
-assert(crn1.toString() == "User(name EQ \"Pavel\")")
-assert(crn2.toString() == "User(id GT 1)")
+assert(crn1.toString() == "User {name EQ \"Pavel\"}")
+assert(crn2.toString() == "User {id GT 1}")
 
 val user = User(11, "Xaver", LocalDate.now())
 val isValid : Boolean = crn4.eval(user)

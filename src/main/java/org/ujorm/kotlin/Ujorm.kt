@@ -153,7 +153,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 
     /** Extenced text expression */
     override fun toString(): String {
-        return "${domainClass}(${this()})"
+        return "${domainClass} {${this()}}"
     }
 }
 
