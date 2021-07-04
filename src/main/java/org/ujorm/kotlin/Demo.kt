@@ -12,17 +12,20 @@ fun main(args: Array<String>) {
     val crn3 = _user.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
     //val crn5 = crn1.not() OR (crn2 AND crn3) // TODO
+    assert(crn1() == "name EQ \"Xaver\"")
+    assert(crn2.toString() == "User(id GT 1)")
 
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val id : Int = _user.id.of(user)
     //val parent : User = _user.parent.of(user) // TODO
     //val parentName : String = _user.name.parent.of(user) // TODO
-    println("Valid: $isValid, name=$userName, id=$id")
+    assert(isValid, { "crn4.eval(user)" })
 
     val nameId1 : String = _user.id.toString()
     val nameId2 : String = _user.id()
-    println("NameId: $nameId1 , $nameId2")
+    assert(nameId1 == "id", { "Wrong name of id" } )
+    assert(nameId2 == "id", { "Wrong name of id" } )
 }
 
 /** Domain object */

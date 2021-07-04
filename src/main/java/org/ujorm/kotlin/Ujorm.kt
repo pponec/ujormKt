@@ -1,14 +1,18 @@
 package org.ujorm.kotlin
 
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 interface Operator
 
 interface Criterion<D : Any, out OP : Operator, out V : Any> {
     val operator: OP
+    val domainClass : KClass<*>
     fun eval(domain : D) : Boolean
     fun not() = BinaryCriterion(this, BinaryOperator.NOT, this)
+    /** Plain text expression */
+    operator fun invoke(): String
+    /** Extended text expression */
+    override fun toString(): String
 }
 
 interface Key<D : Any, V : Any> : CharSequence {
@@ -103,6 +107,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     val left : Criterion<D, Operator, out Any>
     val right : Criterion<D, Operator, out Any>
     override val operator: BinaryOperator
+    override val domainClass: KClass<*> get() = left.domainClass
 
     constructor(
         left: Criterion<D, out Operator, out Any>,
@@ -126,8 +131,14 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         }
     }
 
-    override fun toString(): String {
+    /** Plain text expression */
+    override operator fun invoke(): String {
         return "($left) $operator ($right))"
+    }
+
+    /** Extenced text expression */
+    override fun toString(): String {
+        return "${domainClass}(${this()})"
     }
 }
 
@@ -135,6 +146,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     val key : Key<D, out V>
     val value : V
     override val operator: ValueOperator
+    override val domainClass: KClass<*> get() = key.domainClass
 
     constructor(key: Key<D, out V>, operator: ValueOperator, value: V) {
         this.key = key
@@ -182,13 +194,17 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
 
-    override fun toString(): String {
-        val separator = stringSeparator()
+    override operator fun invoke(): String {
+        val separator = stringValueSeparator()
         return "$key $operator $separator$value$separator"
     }
 
+    override fun toString(): String {
+        return "${key.domainClass.simpleName}(${this()})"
+    }
+
     /** A separator for String values */
-    private fun stringSeparator() : String {
+    private fun stringValueSeparator() : String {
         return if (value is CharSequence) "\"" else "";
     }
 }
