@@ -16,7 +16,8 @@ fun main(args: Array<String>) {
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val id : Int = _user.id.of(user)
-    //val parent : String = _user.name.parent.of(user) // TODO
+    //val parent : User = _user.parent.of(user) // TODO
+    //val parentName : String = _user.name.parent.of(user) // TODO
     println("Valid: $isValid, name=$userName, id=$id")
 
     val nameId1 : String = _user.id.toString()
