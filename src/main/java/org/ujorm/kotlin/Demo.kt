@@ -6,8 +6,6 @@ import kotlin.reflect.KClass
 /** Sample of usage */
 fun main(args: Array<String>) {
     val _user = ModelProvier.user
-    val user = User(11, "Pavel", LocalDate.now(), null)
-
     val crn1 = _user.name EQ "Xaver"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
@@ -16,6 +14,7 @@ fun main(args: Array<String>) {
     assert(crn1() == "name EQ \"Xaver\"")
     assert(crn2.toString() == "User(id GT 1)")
 
+    val user = User(11, "Pavel", LocalDate.now(), null)
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val userId : Int = _user.id.of(user)
