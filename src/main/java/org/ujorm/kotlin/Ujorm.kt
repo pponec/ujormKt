@@ -1,5 +1,6 @@
 package org.ujorm.kotlin
 
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 interface Operator
@@ -128,14 +129,25 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
             ValueOperator.ALL -> true
             ValueOperator.NONE -> false
             ValueOperator.EQ -> key.of(domain) == value
-            ValueOperator.GT ->  {
-                val v1 : V = value
-//                val v2 : V = key.of(domain)
-//                return if (v1 is Comparable<*>) compareValues(v1, v2) < 0 else false
-                return false
-            }
-            ValueOperator.LT -> false
+            ValueOperator.GT ->  compare(key.of(domain), value) > 0
+            ValueOperator.GTE -> compare(key.of(domain), value) >= 0
+            ValueOperator.LT -> compare(key.of(domain), value) < 0
+            ValueOperator.LTE -> compare(key.of(domain), value) <= 0
             else -> throw java.lang.UnsupportedOperationException("Unsupported operator $operator")
+        }
+    }
+
+    /** Private comparator */
+    private fun <T : Any> compare(a: T?, b: T?): Int {
+        if (a === b) return 0
+        if (a == null) return -1
+        if (b == null) return 1
+
+        return if (a is Comparable<*>) {
+            //@Suppress("UNCHECKED_CAST")
+            (a as Comparable<T>).compareTo(b)
+        } else {
+            throw IllegalStateException("Unsupported comparation for ${this.key.valueClass}" )
         }
     }
 
