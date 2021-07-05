@@ -6,7 +6,7 @@ The solution is based on a design from the [Ujorm](https://pponec.github.io/ujor
 ## Usage:
 
 ```kotlin
-val _user = ModelProvier.user
+val _user = ModelProvider.user
 val crn1 = _user.name EQ "Pavel"
 val crn2 = _user.id GT 1
 val crn3 = _user.id LT 99

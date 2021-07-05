@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 /** Sample of usage */
 fun main(args: Array<String>) {
-    val _user = ModelProvier.user
+    val _user = ModelProvider.user
     val crn1 = _user.name EQ "Pavel"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
@@ -81,6 +81,6 @@ open class _User : DomainModel{
 }
 
 /** Provider of meta-models */
-object ModelProvier : AbstractMetaModel {
+object ModelProvider : AbstractMetaModel {
     val user = _User()
 }
