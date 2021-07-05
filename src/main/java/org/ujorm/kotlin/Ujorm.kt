@@ -220,13 +220,12 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 
     /** A separator for String values */
     private fun stringValueSeparator() : String {
-        return if (value is CharSequence) "\"" else "";
+        return if (value is CharSequence) "\"" else ""
     }
 }
 
 /** Interface of meta-model */
-interface AbstractMetaModel {
-}
+interface AbstractMetaModel {}
 
 /** Meta-model of the domain object will be a generated class in the feature */
 interface DomainModel {
