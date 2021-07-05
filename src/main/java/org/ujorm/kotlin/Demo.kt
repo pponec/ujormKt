@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin
+package org.ujorm.kotlin.demo
 
+import org.ujorm.kotlin.*
 import java.time.LocalDate
 import kotlin.reflect.KClass
 
@@ -34,8 +35,8 @@ fun main(args: Array<String>) {
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val userId : Int = _user.id.of(user)
-    //val parent : User = _user.parent.of(user) // TODO
-    //val parentName : String = _user.name.parent.of(user) // TODO
+    val parent : User? = _user.parent.of(user) // TODO: reading nullable values
+    //val parentName : String = _user.name.parent.of(user) // TODO: reading the relations
     assert(!noValid, { "crn1.eval(user)" })
     assert( isValid, { "crn4.eval(user)" })
     assert(userName == "Xaver", { "userName" })

@@ -32,6 +32,7 @@ interface Criterion<D : Any, out OP : Operator, out V : Any> {
 
 interface Key<D : Any, V : Any> : CharSequence {
     val name : String
+    val required : Boolean
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
 
@@ -65,8 +66,9 @@ interface Key<D : Any, V : Any> : CharSequence {
 }
 
 open class KeyImpl<D : Any, V : Any> : Key<D, V> {
-
     override val name: String
+    /** Required value (mon-nnull) */
+    override val required: Boolean = true
     override val domainClass: KClass<D>
     override val valueClass: KClass<V>
     // var type : KType = typeOf<Int?>() // TODO: how to check nullable values?

@@ -30,7 +30,19 @@ assert(nameId1 == "id", { "nameId1" } )
 assert(nameId2 == "id", { "nameId2" } )
 ``````
 
+## What is the use?
 
+The library allows you to build a meta-model according to domain objects.
+Using the model there is posssible to read and to write attribute values and create a structured condition models to a common use.
+For example:
+
+- validations
+- alerting
+- modelling conditions for ORM
+
+## Class diagram
+
+![Class diagram](docs/Ujorm.png)
 
 For more information see the 
 [source code](https://github.com/pponec/ujormKt/blob/main/src/main/java/org/ujorm/kotlin/Demo.kt).

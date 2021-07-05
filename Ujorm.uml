@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>/home/pavel/Vyvoj/ProjectUjormKt/src/main/java/org/ujorm/kotlin/Ujorm.kt</OriginalElement>
+  <nodes>
+    <node x="1381.976817702845" y="85.0">org.ujorm.kotlin.AbstractMetaModel</node>
+    <node x="320.75" y="87.2291886195996">org.ujorm.kotlin.Criterion</node>
+    <node x="485.75" y="355.0">org.ujorm.kotlin.BinaryCriterion</node>
+    <node x="1300.976817702845" y="355.0">org.ujorm.kotlin.KeyImpl</node>
+    <node x="955.2220758693361" y="85.0">org.ujorm.kotlin.ValueOperator</node>
+    <node x="657.6280295047418" y="-47.54162276080084">org.ujorm.kotlin.Operator</node>
+    <node x="853.9884088514225" y="355.0">org.ujorm.kotlin.Key</node>
+    <node x="0.0" y="355.0">org.ujorm.kotlin.ValueCriterion</node>
+    <node x="624.7144362486828" y="87.2291886195996">org.ujorm.kotlin.BinaryOperator</node>
+    <node x="1391.976817702845" y="163.0">org.ujorm.kotlin.DomainModel</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.ujorm.kotlin.ValueCriterion" target="org.ujorm.kotlin.Criterion" relationship="REALIZATION">
+      <point x="0.0" y="-162.5" />
+      <point x="230.0" y="319.0" />
+      <point x="427.75" y="319.0" />
+      <point x="0.0" y="97.49981138040039" />
+    </edge>
+    <edge source="org.ujorm.kotlin.BinaryCriterion" target="org.ujorm.kotlin.Criterion" relationship="REALIZATION">
+      <point x="0.0" y="-110.5" />
+      <point x="631.25" y="319.0" />
+      <point x="427.75" y="319.0" />
+      <point x="0.0" y="97.49981138040039" />
+    </edge>
+    <edge source="org.ujorm.kotlin.Criterion" target="org.ujorm.kotlin.Operator" relationship="DEPENDENCY">
+      <point x="0.0" y="-97.5" />
+      <point x="427.75" y="-30.04162276080084" />
+      <point x="-64.0" y="0.0" />
+    </edge>
+    <edge source="org.ujorm.kotlin.ValueOperator" target="org.ujorm.kotlin.Operator" relationship="REALIZATION">
+      <point x="1.1064278191952326E-4" y="-110.0" />
+      <point x="1050.722186512118" y="-30.041622760800834" />
+      <point x="721.6278219178082" y="-30.041622760800834" />
+      <point x="-2.0758693358402525E-4" y="17.49962276080084" />
+    </edge>
+    <edge source="org.ujorm.kotlin.BinaryOperator" target="org.ujorm.kotlin.Operator" relationship="REALIZATION">
+      <point x="-4.362486827176326E-4" y="-84.0001886195996" />
+      <point x="735.714" y="-30.041622760800834" />
+      <point x="721.6278219178082" y="-30.041622760800834" />
+      <point x="-2.0758693358402525E-4" y="17.49962276080084" />
+    </edge>
+    <edge source="org.ujorm.kotlin.KeyImpl" target="org.ujorm.kotlin.Key" relationship="REALIZATION">
+      <point x="-147.5" y="13.0" />
+      <point x="182.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.5679233991621782" showDependencies="false" x="932.2954550706663" y="362.1174920969444" />
+  <SelectedNodes>
+    <node>org.ujorm.kotlin.AbstractMetaModel</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>Project Files</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+
