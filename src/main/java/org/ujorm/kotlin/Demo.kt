@@ -35,7 +35,7 @@ fun main(args: Array<String>) {
     val isValid : Boolean = crn4.eval(user)
     val userName : String = _user.name.of(user)
     val userId : Int = _user.id.of(user)
-    val parent : User? = _user.parent.of(user) // TODO: reading nullable values
+    //val parent : User? = _user.parent.of(user) // TODO: how to read nullable value?
     //val parentName : String = _user.name.parent.of(user) // TODO: reading the relations
     assert(!noValid, { "crn1.eval(user)" })
     assert( isValid, { "crn4.eval(user)" })
@@ -76,8 +76,8 @@ open class _User : DomainModel{
     val parent : Key<User, User> = KeyImpl("parent",
         domainClass =_domainClass,
         valueClass = User::class, // TODO: How to use the type: User?::class
-        setter = { d : User, v : User -> d.parent = v },
-        getter = { d : User -> d.parent!! }) // TODO: return a nullable value
+        setter = { d : User, v : User? -> d.parent = v },
+        getter = { d : User -> d.parent!!}) // TODO: how to return the nullable value?
 }
 
 /** Provider of meta-models */
