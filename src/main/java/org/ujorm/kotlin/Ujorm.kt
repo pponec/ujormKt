@@ -30,14 +30,15 @@ interface Criterion<D : Any, out OP : Operator, out V : Any> {
     override fun toString(): String
 }
 
-interface Key<D : Any, V : Any> : CharSequence {
+interface KeyNullable<D : Any, V : Any> : CharSequence {
     val name : String
+    /** Is the value required (non-null) ? */
     val required : Boolean
     val domainClass : KClass<D>
     val valueClass : KClass<out V>
 
     /** Get a value from the domain object */
-    fun of(domain : D) : V
+    fun of(domain : D) : V?
 
     /** Set a value to the domain object */
     fun set(domain: D, value: V) : Unit
@@ -65,29 +66,26 @@ interface Key<D : Any, V : Any> : CharSequence {
     }
 }
 
-open class KeyImpl<D : Any, V : Any> : Key<D, V> {
+interface Key<D : Any, V : Any> : KeyNullable<D, V> {
+    /** Get a value from the domain object */
+    override fun of(domain : D) : V
+
+    /** Set a value to the domain object */
+    override fun set(domain: D, value: V) : Unit
+}
+
+abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
     override val name: String
-    /** Required value (mon-nnull) */
-    override val required: Boolean = true
+    /** Required value (mon-nnull)
+     * KType = typeOf<Int?>()  */
     override val domainClass: KClass<D>
     override val valueClass: KClass<V>
-    // var type : KType = typeOf<Int?>() // TODO: how to check nullable values?
-    private val setter: (D, V) -> Unit
-    private val getter: (D) -> V
 
-    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>, setter: (D, V) -> Unit, getter: (D) -> V) {
+    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>,) {
         this.name = name
         this.domainClass = domainClass
         this.valueClass = valueClass
-        this.setter = setter
-        this.getter = getter
     }
-
-    /** Get a value from the domain object */
-    override fun of(domain: D): V = getter(domain)
-
-    /** Set a value to the domain object */
-    override fun set(domain: D, value: V) = setter(domain, value)
 
     /** For a CharSequence implementation */
     override val length: Int get() = name.length
@@ -100,6 +98,48 @@ open class KeyImpl<D : Any, V : Any> : Key<D, V> {
 
     /** For a CharSequence implementation */
     override fun toString(): String = name
+}
+
+/** Key implementation for a nullable values */
+open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
+    override val required: Boolean get() = false
+    private val setter: (D, V?) -> Unit
+    private val getter: (D) -> V?
+
+    constructor(
+        name: String,
+        domainClass: KClass<D>,
+        valueClass: KClass<V>,
+        setter: (D, V?) -> Unit,
+        getter: (D) -> V?
+    ) : super(name, domainClass, valueClass) {
+        this.setter = setter
+        this.getter = getter
+    }
+
+    override fun of(domain: D): V? = getter(domain)
+    override fun set(domain: D, value: V) = setter(domain, value)
+}
+
+/** Key implementation for a non-null values */
+open class KeyImpl<D : Any, V : Any> : AbstractKey<D, V> , Key<D, V> {
+    override val required: Boolean get() = true
+    private val setter: (D, V) -> Unit
+    private val getter: (D) -> V
+
+    constructor(
+        name: String,
+        domainClass: KClass<D>,
+        valueClass: KClass<V>,
+        setter: (D, V) -> Unit,
+        getter: (D) -> V
+    ) : super(name, domainClass, valueClass) {
+        this.setter = setter
+        this.getter = getter
+    }
+
+    override fun of(domain: D): V = getter(domain)
+    override fun set(domain: D, value: V) = setter(domain, value)
 }
 
 enum class ValueOperator : Operator {
@@ -160,12 +200,12 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 }
 
 open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
-    val key : Key<D, out V>
-    val value : V
+    val key : KeyNullable<D, out V>
+    val value : V?
     override val operator: ValueOperator
     override val domainClass: KClass<D> get() = key.domainClass
 
-    constructor(key: Key<D, out V>, operator: ValueOperator, value: V) {
+    constructor(key: KeyNullable<D, out V>, operator: ValueOperator, value: V) {
         this.key = key
         this.operator = operator
         this.value = value
@@ -217,7 +257,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 
     override fun toString(): String {
-        return "${key.domainClass.simpleName}(${this()})"
+        return "${key.domainClass.simpleName} {${this()}}"
     }
 
     /** A separator for String values */
