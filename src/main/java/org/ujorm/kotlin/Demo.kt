@@ -43,6 +43,9 @@ fun main(args: Array<String>) {
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
 
+    _user.name.set(user, "James");
+    //_user.parent.set(user, null); // TODO: Write a null value
+
     val nameId1 : String = _user.id.toString()
     val nameId2 : String = _user.id()
     assert(nameId1 == "id", { "nameId1" } )
