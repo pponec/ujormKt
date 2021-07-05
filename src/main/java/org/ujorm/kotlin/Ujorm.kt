@@ -19,7 +19,7 @@ import kotlin.reflect.KClass
 
 interface Operator
 
-interface Criterion<D : Any, out OP : Operator, out V : Any> {
+interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val domainClass : KClass<D>
     val operator: OP
     fun eval(domain : D) : Boolean
@@ -100,7 +100,7 @@ abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
     override fun toString(): String = name
 }
 
-/** Key implementation for a nullable values */
+/** Key implementation for nullable values */
 open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
     override val required: Boolean get() = false
     private val setter: (D, V?) -> Unit
@@ -160,16 +160,16 @@ enum class BinaryOperator : Operator {
     OR_NOT;
 }
 
-open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any>> {
-    val left : Criterion<D, Operator, out Any>
-    val right : Criterion<D, Operator, out Any>
+open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
+    val left : Criterion<D, Operator, out Any?>
+    val right : Criterion<D, Operator, out Any?>
     override val operator: BinaryOperator
     override val domainClass: KClass<D> get() = left.domainClass
 
     constructor(
-        left: Criterion<D, out Operator, out Any>,
+        left: Criterion<D, out Operator, out Any?>,
         operator: BinaryOperator,
-        right: Criterion<D, out Operator, out Any>
+        right: Criterion<D, out Operator, out Any?>
     ) {
         this.left = left
         this.operator = operator
