@@ -5,26 +5,26 @@
   <nodes>
     <node x="1381.976817702845" y="85.0">org.ujorm.kotlin.AbstractMetaModel</node>
     <node x="320.75" y="87.2291886195996">org.ujorm.kotlin.Criterion</node>
-    <node x="485.75" y="355.0">org.ujorm.kotlin.BinaryCriterion</node>
+    <node x="59.92345833447641" y="355.0">org.ujorm.kotlin.BinaryCriterion</node>
     <node x="1300.976817702845" y="355.0">org.ujorm.kotlin.KeyImpl</node>
     <node x="955.2220758693361" y="85.0">org.ujorm.kotlin.ValueOperator</node>
     <node x="657.6280295047418" y="-47.54162276080084">org.ujorm.kotlin.Operator</node>
-    <node x="853.9884088514225" y="355.0">org.ujorm.kotlin.Key</node>
-    <node x="0.0" y="355.0">org.ujorm.kotlin.ValueCriterion</node>
+    <node x="884.7163756478972" y="355.0">org.ujorm.kotlin.Key</node>
     <node x="624.7144362486828" y="87.2291886195996">org.ujorm.kotlin.BinaryOperator</node>
+    <node x="372.45593359294946" y="355.0">org.ujorm.kotlin.ValueCriterion</node>
     <node x="1391.976817702845" y="163.0">org.ujorm.kotlin.DomainModel</node>
   </nodes>
   <notes />
   <edges>
     <edge source="org.ujorm.kotlin.ValueCriterion" target="org.ujorm.kotlin.Criterion" relationship="REALIZATION">
       <point x="0.0" y="-162.5" />
-      <point x="230.0" y="319.0" />
+      <point x="602.4559335929495" y="319.0" />
       <point x="427.75" y="319.0" />
       <point x="0.0" y="97.49981138040039" />
     </edge>
     <edge source="org.ujorm.kotlin.BinaryCriterion" target="org.ujorm.kotlin.Criterion" relationship="REALIZATION">
       <point x="0.0" y="-110.5" />
-      <point x="631.25" y="319.0" />
+      <point x="205.4234583344764" y="319.0" />
       <point x="427.75" y="319.0" />
       <point x="0.0" y="97.49981138040039" />
     </edge>
@@ -50,9 +50,9 @@
       <point x="182.0" y="0.0" />
     </edge>
   </edges>
-  <settings layout="Hierarchic" zoom="0.5679233991621782" showDependencies="false" x="932.2954550706663" y="362.1174920969444" />
+  <settings layout="Hierarchic" zoom="1.1679233991621782" showDependencies="false" x="681.9766390119146" y="313.5476175624015" />
   <SelectedNodes>
-    <node>org.ujorm.kotlin.AbstractMetaModel</node>
+    <node>org.ujorm.kotlin.Key</node>
   </SelectedNodes>
   <Categories>
     <Category>Methods</Category>
