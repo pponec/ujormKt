@@ -1,7 +1,8 @@
 # ujormKt
 
-A very early prototype of the Kotlin library for modelling filters using a domain object meta-model.
-The solution is based on a design from the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework.
+A very early prototype of the `Kotlin` library for modelling filters using a domain object meta-model.
+Assembled filters work on common POJO objects.
+The solution was inspired by the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework, but this code is completely new.
 Topical areas of use are:
 
 - validations
@@ -10,10 +11,11 @@ Topical areas of use are:
 
 # What remains to be done
 
-- reading and writing remote attributes (via relationships) is not supported yet
+- building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
 - the domain object model should be generated according to the original POJO objects in feature
 - API cleaning
-- Integration of model filters with the Hibernate framework
+- Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
+- Integration of model filters with the `Hibernate` ORM framework
 
 
 ## Usage:
