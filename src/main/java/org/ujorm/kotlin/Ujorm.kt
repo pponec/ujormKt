@@ -24,11 +24,25 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val domainClass : KClass<D>
     val operator: OP
     fun eval(domain : D) : Boolean
-    fun not() = BinaryCriterion(this, BinaryOperator.NOT, this)
+    fun not() : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>>
+    = BinaryCriterion(this, BinaryOperator.NOT, this)
     /** Plain text expression */
     operator fun invoke(): String
     /** Extended text expression */
     override fun toString(): String
+
+    infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND, crn)
+    }
+    infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR, crn)
+    }
+    infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.AND_NOT, crn)
+    }
+    infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+        return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
+    }
 }
 
 interface KeyNullable<D : Any, V : Any> : CharSequence {
@@ -191,12 +205,15 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 
     /** Plain text expression */
     override operator fun invoke(): String {
-        return "($left) $operator ($right))"
+        return when (operator) {
+            BinaryOperator.NOT -> /**/ "$operator (${right.invoke()})"
+            else -> "(${left.invoke()}) $operator (${right.invoke()})"
+        }
     }
 
     /** Extenced text expression */
     override fun toString(): String {
-        return "${domainClass} {${this()}}"
+        return "${domainClass.simpleName}: ${invoke()}"
     }
 }
 
@@ -239,26 +256,13 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         }
     }
 
-    infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.AND, crn)
-    }
-    infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.OR, crn)
-    }
-    infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.AND_NOT, crn)
-    }
-    infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
-        return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
-    }
-
     override operator fun invoke(): String {
         val separator = stringValueSeparator()
         return "$key $operator $separator$value$separator"
     }
 
     override fun toString(): String {
-        return "${key.domainClass.simpleName} {${this()}}"
+        return "${key.domainClass.simpleName}: ${invoke()}"
     }
 
     /** A separator for String values */
@@ -267,11 +271,16 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 }
 
-/** Interface of meta-model */
-interface AbstractMetaModel {}
+/** Interface of the domain meta-model */
+interface AbstractModelProvider {
+    /** Get all entity models */
+    val entityModels : List<DomainModel>
+}
 
 /** Meta-model of the domain object will be a generated class in the feature */
 interface DomainModel {
-    /** Domain class */
+    /** Get the main domain class */
     val _domainClass : KClass<*>
+    /** Get all attributes */
+    val attributes : List<KeyNullable<out Any, Any>>
 }

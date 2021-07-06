@@ -8,6 +8,6 @@ internal class DemoKtTest {
 
     @Test
     fun mainTest() {
-        main1(arrayOf())
+        main1()
     }
 }

@@ -20,15 +20,17 @@ import java.time.LocalDate
 import kotlin.reflect.KClass
 
 /** Sample of usage */
-fun main(args: Array<String>) {
+fun main() {
     val _user = ModelProvider.user
     val crn1 = _user.name EQ "Pavel"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
-    //val crn5 = crn1.not() OR (crn2 AND crn3) // TODO
-    assert(crn1.toString() == "User {name EQ \"Pavel\"}")
-    assert(crn2.toString() == "User {id GT 1}")
+    val crn5 = crn1.not() OR (crn2 AND crn3)
+    assert(crn1.toString() == "User: name EQ \"Pavel\"")
+    assert(crn2.toString() == "User: id GT 1")
+    assert(crn4.toString() == "User: (name EQ \"Pavel\") OR ((id GT 1) AND (id LT 99))")
+    assert(crn5.toString() == "User: (NOT (name EQ \"Pavel\")) OR ((id GT 1) AND (id LT 99))")
 
     val user = User(id = 11, name = "Xaver", born = LocalDate.now())
     val noValid : Boolean = crn1.eval(user)
@@ -43,8 +45,8 @@ fun main(args: Array<String>) {
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
 
-    _user.name.set(user, "James");
-    _user.parent.set(user, null);
+    _user.name.set(user, "James")
+    _user.parent.set(user, null)
 
     val nameId1 : String = _user.id.toString()
     val nameId2 : String = _user.id()
@@ -82,9 +84,14 @@ open class _User : DomainModel{
         valueClass = User::class,
         setter = { d : User, v : User? -> d.parent = v },
         getter = { d : User -> d.parent}) // TODO: how to return the nullable value?
+
+    override val attributes: List<KeyNullable<User, Any>>
+        get() = TODO("listOf(id, name, parent), ...")
 }
 
 /** Provider of meta-models */
-object ModelProvider : AbstractMetaModel {
+object ModelProvider : AbstractModelProvider {
     val user = _User()
+    override val entityModels: List<DomainModel>
+        get() = TODO("listOf(user)")
 }
