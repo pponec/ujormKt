@@ -44,7 +44,7 @@ fun main(args: Array<String>) {
     assert(parent == null, { "userId" })
 
     _user.name.set(user, "James");
-    //_user.parent.set(user, null); // TODO: Write a null value
+    _user.parent.set(user, null);
 
     val nameId1 : String = _user.id.toString()
     val nameId2 : String = _user.id()
@@ -65,17 +65,17 @@ open class _User : DomainModel{
     val id : Key<User, Int> = KeyImpl("id",
         domainClass = _domainClass,
         valueClass = Int::class,
-        setter = { d : User, v : Int -> d.id = v },
+        setter = { d : User, v : Int? -> d.id = v!! },
         getter = { d : User -> d.id })
     val name : Key<User, String> = KeyImpl("name",
         domainClass = _domainClass,
         valueClass = String::class,
-        setter = { d : User, v : String -> d.name = v },
+        setter = { d : User, v : String? -> d.name = v!! },
         getter = { d : User -> d.name })
     val born : Key<User, LocalDate> = KeyImpl("born",
         domainClass = _domainClass,
         valueClass = LocalDate::class,
-        setter = { d : User, v : LocalDate -> d.born = v },
+        setter = { d : User, v : LocalDate? -> d.born = v!! },
         getter = { d : User -> d.born })
     val parent : KeyNullable<User, User> = KeyNullableImpl("parent",
         domainClass =_domainClass,

@@ -15,6 +15,7 @@
  */
 package org.ujorm.kotlin
 
+import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
 interface Operator
@@ -41,7 +42,7 @@ interface KeyNullable<D : Any, V : Any> : CharSequence {
     fun of(domain : D) : V?
 
     /** Set a value to the domain object */
-    fun set(domain: D, value: V) : Unit
+    fun set(domain: D, value: V?) : Unit
 
     fun operate(operator : ValueOperator, value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -70,8 +71,8 @@ interface Key<D : Any, V : Any> : KeyNullable<D, V> {
     /** Get a value from the domain object */
     override fun of(domain : D) : V
 
-    /** Set a value to the domain object */
-    override fun set(domain: D, value: V) : Unit
+    /** Set a non-null value to the domain object */
+    override fun set(domain: D, value: V?) : Unit
 }
 
 abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
@@ -118,20 +119,20 @@ open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
     }
 
     override fun of(domain: D): V? = getter(domain)
-    override fun set(domain: D, value: V) = setter(domain, value)
+    override fun set(domain: D, value: V?) = setter(domain, value)
 }
 
 /** Key implementation for a non-null values */
 open class KeyImpl<D : Any, V : Any> : AbstractKey<D, V> , Key<D, V> {
     override val required: Boolean get() = true
-    private val setter: (D, V) -> Unit
+    private val setter: (D, V?) -> Unit
     private val getter: (D) -> V
 
     constructor(
         name: String,
         domainClass: KClass<D>,
         valueClass: KClass<V>,
-        setter: (D, V) -> Unit,
+        setter: (D, V?) -> Unit,
         getter: (D) -> V
     ) : super(name, domainClass, valueClass) {
         this.setter = setter
@@ -139,7 +140,7 @@ open class KeyImpl<D : Any, V : Any> : AbstractKey<D, V> , Key<D, V> {
     }
 
     override fun of(domain: D): V = getter(domain)
-    override fun set(domain: D, value: V) = setter(domain, value)
+    override fun set(domain: D, value: V?) = setter(domain, value)
 }
 
 enum class ValueOperator : Operator {
