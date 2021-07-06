@@ -5,7 +5,7 @@ Assembled filters work on common POJO objects.
 The solution was inspired by the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework, but this code is completely new.
 Topical areas of use are:
 
-- validations
+- dynamic validations
 - alerting
 - modelling conditions for ORM
 
@@ -47,10 +47,8 @@ assert(parent == null, { "userId" })
 _user.name.set(user, "James")
 _user.parent.set(user, null)
 
-val nameId1 : String = _user.id.toString()
-val nameId2 : String = _user.id()
-assert(nameId1 == "id", { "nameId1" } )
-assert(nameId2 == "id", { "nameId2" } )
+assert("id" == _user.id.toString(), { "id" } )
+assert("id" == _user.id(), { "id" } )
 ``````
 
 ## Class diagram

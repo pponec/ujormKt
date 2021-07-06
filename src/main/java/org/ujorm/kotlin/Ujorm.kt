@@ -115,7 +115,7 @@ abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
     override fun toString(): String = name
 }
 
-/** Key implementation for nullable values */
+/** Property descriptor for nullable values */
 open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
     override val required: Boolean get() = false
     private val setter: (D, V?) -> Unit
@@ -136,7 +136,7 @@ open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
     override fun set(domain: D, value: V?) = setter(domain, value)
 }
 
-/** Key implementation for a non-null values */
+/** Property descriptor for non-null values */
 open class KeyImpl<D : Any, V : Any> : AbstractKey<D, V> , Key<D, V> {
     override val required: Boolean get() = true
     private val setter: (D, V?) -> Unit
