@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 /** Sample of usage */
 fun main() {
-    val _user = ModelProvider.user
+    val _user = EntityModelProvider.user
     val crn1 = _user.name EQ "Pavel"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
@@ -52,33 +52,33 @@ fun main() {
     assert("id" == _user.id(), { "id" } )
 }
 
-/** Domain object */
+/** An entity */
 data class User constructor (
     var id: Int,
     var name: String,
     var born: LocalDate,
     var parent: User? = null)
 
-/** Meta-model of the domain object will be a generated class in the feature */
-open class _User : DomainModel{
-    override val _domainClass: KClass<User> get() = User::class
+/** Model of the entity will be a generated class in the feature */
+open class _User : EntityModel{
+    override val _entityClass: KClass<User> get() = User::class
     val id : Property<User, Int> = PropertyImpl("id",
-        domainClass = _domainClass,
+        entityClass = _entityClass,
         valueClass = Int::class,
         setter = { d : User, v : Int? -> d.id = v!! },
         getter = { d : User -> d.id })
     val name : Property<User, String> = PropertyImpl("name",
-        domainClass = _domainClass,
+        entityClass = _entityClass,
         valueClass = String::class,
         setter = { d : User, v : String? -> d.name = v!! },
         getter = { d : User -> d.name })
     val born : Property<User, LocalDate> = PropertyImpl("born",
-        domainClass = _domainClass,
+        entityClass = _entityClass,
         valueClass = LocalDate::class,
         setter = { d : User, v : LocalDate? -> d.born = v!! },
         getter = { d : User -> d.born })
     val parent : PropertyNullable<User, User> = PropertyNullableImpl("parent",
-        domainClass =_domainClass,
+        entityClass =_entityClass,
         valueClass = User::class,
         setter = { d : User, v : User? -> d.parent = v },
         getter = { d : User -> d.parent}) // TODO: how to return the nullable value?
@@ -87,9 +87,9 @@ open class _User : DomainModel{
         get() = TODO("listOf(id, name, parent), ...")
 }
 
-/** Provider of meta-models */
-object ModelProvider : AbstractModelProvider {
+/** Model provider of entity */
+object EntityModelProvider : AbstractModelProvider {
     val user = _User()
-    override val entityModels: List<DomainModel>
+    override val entityModels: List<EntityModel>
         get() = TODO("listOf(user)")
 }

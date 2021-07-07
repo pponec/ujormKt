@@ -20,9 +20,9 @@ import kotlin.reflect.KClass
 interface Operator
 
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
-    val domainClass : KClass<D>
+    val entityClass : KClass<D>
     val operator: OP
-    fun eval(domain : D) : Boolean
+    fun eval(entity : D) : Boolean
     fun not() : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>>
     = BinaryCriterion(this, BinaryOperator.NOT, this)
     /** Plain text expression */
@@ -49,14 +49,14 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val name : String
     /** Is the value required (non-null) ? */
     val required : Boolean
-    val domainClass : KClass<D>
+    val entityClass : KClass<D>
     val valueClass : KClass<out V>
 
-    /** Get a value from the domain object */
-    fun of(domain : D) : V?
+    /** Get a value from the entity */
+    fun of(entity : D) : V?
 
-    /** Set a value to the domain object */
-    fun set(domain: D, value: V?) : Unit
+    /** Set a value to the entity */
+    fun set(entity: D, value: V?) : Unit
 
     fun operate(operator : ValueOperator, value : V) : ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -83,11 +83,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 
 /** Property descriptor for non-null values */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
-    /** Get a value from the domain object */
-    override fun of(domain : D) : V
+    /** Get a value from the entity */
+    override fun of(entity : D) : V
 
-    /** Set a non-null value to the domain object */
-    override fun set(domain: D, value: V?) : Unit
+    /** Set a non-null value to the entity */
+    override fun set(entity: D, value: V?) : Unit
 }
 
 /** Abstract property descriptor */
@@ -95,12 +95,12 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val name: String
     /** Required value (mon-nnull)
      * KType = typeOf<Int?>()  */
-    override val domainClass: KClass<D>
+    override val entityClass: KClass<D>
     override val valueClass: KClass<V>
 
-    constructor(name: String, domainClass: KClass<D>, valueClass: KClass<V>,) {
+    constructor(name: String, entityClass: KClass<D>, valueClass: KClass<V>,) {
         this.name = name
-        this.domainClass = domainClass
+        this.entityClass = entityClass
         this.valueClass = valueClass
     }
 
@@ -125,17 +125,17 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
 
     constructor(
         name: String,
-        domainClass: KClass<D>,
+        entityClass: KClass<D>,
         valueClass: KClass<V>,
         setter: (D, V?) -> Unit,
         getter: (D) -> V?
-    ) : super(name, domainClass, valueClass) {
+    ) : super(name, entityClass, valueClass) {
         this.setter = setter
         this.getter = getter
     }
 
-    override fun of(domain: D): V? = getter(domain)
-    override fun set(domain: D, value: V?) = setter(domain, value)
+    override fun of(entity: D): V? = getter(entity)
+    override fun set(entity: D, value: V?) = setter(entity, value)
 }
 
 /** Property for non-null values */
@@ -146,17 +146,17 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D,
 
     constructor(
         name: String,
-        domainClass: KClass<D>,
+        entityClass: KClass<D>,
         valueClass: KClass<V>,
         setter: (D, V?) -> Unit,
         getter: (D) -> V
-    ) : super(name, domainClass, valueClass) {
+    ) : super(name, entityClass, valueClass) {
         this.setter = setter
         this.getter = getter
     }
 
-    override fun of(domain: D): V = getter(domain)
-    override fun set(domain: D, value: V?) = setter(domain, value)
+    override fun of(entity: D): V = getter(entity)
+    override fun set(entity: D, value: V?) = setter(entity, value)
 }
 
 enum class ValueOperator : Operator {
@@ -181,7 +181,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     val left : Criterion<D, Operator, out Any?>
     val right : Criterion<D, Operator, out Any?>
     override val operator: BinaryOperator
-    override val domainClass: KClass<D> get() = left.domainClass
+    override val entityClass: KClass<D> get() = left.entityClass
 
     constructor(
         left: Criterion<D, out Operator, out Any?>,
@@ -193,12 +193,12 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         this.right = right
     }
 
-    override fun eval(domain: D): Boolean {
+    override fun eval(entity: D): Boolean {
         return when(operator) {
-            BinaryOperator.AND -> left.eval(domain) && right.eval(domain)
-            BinaryOperator.OR -> left.eval(domain) || right.eval(domain)
-            BinaryOperator.AND_NOT -> left.eval(domain) && !right.eval(domain)
-            BinaryOperator.OR_NOT -> left.eval(domain) || !right.eval(domain)
+            BinaryOperator.AND -> left.eval(entity) && right.eval(entity)
+            BinaryOperator.OR -> left.eval(entity) || right.eval(entity)
+            BinaryOperator.AND_NOT -> left.eval(entity) && !right.eval(entity)
+            BinaryOperator.OR_NOT -> left.eval(entity) || !right.eval(entity)
             else -> {
                 throw UnsupportedOperationException("Unsupported operator: $operator")
             }
@@ -215,7 +215,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 
     /** Extenced text expression */
     override fun toString(): String {
-        return "${domainClass.simpleName}: ${invoke()}"
+        return "${entityClass.simpleName}: ${invoke()}"
     }
 }
 
@@ -223,7 +223,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     val property : PropertyNullable<D, out V>
     val value : V?
     override val operator: ValueOperator
-    override val domainClass: KClass<D> get() = property.domainClass
+    override val entityClass: KClass<D> get() = property.entityClass
 
     constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V) {
         this.property = property
@@ -231,15 +231,15 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         this.value = value
     }
 
-    override fun eval(domain: D): Boolean {
+    override fun eval(entity: D): Boolean {
         return when(operator) {
             ValueOperator.ALL -> true
             ValueOperator.NONE -> false
-            ValueOperator.EQ -> property.of(domain) == value
-            ValueOperator.GT ->  compare(property.of(domain), value) > 0
-            ValueOperator.GTE -> compare(property.of(domain), value) >= 0
-            ValueOperator.LT -> compare(property.of(domain), value) < 0
-            ValueOperator.LTE -> compare(property.of(domain), value) <= 0
+            ValueOperator.EQ -> property.of(entity) == value
+            ValueOperator.GT ->  compare(property.of(entity), value) > 0
+            ValueOperator.GTE -> compare(property.of(entity), value) >= 0
+            ValueOperator.LT -> compare(property.of(entity), value) < 0
+            ValueOperator.LTE -> compare(property.of(entity), value) <= 0
             else -> throw java.lang.UnsupportedOperationException("Unsupported operator $operator")
         }
     }
@@ -264,7 +264,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 
     override fun toString(): String {
-        return "${property.domainClass.simpleName}: ${invoke()}"
+        return "${property.entityClass.simpleName}: ${invoke()}"
     }
 
     /** A separator for String values */
@@ -276,13 +276,13 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 /** Interface of the domain meta-model */
 interface AbstractModelProvider {
     /** Get all entity models */
-    val entityModels : List<DomainModel>
+    val entityModels : List<EntityModel>
 }
 
-/** Meta-model of the domain object will be a generated class in the feature */
-interface DomainModel {
+/** Model of the entity will be generated in the feature */
+interface EntityModel {
     /** Get the main domain class */
-    val _domainClass : KClass<*>
+    val _entityClass : KClass<*>
     /** Get all properties */
     val _properties : List<PropertyNullable<out Any, Any>>
 }
