@@ -15,7 +15,6 @@
  */
 package org.ujorm.kotlin
 
-import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
 interface Operator
@@ -45,7 +44,8 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     }
 }
 
-interface KeyNullable<D : Any, V : Any> : CharSequence {
+/** Property descriptor for nullable values */
+interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val name : String
     /** Is the value required (non-null) ? */
     val required : Boolean
@@ -62,7 +62,7 @@ interface KeyNullable<D : Any, V : Any> : CharSequence {
         return ValueCriterion(this, operator, value)
     }
 
-    /** key() */
+    /** Name of property */
     operator fun invoke(): String = name
 
     /** Value operator */
@@ -81,7 +81,8 @@ interface KeyNullable<D : Any, V : Any> : CharSequence {
     }
 }
 
-interface Key<D : Any, V : Any> : KeyNullable<D, V> {
+/** Property descriptor for non-null values */
+interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     /** Get a value from the domain object */
     override fun of(domain : D) : V
 
@@ -89,7 +90,8 @@ interface Key<D : Any, V : Any> : KeyNullable<D, V> {
     override fun set(domain: D, value: V?) : Unit
 }
 
-abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
+/** Abstract property descriptor */
+abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val name: String
     /** Required value (mon-nnull)
      * KType = typeOf<Int?>()  */
@@ -116,7 +118,7 @@ abstract class AbstractKey<D : Any, V : Any> : KeyNullable<D, V> {
 }
 
 /** Property descriptor for nullable values */
-open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
+open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
     override val required: Boolean get() = false
     private val setter: (D, V?) -> Unit
     private val getter: (D) -> V?
@@ -136,8 +138,8 @@ open class KeyNullableImpl<D : Any, V : Any> : AbstractKey<D, V> {
     override fun set(domain: D, value: V?) = setter(domain, value)
 }
 
-/** Property descriptor for non-null values */
-open class KeyImpl<D : Any, V : Any> : AbstractKey<D, V> , Key<D, V> {
+/** Property for non-null values */
+open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D, V> {
     override val required: Boolean get() = true
     private val setter: (D, V?) -> Unit
     private val getter: (D) -> V
@@ -218,13 +220,13 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 }
 
 open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
-    val key : KeyNullable<D, out V>
+    val property : PropertyNullable<D, out V>
     val value : V?
     override val operator: ValueOperator
-    override val domainClass: KClass<D> get() = key.domainClass
+    override val domainClass: KClass<D> get() = property.domainClass
 
-    constructor(key: KeyNullable<D, out V>, operator: ValueOperator, value: V) {
-        this.key = key
+    constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V) {
+        this.property = property
         this.operator = operator
         this.value = value
     }
@@ -233,11 +235,11 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         return when(operator) {
             ValueOperator.ALL -> true
             ValueOperator.NONE -> false
-            ValueOperator.EQ -> key.of(domain) == value
-            ValueOperator.GT ->  compare(key.of(domain), value) > 0
-            ValueOperator.GTE -> compare(key.of(domain), value) >= 0
-            ValueOperator.LT -> compare(key.of(domain), value) < 0
-            ValueOperator.LTE -> compare(key.of(domain), value) <= 0
+            ValueOperator.EQ -> property.of(domain) == value
+            ValueOperator.GT ->  compare(property.of(domain), value) > 0
+            ValueOperator.GTE -> compare(property.of(domain), value) >= 0
+            ValueOperator.LT -> compare(property.of(domain), value) < 0
+            ValueOperator.LTE -> compare(property.of(domain), value) <= 0
             else -> throw java.lang.UnsupportedOperationException("Unsupported operator $operator")
         }
     }
@@ -252,17 +254,17 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
             //@Suppress("UNCHECKED_CAST")
             (a as Comparable<T>).compareTo(b)
         } else {
-            throw IllegalStateException("Unsupported comparation for ${this.key.valueClass}" )
+            throw IllegalStateException("Unsupported comparation for ${this.property.valueClass}" )
         }
     }
 
     override operator fun invoke(): String {
         val separator = stringValueSeparator()
-        return "$key $operator $separator$value$separator"
+        return "$property $operator $separator$value$separator"
     }
 
     override fun toString(): String {
-        return "${key.domainClass.simpleName}: ${invoke()}"
+        return "${property.domainClass.simpleName}: ${invoke()}"
     }
 
     /** A separator for String values */
@@ -281,6 +283,6 @@ interface AbstractModelProvider {
 interface DomainModel {
     /** Get the main domain class */
     val _domainClass : KClass<*>
-    /** Get all attributes */
-    val attributes : List<KeyNullable<out Any, Any>>
+    /** Get all properties */
+    val _properties : List<PropertyNullable<out Any, Any>>
 }

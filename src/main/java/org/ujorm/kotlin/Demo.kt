@@ -62,28 +62,28 @@ data class User constructor (
 /** Meta-model of the domain object will be a generated class in the feature */
 open class _User : DomainModel{
     override val _domainClass: KClass<User> get() = User::class
-    val id : Key<User, Int> = KeyImpl("id",
+    val id : Property<User, Int> = PropertyImpl("id",
         domainClass = _domainClass,
         valueClass = Int::class,
         setter = { d : User, v : Int? -> d.id = v!! },
         getter = { d : User -> d.id })
-    val name : Key<User, String> = KeyImpl("name",
+    val name : Property<User, String> = PropertyImpl("name",
         domainClass = _domainClass,
         valueClass = String::class,
         setter = { d : User, v : String? -> d.name = v!! },
         getter = { d : User -> d.name })
-    val born : Key<User, LocalDate> = KeyImpl("born",
+    val born : Property<User, LocalDate> = PropertyImpl("born",
         domainClass = _domainClass,
         valueClass = LocalDate::class,
         setter = { d : User, v : LocalDate? -> d.born = v!! },
         getter = { d : User -> d.born })
-    val parent : KeyNullable<User, User> = KeyNullableImpl("parent",
+    val parent : PropertyNullable<User, User> = PropertyNullableImpl("parent",
         domainClass =_domainClass,
         valueClass = User::class,
         setter = { d : User, v : User? -> d.parent = v },
         getter = { d : User -> d.parent}) // TODO: how to return the nullable value?
 
-    override val attributes: List<KeyNullable<User, Any>>
+    override val _properties: List<PropertyNullable<User, Any>>
         get() = TODO("listOf(id, name, parent), ...")
 }
 
