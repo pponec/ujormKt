@@ -5,7 +5,7 @@ Assembled filters work on common POJO objects.
 The solution was inspired by the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework, but this code is completely new.
 Topical areas of use are:
 
-- validations
+- dynamic validations
 - alerting
 - modelling conditions for ORM
 
