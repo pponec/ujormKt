@@ -53,9 +53,8 @@ fun main() {
 
     val properties : List<PropertyNullable<Any, Any>> = EntityModelProvider.user._properties
     assert(properties.size == 5, { "Count of properties"} )
-    assert(properties[0].name == "born", { "property name"} )
-    assert(properties[1].name == "id", { "property name"} )
-
+    assert(properties[0].name == "id", { "property name"} )
+    assert(properties[1].name == "born", { "property name"} )
 }
 
 /** An entity */

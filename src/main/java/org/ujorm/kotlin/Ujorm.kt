@@ -286,7 +286,8 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 abstract class AbstractModelProvider {
     /** Get all entity models */
     val entityModels: List<EntityModel> by lazy {
-        Utils.getProperties(this, EntityModel::class)
+        val result : List<EntityModel> = Utils.getProperties(this, EntityModel::class)
+        result.sortedBy { it._entityClass.simpleName }
     }
 }
 
@@ -296,7 +297,8 @@ abstract class EntityModel {
     abstract val _entityClass : KClass<*>
     /** Get all properties */
     val _properties: List<PropertyNullable<Any, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        Utils.getProperties(this, PropertyNullable::class)
+         val result : List<PropertyNullable<Any, Any>> = Utils.getProperties(this, PropertyNullable::class)
+         result.sortedBy { it.index }
     }
 }
 
