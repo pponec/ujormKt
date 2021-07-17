@@ -122,6 +122,23 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
 
     /** For a CharSequence implementation */
     override fun toString(): String = name
+
+    /** Equals */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as AbstractProperty<*, *>
+        if (entityClass != other.entityClass) return false
+        if (name != other.name) return false
+
+        return true
+    }
+
+    /** HashCode */
+    override fun hashCode(): Int {
+        return entityClass.hashCode() * 31 + name.hashCode()
+    }
+
 }
 
 /** Property descriptor for nullable values */
@@ -303,7 +320,7 @@ abstract class EntityModel<T : Any> {
 }
 
 /** Common utilities */
-object Utils {
+private object Utils {
     /** Get all properties of the instance for a required types */
     fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> = instance::class.members.stream()
         .filter { property -> property is KProperty1<*, *> }
