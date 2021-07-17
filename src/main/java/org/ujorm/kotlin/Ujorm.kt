@@ -313,9 +313,9 @@ object Utils {
         .toList()
 
     /** Check if the property value has required type */
-    fun <V : Any> isPropertyTypeOf(property: KProperty1<Any, *>, type: KClass<V>): Boolean {
+    fun <V : Any> isPropertyTypeOf(property: KProperty1<Any, *>, targetClass: KClass<V>): Boolean {
         val classifier: KClassifier? = property.getter.returnType.classifier;
         val properClass: KClass<*> = if (classifier is KClass<*>) classifier else Unit::class
-        return type.isSuperclassOf(properClass)
+        return targetClass.isSuperclassOf(properClass)
     }
 }
