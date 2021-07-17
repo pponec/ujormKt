@@ -17,8 +17,11 @@ package org.ujorm.kotlin
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
+import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
+import kotlin.reflect.jvm.reflect
 import kotlin.streams.toList
 
 interface Operator
@@ -169,16 +172,35 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D,
     private val setter: (D, V?) -> Unit
     private val getter: (D) -> V
 
+    /** Original constructor */
     constructor(
         index: Short,
         name: String,
         entityClass: KClass<D>,
-        valueClass: KClass<V>,
+        valueClass: KClass<V> ,
         setter: (D, V?) -> Unit,
         getter: (D) -> V
     ) : super(index, name, entityClass, valueClass) {
         this.setter = setter
         this.getter = getter
+    }
+
+    /** An experimental constructor */
+    constructor(
+        index: Short,
+        name: String,
+        entityClass: KClass<D>,
+        setter: (D, V?) -> Unit,
+        getter: (D) -> V
+    ) : super(index, name, entityClass, getter.reflect()!!.returnType!!.classifier as KClass<V>) {
+        this.setter = setter
+        this.getter = getter
+    }
+
+
+    fun test() : Unit {
+        val x = getter.reflect()?.returnType ?: TODO("Unsupported type")
+
     }
 
     override fun of(entity: D): V = getter(entity)
@@ -309,9 +331,10 @@ abstract class AbstractModelProvider {
 }
 
 /** Model of the entity will be generated in the feature */
-abstract class EntityModel<T : Any> {
-    /** Get the main domain class */
-    abstract val _entityClass : KClass<T>
+abstract class EntityModel<T : Any> (
+        /** Get the main domain class */
+        val _entityClass : KClass<T>
+    ) {
     /** Get all properties */
     val _properties: List<PropertyNullable<T, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
          val result : List<PropertyNullable<T, Any>> = Utils.getProperties(this, PropertyNullable::class)

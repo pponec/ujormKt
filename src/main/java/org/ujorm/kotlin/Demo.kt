@@ -57,6 +57,10 @@ fun main() {
     assert(properties[0].name == "id", { "property id"} )
     assert(properties[1].name == "name", { "property name"} )
     assert(properties[2].name == "born", { "property born"} )
+
+    /** Value type */
+    assert(_user.id.valueClass == Int::class)
+    assert(_user.born.valueClass == LocalDate::class)
 }
 
 /** An entity */
@@ -67,11 +71,9 @@ data class User constructor (
     var parent: User? = null)
 
 /** Model of the entity will be a generated class in the feature */
-open class _User : EntityModel<User>() {
-    override val _entityClass: KClass<User> get() = User::class
+open class _User : EntityModel<User>(User::class) {
     val id : Property<User, Int> = PropertyImpl(0, "id",
         entityClass = _entityClass,
-        valueClass = Int::class,
         setter = { d : User, v : Int? -> d.id = v!! },
         getter = { d : User -> d.id })
     val name : Property<User, String> = PropertyImpl(1, "name",

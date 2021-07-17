@@ -82,6 +82,22 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.ktorm/ktorm-core -->
+        <dependency>
+            <groupId>org.ktorm</groupId>
+            <artifactId>ktorm-core</artifactId>
+            <version>3.4.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Database H2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+        </dependency>
+
     </dependencies>
 
     <build>
