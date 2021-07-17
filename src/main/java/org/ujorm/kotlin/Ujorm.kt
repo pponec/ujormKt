@@ -305,17 +305,17 @@ abstract class EntityModel<T : Any> {
 /** Common utilities */
 object Utils {
     /** Get all properties of the instance for a required types */
-    fun <R> getProperties(instance: Any, type: KClass<*> ) = instance::class.members.stream()
+    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> = instance::class.members.stream()
         .filter { property -> property is KProperty1<*, *> }
-        .map { property -> property as KProperty1<Any, *> }
+        .map { property -> property as KProperty1<Any, V> }
         .filter { property -> isPropertyTypeOf(property, type) }
-        .map { property -> property.getter.call(instance) as R}
+        .map { property -> property.getter.call(instance) as V}
         .toList()
 
     /** Check if the property value has required type */
-    fun isPropertyTypeOf(property: KProperty1<Any, *>, type: KClass<*>): Boolean {
+    fun <V : Any> isPropertyTypeOf(property: KProperty1<Any, *>, type: KClass<V>): Boolean {
         val classifier: KClassifier? = property.getter.returnType.classifier;
-        val properType: KClass<*> = if (classifier is KClass<*>) classifier else Unit::class
-        return type.isSuperclassOf(properType)
+        val properClass: KClass<*> = if (classifier is KClass<*>) classifier else Unit::class
+        return type.isSuperclassOf(properClass)
     }
 }
