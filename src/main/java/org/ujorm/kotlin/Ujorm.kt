@@ -285,19 +285,19 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 /** Interface of the domain meta-model */
 abstract class AbstractModelProvider {
     /** Get all entity models */
-    val entityModels: List<EntityModel> by lazy {
-        val result : List<EntityModel> = Utils.getProperties(this, EntityModel::class)
+    val entityModels: List<EntityModel<*>> by lazy {
+        val result : List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
         result.sortedBy { it._entityClass.simpleName }
     }
 }
 
 /** Model of the entity will be generated in the feature */
-abstract class EntityModel {
+abstract class EntityModel<T : Any> {
     /** Get the main domain class */
-    abstract val _entityClass : KClass<*>
+    abstract val _entityClass : KClass<T>
     /** Get all properties */
-    val _properties: List<PropertyNullable<Any, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-         val result : List<PropertyNullable<Any, Any>> = Utils.getProperties(this, PropertyNullable::class)
+    val _properties: List<PropertyNullable<T, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+         val result : List<PropertyNullable<T, Any>> = Utils.getProperties(this, PropertyNullable::class)
          result.sortedBy { it.index }
     }
 }

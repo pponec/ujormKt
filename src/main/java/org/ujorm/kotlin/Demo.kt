@@ -48,13 +48,15 @@ fun main() {
     _user.name.set(user, "James")
     _user.parent.set(user, null)
 
-    assert("id" == _user.id.toString(), { "id" } )
     assert("id" == _user.id(), { "id" } )
+    assert("id" == _user.id.name, { "id" } )
+    assert("id" == _user.id.toString(), { "id" } )
 
-    val properties : List<PropertyNullable<Any, Any>> = EntityModelProvider.user._properties
-    assert(properties.size == 5, { "Count of properties"} )
-    assert(properties[0].name == "id", { "property name"} )
-    assert(properties[1].name == "born", { "property name"} )
+    val properties : List<PropertyNullable<User, Any>> = EntityModelProvider.user._properties
+    assert(properties.size == 4, { "Count of properties"} )
+    assert(properties[0].name == "id", { "property id"} )
+    assert(properties[1].name == "name", { "property name"} )
+    assert(properties[2].name == "born", { "property born"} )
 }
 
 /** An entity */
@@ -65,7 +67,7 @@ data class User constructor (
     var parent: User? = null)
 
 /** Model of the entity will be a generated class in the feature */
-open class _User : EntityModel() {
+open class _User : EntityModel<User>() {
     override val _entityClass: KClass<User> get() = User::class
     val id : Property<User, Int> = PropertyImpl(0, "id",
         entityClass = _entityClass,
