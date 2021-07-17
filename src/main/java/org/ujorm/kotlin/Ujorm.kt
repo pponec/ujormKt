@@ -16,6 +16,10 @@
 package org.ujorm.kotlin
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.isSuperclassOf
+import kotlin.streams.toList
 
 interface Operator
 
@@ -30,22 +34,23 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     /** Extended text expression */
     override fun toString(): String
 
-    infix fun AND(crn: Criterion<D, out Operator, out Any>): BinaryCriterion<D> {
+    infix fun AND(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.AND, crn)
     }
-    infix fun OR (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+    infix fun OR (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR, crn)
     }
-    infix fun AND_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+    infix fun AND_NOT (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.AND_NOT, crn)
     }
-    infix fun OR_NOT (crn: Criterion<D, Operator, out Any>): BinaryCriterion<D> {
+    infix fun OR_NOT (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
 }
 
 /** Property descriptor for nullable values */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
+    val index : Short
     val name : String
     /** Is the value required (non-null) ? */
     val required : Boolean
@@ -92,13 +97,15 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 
 /** Abstract property descriptor */
 abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
+    override val index: Short
     override val name: String
     /** Required value (mon-nnull)
      * KType = typeOf<Int?>()  */
     override val entityClass: KClass<D>
     override val valueClass: KClass<V>
 
-    constructor(name: String, entityClass: KClass<D>, valueClass: KClass<V>,) {
+    constructor(index : Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>,) {
+        this.index = index
         this.name = name
         this.entityClass = entityClass
         this.valueClass = valueClass
@@ -124,12 +131,13 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
     private val getter: (D) -> V?
 
     constructor(
+        index: Short,
         name: String,
         entityClass: KClass<D>,
         valueClass: KClass<V>,
         setter: (D, V?) -> Unit,
         getter: (D) -> V?
-    ) : super(name, entityClass, valueClass) {
+    ) : super(index, name, entityClass, valueClass) {
         this.setter = setter
         this.getter = getter
     }
@@ -145,12 +153,13 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D,
     private val getter: (D) -> V
 
     constructor(
+        index: Short,
         name: String,
         entityClass: KClass<D>,
         valueClass: KClass<V>,
         setter: (D, V?) -> Unit,
         getter: (D) -> V
-    ) : super(name, entityClass, valueClass) {
+    ) : super(index, name, entityClass, valueClass) {
         this.setter = setter
         this.getter = getter
     }
@@ -274,15 +283,37 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 }
 
 /** Interface of the domain meta-model */
-interface AbstractModelProvider {
+abstract class AbstractModelProvider {
     /** Get all entity models */
-    val entityModels : List<EntityModel>
+    val entityModels: List<EntityModel> by lazy {
+        Utils.getProperties(this, EntityModel::class)
+    }
 }
 
 /** Model of the entity will be generated in the feature */
-interface EntityModel {
+abstract class EntityModel {
     /** Get the main domain class */
-    val _entityClass : KClass<*>
+    abstract val _entityClass : KClass<*>
     /** Get all properties */
-    val _properties : List<PropertyNullable<out Any, Any>>
+    val _properties: List<PropertyNullable<Any, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        Utils.getProperties(this, PropertyNullable::class)
+    }
+}
+
+/** Common utilities */
+object Utils {
+    /** Get all properties of the instance for a required types */
+    fun <R> getProperties(instance: Any, type: KClass<*> ) = instance::class.members.stream()
+        .filter { property -> property is KProperty1<*, *> }
+        .map { property -> property as KProperty1<Any, *> }
+        .filter { property -> isPropertyTypeOf(property, type) }
+        .map { property -> property.getter.call(instance) as R}
+        .toList()
+
+    /** Check if the property value has required type */
+    fun isPropertyTypeOf(property: KProperty1<Any, *>, type: KClass<*>): Boolean {
+        val classifier: KClassifier? = property.getter.returnType.classifier;
+        val properType: KClass<*> = if (classifier is KClass<*>) classifier else Unit::class
+        return type.isSuperclassOf(properType)
+    }
 }

@@ -50,6 +50,12 @@ fun main() {
 
     assert("id" == _user.id.toString(), { "id" } )
     assert("id" == _user.id(), { "id" } )
+
+    val properties : List<PropertyNullable<Any, Any>> = EntityModelProvider.user._properties
+    assert(properties.size == 5, { "Count of properties"} )
+    assert(properties[0].name == "born", { "property name"} )
+    assert(properties[1].name == "id", { "property name"} )
+
 }
 
 /** An entity */
@@ -60,36 +66,32 @@ data class User constructor (
     var parent: User? = null)
 
 /** Model of the entity will be a generated class in the feature */
-open class _User : EntityModel{
+open class _User : EntityModel() {
     override val _entityClass: KClass<User> get() = User::class
-    val id : Property<User, Int> = PropertyImpl("id",
+    val id : Property<User, Int> = PropertyImpl(0, "id",
         entityClass = _entityClass,
         valueClass = Int::class,
         setter = { d : User, v : Int? -> d.id = v!! },
         getter = { d : User -> d.id })
-    val name : Property<User, String> = PropertyImpl("name",
+    val name : Property<User, String> = PropertyImpl(1, "name",
         entityClass = _entityClass,
         valueClass = String::class,
         setter = { d : User, v : String? -> d.name = v!! },
         getter = { d : User -> d.name })
-    val born : Property<User, LocalDate> = PropertyImpl("born",
+    val born : Property<User, LocalDate> = PropertyImpl(2, "born",
         entityClass = _entityClass,
         valueClass = LocalDate::class,
         setter = { d : User, v : LocalDate? -> d.born = v!! },
         getter = { d : User -> d.born })
-    val parent : PropertyNullable<User, User> = PropertyNullableImpl("parent",
+    val parent : PropertyNullable<User, User> = PropertyNullableImpl(3, "parent",
         entityClass =_entityClass,
         valueClass = User::class,
         setter = { d : User, v : User? -> d.parent = v },
-        getter = { d : User -> d.parent}) // TODO: how to return the nullable value?
-
-    override val _properties: List<PropertyNullable<User, Any>>
-        get() = TODO("listOf(id, name, parent), ...")
+        getter = { d : User -> d.parent})
 }
 
 /** Model provider of entity */
-object EntityModelProvider : AbstractModelProvider {
+object EntityModelProvider : AbstractModelProvider() {
     val user = _User()
-    override val entityModels: List<EntityModel>
-        get() = TODO("listOf(user)")
+
 }
