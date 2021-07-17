@@ -78,12 +78,10 @@ open class _User : EntityModel<User>(User::class) {
         getter = { d : User -> d.id })
     val name : Property<User, String> = PropertyImpl(1, "name",
         entityClass = _entityClass,
-        valueClass = String::class,
         setter = { d : User, v : String? -> d.name = v!! },
         getter = { d : User -> d.name })
     val born : Property<User, LocalDate> = PropertyImpl(2, "born",
         entityClass = _entityClass,
-        valueClass = LocalDate::class,
         setter = { d : User, v : LocalDate? -> d.born = v!! },
         getter = { d : User -> d.born })
     val parent : PropertyNullable<User, User> = PropertyNullableImpl(3, "parent",

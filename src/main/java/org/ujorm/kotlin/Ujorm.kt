@@ -141,7 +141,6 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override fun hashCode(): Int {
         return entityClass.hashCode() * 31 + name.hashCode()
     }
-
 }
 
 /** Property descriptor for nullable values */
@@ -333,13 +332,22 @@ abstract class AbstractModelProvider {
 /** Model of the entity will be generated in the feature */
 abstract class EntityModel<T : Any> (
         /** Get the main domain class */
-        val _entityClass : KClass<T>
+        val _entityClass : KClass<T>,
+        private var _size : Short = 0
     ) {
     /** Get all properties */
     val _properties: List<PropertyNullable<T, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
          val result : List<PropertyNullable<T, Any>> = Utils.getProperties(this, PropertyNullable::class)
          result.sortedBy { it.index }
     }
+
+//    protected fun <X : Any> property(
+//        name : String,
+//        getter : (T) -> X,
+//        setter = (T, ?) -> Unit
+//    ) : Property<T, V> {
+//       return PropertyImpl<T, V>(_size++, name, _entityClass, getter, setter);
+//    }
 }
 
 /** Common utilities */
