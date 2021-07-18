@@ -33,11 +33,11 @@ fun main() {
     assert(crn5.toString() == "User: (NOT (name EQ \"Pavel\")) OR ((id GT 1) AND (id LT 99))")
 
     val user = User(id = 11, name = "Xaver", born = LocalDate.now())
-    val noValid : Boolean = crn1.eval(user)
-    val isValid : Boolean = crn4.eval(user)
-    val userName : String = _user.name.of(user)
-    val userId : Int = _user.id.of(user)
-    val parent : User? = _user.parent.of(user)
+    val noValid: Boolean = crn1.eval(user)
+    val isValid: Boolean = crn4.eval(user)
+    val userName: String = _user.name.of(user)
+    val userId: Int = _user.id.of(user)
+    val parent: User? = _user.parent.of(user)
     //val parentName : String = _user.name.parent.of(user) // TODO: reading the relations
     assert(!noValid, { "crn1.eval(user)" })
     assert( isValid, { "crn4.eval(user)" })
@@ -48,15 +48,15 @@ fun main() {
     _user.name.set(user, "James")
     _user.parent.set(user, null)
 
-    assert("id" == _user.id(), { "id" } )
-    assert("id" == _user.id.name, { "id" } )
-    assert("id" == _user.id.toString(), { "id" } )
+    assert("id" == _user.id(), { "id" })
+    assert("id" == _user.id.name, { "id" })
+    assert("id" == _user.id.toString(), { "id" })
 
-    val properties : List<PropertyNullable<User, Any>> = EntityModelProvider.user._properties
-    assert(properties.size == 4, { "Count of properties"} )
-    assert(properties[0].name == "id", { "property id"} )
-    assert(properties[1].name == "name", { "property name"} )
-    assert(properties[2].name == "born", { "property born"} )
+    val properties: List<PropertyNullable<User, Any>> = EntityModelProvider.user._properties
+    assert(properties.size == 4, { "Count of properties" })
+    assert(properties[0].name == "id", { "property id" })
+    assert(properties[1].name == "name", { "property name" })
+    assert(properties[2].name == "born", { "property born" })
 
     /** Value type */
     assert(_user.id.valueClass == Int::class)
@@ -64,31 +64,19 @@ fun main() {
 }
 
 /** An entity */
-data class User constructor (
+data class User constructor(
     var id: Int,
     var name: String,
     var born: LocalDate,
-    var parent: User? = null)
+    var parent: User? = null
+)
 
 /** Model of the entity will be a generated class in the feature */
 open class _User : EntityModel<User>(User::class) {
-    val id : Property<User, Int> = PropertyImpl(0, "id",
-        entityClass = _entityClass,
-        setter = { d : User, v : Int? -> d.id = v!! },
-        getter = { d : User -> d.id })
-    val name : Property<User, String> = PropertyImpl(1, "name",
-        entityClass = _entityClass,
-        setter = { d : User, v : String? -> d.name = v!! },
-        getter = { d : User -> d.name })
-    val born : Property<User, LocalDate> = PropertyImpl(2, "born",
-        entityClass = _entityClass,
-        setter = { d : User, v : LocalDate? -> d.born = v!! },
-        getter = { d : User -> d.born })
-    val parent : PropertyNullable<User, User> = PropertyNullableImpl(3, "parent",
-        entityClass =_entityClass,
-        valueClass = User::class,
-        setter = { d : User, v : User? -> d.parent = v },
-        getter = { d : User -> d.parent})
+    val id = property("id", { it.id }, { d, v -> d.id = v!! })
+    val name = property("name", { it.name }, { d, v -> d.name = v!! })
+    val born = property("born", { it.born }, { d, v -> d.born = v!! })
+    val parent = propertyNullable("parent", { it.parent }, { d: User, v: User? -> d.parent = v })
 }
 
 /** Model provider of entity */

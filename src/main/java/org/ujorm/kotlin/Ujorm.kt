@@ -152,13 +152,13 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
     constructor(
         index: Short,
         name: String,
-        entityClass: KClass<D>,
-        valueClass: KClass<V>,
+        getter: (D) -> V?,
         setter: (D, V?) -> Unit,
-        getter: (D) -> V?
+        entityClass: KClass<D>,
+        valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
-        this.setter = setter
         this.getter = getter
+        this.setter = setter
     }
 
     override fun of(entity: D): V? = getter(entity)
@@ -168,39 +168,20 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
 /** Property for non-null values */
 open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D, V> {
     override val required: Boolean get() = true
-    private val setter: (D, V?) -> Unit
     private val getter: (D) -> V
+    private val setter: (D, V?) -> Unit
 
     /** Original constructor */
     constructor(
         index: Short,
         name: String,
-        entityClass: KClass<D>,
-        valueClass: KClass<V> ,
+        getter: (D) -> V,
         setter: (D, V?) -> Unit,
-        getter: (D) -> V
+        entityClass: KClass<D>,
+        valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
-        this.setter = setter
         this.getter = getter
-    }
-
-    /** An experimental constructor */
-    constructor(
-        index: Short,
-        name: String,
-        entityClass: KClass<D>,
-        setter: (D, V?) -> Unit,
-        getter: (D) -> V
-    ) : this( index, name,
-        entityClass = entityClass,
-        valueClass = getter.reflect()!!.returnType!!.classifier as KClass<V>,
-        setter = setter,
-        getter = getter) {
-    }
-
-    fun test() : Unit {
-        val x = getter.reflect()?.returnType ?: TODO("Unsupported type")
-
+        this.setter = setter
     }
 
     override fun of(entity: D): V = getter(entity)
@@ -342,14 +323,19 @@ abstract class EntityModel<D : Any> (
          result.sortedBy { it.index }
     }
 
-//    // TODO:
-//    internal fun <V : Any> property(
-//        name : String,
-//        getter : (D) -> V,
-//        setter : (D, V?) -> Unit
-//    ) : PropertyImpl<D, V> {
-//       return PropertyImpl<D, V>(_size++, name, _entityClass, getter, setter);
-//    }
+    /** Crate a non-null property */
+    protected fun <V : Any> property(
+        name : String,
+        getter : (D) -> V,
+        setter : (D, V?) -> Unit
+    ) : Property<D, V> = PropertyImpl<D, V> (_size++, name, getter, setter, _entityClass);
+
+    /** Crate a nullable property */
+    protected fun <V : Any> propertyNullable(
+        name : String,
+        getter : (D) -> V?,
+        setter : (D, V?) -> Unit
+    ) : PropertyNullable<D, V> = PropertyNullableImpl<D, V> (_size++, name, getter, setter, _entityClass);
 }
 
 /** Common utilities */
