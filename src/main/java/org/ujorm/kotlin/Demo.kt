@@ -17,7 +17,6 @@ package org.ujorm.kotlin.demo
 
 import org.ujorm.kotlin.*
 import java.time.LocalDate
-import kotlin.reflect.KClass
 
 /** Sample of usage */
 fun main() {
@@ -76,7 +75,7 @@ open class _User : EntityModel<User>(User::class) {
     val id = property("id", { it.id }, { d, v -> d.id = v!! })
     val name = property("name", { it.name }, { d, v -> d.name = v!! })
     val born = property("born", { it.born }, { d, v -> d.born = v!! })
-    val parent = propertyNullable("parent", { it.parent }, { d: User, v: User? -> d.parent = v })
+    val parent = propertyN6e("parent", { it.parent }, { d, v -> d.parent = v })
 }
 
 /** Model provider of entity */

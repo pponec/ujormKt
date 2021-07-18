@@ -323,15 +323,15 @@ abstract class EntityModel<D : Any> (
          result.sortedBy { it.index }
     }
 
-    /** Crate a non-null property */
+    /** Create a non-null property */
     protected fun <V : Any> property(
         name : String,
         getter : (D) -> V,
         setter : (D, V?) -> Unit
     ) : Property<D, V> = PropertyImpl<D, V> (_size++, name, getter, setter, _entityClass);
 
-    /** Crate a nullable property */
-    protected fun <V : Any> propertyNullable(
+    /** Create a nullable property */
+    protected fun <V : Any> propertyN6e(
         name : String,
         getter : (D) -> V?,
         setter : (D, V?) -> Unit
