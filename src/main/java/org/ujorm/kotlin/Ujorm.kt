@@ -191,11 +191,12 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D,
         entityClass: KClass<D>,
         setter: (D, V?) -> Unit,
         getter: (D) -> V
-    ) : super(index, name, entityClass, getter.reflect()!!.returnType!!.classifier as KClass<V>) {
-        this.setter = setter
-        this.getter = getter
+    ) : this( index, name,
+        entityClass = entityClass,
+        valueClass = getter.reflect()!!.returnType!!.classifier as KClass<V>,
+        setter = setter,
+        getter = getter) {
     }
-
 
     fun test() : Unit {
         val x = getter.reflect()?.returnType ?: TODO("Unsupported type")
