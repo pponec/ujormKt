@@ -331,23 +331,24 @@ abstract class AbstractModelProvider {
 }
 
 /** Model of the entity will be generated in the feature */
-abstract class EntityModel<T : Any> (
+abstract class EntityModel<D : Any> (
         /** Get the main domain class */
-        val _entityClass : KClass<T>,
+        val _entityClass : KClass<D>,
         private var _size : Short = 0
     ) {
     /** Get all properties */
-    val _properties: List<PropertyNullable<T, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-         val result : List<PropertyNullable<T, Any>> = Utils.getProperties(this, PropertyNullable::class)
+    val _properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+         val result : List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
          result.sortedBy { it.index }
     }
 
-//    protected fun <X : Any> property(
+//    // TODO:
+//    internal fun <V : Any> property(
 //        name : String,
-//        getter : (T) -> X,
-//        setter = (T, ?) -> Unit
-//    ) : Property<T, V> {
-//       return PropertyImpl<T, V>(_size++, name, _entityClass, getter, setter);
+//        getter : (D) -> V,
+//        setter : (D, V?) -> Unit
+//    ) : PropertyImpl<D, V> {
+//       return PropertyImpl<D, V>(_size++, name, _entityClass, getter, setter);
 //    }
 }
 
