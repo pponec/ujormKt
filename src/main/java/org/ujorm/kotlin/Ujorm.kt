@@ -59,6 +59,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val required : Boolean
     val entityClass : KClass<D>
     val valueClass : KClass<out V>
+    val readOnly : Boolean
 
     /** Get a value from the entity */
     fun of(entity : D) : V?
@@ -106,12 +107,14 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
      * KType = typeOf<Int?>()  */
     override val entityClass: KClass<D>
     override val valueClass: KClass<V>
+    override val readOnly: Boolean
 
     constructor(index : Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>,) {
         this.index = index
         this.name = name
         this.entityClass = entityClass
         this.valueClass = valueClass
+        this.readOnly = false // TODO: set the value according to property type
     }
 
     /** For a CharSequence implementation */
@@ -339,7 +342,7 @@ abstract class EntityModel<D : Any> (
 }
 
 /** Common utilities */
-private object Utils {
+internal object Utils {
     /** Get all properties of the instance for a required types */
     fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> = instance::class.members.stream()
         .filter { property -> property is KProperty1<*, *> }
