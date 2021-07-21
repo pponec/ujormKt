@@ -15,12 +15,11 @@
  */
 package org.ujorm.kotlin
 
+import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
-import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
 import kotlin.reflect.jvm.reflect
 import kotlin.streams.toList
 
@@ -31,7 +30,7 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val operator: OP
     fun eval(entity : D) : Boolean
     fun not() : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>>
-    = BinaryCriterion(this, BinaryOperator.NOT, this)
+            = BinaryCriterion(this, BinaryOperator.NOT, this)
     /** Plain text expression */
     operator fun invoke(): String
     /** Extended text expression */
@@ -103,8 +102,8 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val index: Short
     override var name: String
-       internal set(value) { field = if (field.isEmpty()) value else throw IllegalStateException("Name is: $field") }
-       public get() = field
+        internal set(value) { field = if ((field?:"").isEmpty()) value else throw IllegalStateException("Name is: $field") }
+        public get() = field
     /** Required value (mon-nnull)
      * KType = typeOf<Int?>()  */
     override val entityClass: KClass<D>
@@ -318,22 +317,39 @@ abstract class AbstractModelProvider {
 
 /** Model of the entity will be generated in the feature */
 abstract class EntityModel<D : Any> (
-        /** Get the main domain class */
-        val _entityClass : KClass<D>,
-        private var _size : Short = 0
-    ) {
+    /** Get the main domain class */
+    val _entityClass : KClass<D>,
+    private var _size : Short = 0
+) {
     /** Get all properties */
     val _properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-         val result : List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
-         result.sortedBy { it.index }
+        val result : List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
+        result.sortedBy { it.index }
     }
+
+//    //TODO:
+//    init {
+//        val map = Utils.getPropertyNames(this, PropertyNullable::class)
+//        for (p in _properties) {
+//            if (p.name.isEmpty() && p is AbstractProperty) {
+//                p.name = map[p.index]
+//                    ?: throw IllegalStateException("Inknown name for ${p.entityClass.simpleName}[${p.index}]")
+//            }
+//        }
+//    }
 
     /** Create a non-null property */
     protected fun <V : Any> property(
-        name : String,
+        name : String = "",
         getter : (D) -> V,
         setter : (D, V?) -> Unit
     ) : Property<D, V> = PropertyImpl<D, V> (_size++, name, getter, setter, _entityClass);
+
+    /** Create a non-null property */
+    protected fun <V : Any> property(
+        getter : (D) -> V,
+        setter : (D, V?) -> Unit
+    ) : Property<D, V> = PropertyImpl<D, V> (_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
@@ -341,22 +357,46 @@ abstract class EntityModel<D : Any> (
         getter : (D) -> V?,
         setter : (D, V?) -> Unit
     ) : PropertyNullable<D, V> = PropertyNullableImpl<D, V> (_size++, name, getter, setter, _entityClass);
+
+    /** Create a nullable property */
+    protected fun <V : Any> propertyN6e(
+        getter : (D) -> V?,
+        setter : (D, V?) -> Unit
+    ) : PropertyNullable<D, V> = PropertyNullableImpl<D, V> (_size++, "", getter, setter, _entityClass);
 }
 
 /** Common utilities */
 internal object Utils {
     /** Get all properties of the instance for a required types */
-    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> = instance::class.members.stream()
-        .filter { property -> property is KProperty1<*, *> }
-        .map { property -> property as KProperty1<Any, V> }
-        .filter { property -> isPropertyTypeOf(property, type) }
-        .map { property -> property.getter.call(instance) as V}
-        .toList()
+    fun <V : Any> getKProperties(instance: Any, type: KClass<in V> ) : Stream<KProperty1<Any, V>> {
+        return instance::class.members.stream()
+            .filter { property -> property is KProperty1<*, *> }
+            .map { property -> property as KProperty1<Any, V> }
+            .filter { property -> isPropertyTypeOf(property, type) }
+    }
+
+    /** Get all properties of the instance for a required types */
+    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> {
+        return getKProperties(instance, type)
+            .map { property -> property.getter.call(instance) as V}
+            .toList()
+    }
 
     /** Check if the property value has required type */
     fun <V : Any> isPropertyTypeOf(property: KProperty1<Any, *>, targetClass: KClass<V>): Boolean {
         val classifier: KClassifier? = property.getter.returnType.classifier;
         val properClass: KClass<*> = if (classifier is KClass<*>) classifier else Unit::class
         return targetClass.isSuperclassOf(properClass)
+    }
+
+    /** Get property names */
+    fun <V : Any> getPropertyNames(instance: Any, targetClass: KClass<V>): Map<Short, String> {
+        val result = mutableMapOf<Short, String>()
+        getKProperties(targetClass, PropertyNullable::class)
+            .forEach { kProperty ->
+                val prop = kProperty.getter.call(instance)
+                result[prop.index] = kProperty.name
+            }
+        return result
     }
 }

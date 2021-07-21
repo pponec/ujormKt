@@ -17,6 +17,7 @@ package org.ujorm.kotlin.demo
 
 import org.ujorm.kotlin.*
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 /** Sample of usage */
 fun main() {
