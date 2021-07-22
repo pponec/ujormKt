@@ -368,19 +368,17 @@ abstract class EntityModel<D : Any> (
 /** Common utilities */
 internal object Utils {
     /** Get all properties of the instance for a required types */
-    fun <V : Any> getKProperties(instance: Any, type: KClass<in V> ) : Stream<KProperty1<Any, V>> {
-        return instance::class.members.stream()
+    fun <V : Any> getKProperties(instance: Any, type: KClass<in V> ) : Stream<KProperty1<Any, V>> =
+        instance::class.members.stream()
             .filter { property -> property is KProperty1<*, *> }
             .map { property -> property as KProperty1<Any, V> }
             .filter { property -> isPropertyTypeOf(property, type) }
-    }
 
     /** Get all properties of the instance for a required types */
-    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> {
-        return getKProperties(instance, type)
+    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> =
+        getKProperties(instance, type)
             .map { property -> property.getter.call(instance) as V}
             .toList()
-    }
 
     /** Check if the property value has required type */
     fun <V : Any> isPropertyTypeOf(property: KProperty1<Any, *>, targetClass: KClass<V>): Boolean {
@@ -389,14 +387,11 @@ internal object Utils {
         return targetClass.isSuperclassOf(properClass)
     }
 
-    /** Get property names */
-    fun <V : Any> getPropertyNames(instance: Any, targetClass: KClass<V>): Map<Short, String> {
-        val result = mutableMapOf<Short, String>()
-        getKProperties(targetClass, PropertyNullable::class)
-            .forEach { kProperty ->
-                val prop = kProperty.getter.call(instance)
-                result[prop.index] = kProperty.name
-            }
-        return result
+    /** Get a maps: index to name */
+    fun getPropertyNames(instance: Any): Map<Short, String> {
+        return getKProperties(instance, PropertyNullable::class)
+            .toList()
+            .map { it.getter.call(instance).index to it.name }
+            .toMap();
     }
 }
