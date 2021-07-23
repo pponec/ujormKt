@@ -84,6 +84,16 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     /** Name of property */
     operator fun invoke(): String = name
 
+    /** Criterion evaluates the true value always */
+    fun forAll(value: V): ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperatorEnum.ALL, null)
+    }
+
+    /** Criterion evaluates the false value always */
+    fun forNone(value: V): ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperatorEnum.NONE, null)
+    }
+
     /** Value operator */
     infix fun EQ(value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperatorEnum.EQ, value)
@@ -206,7 +216,16 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
     override fun set(entity: D, value: V?) = setter(entity, value)
 }
 
-/** Value operator */
+/** An operator for a BinaryCriterion */
+enum class BinaryOperator : Operator {
+    AND,
+    OR,
+    NOT,
+    AND_NOT,
+    OR_NOT;
+}
+
+/** An operator for a ValueCriterion */
 enum class ValueOperatorEnum : ValueOperator {
     EQ {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
@@ -248,14 +267,6 @@ enum class ValueOperatorEnum : ValueOperator {
             throw IllegalStateException("Unsupported comparation for ${property.valueClass}")
         }
     }
-}
-
-enum class BinaryOperator : Operator {
-    AND,
-    OR,
-    NOT,
-    AND_NOT,
-    OR_NOT;
 }
 
 open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
