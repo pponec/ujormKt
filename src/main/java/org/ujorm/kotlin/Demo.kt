@@ -81,5 +81,5 @@ open class _User : EntityModel<User>(User::class) {
 
 /** Model provider of entity */
 object EntityModelProvider : AbstractModelProvider() {
-    val user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().init() as _User }
+    val user by lazy(SYNCHRONIZED) { _User().init() as _User }
 }

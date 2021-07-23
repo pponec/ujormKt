@@ -308,6 +308,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 
 /** Interface of the domain meta-model */
 abstract class AbstractModelProvider {
+    protected val SYNCHRONIZED = LazyThreadSafetyMode.SYNCHRONIZED
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {
         val result : List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
@@ -368,14 +369,14 @@ internal object Utils {
     /** Get all properties of the instance for a required types */
     fun <V : Any> getKProperties(instance: Any, type: KClass<in V> ) : Stream<KProperty1<Any, V>> =
         instance::class.members.stream()
-            .filter { property -> property is KProperty1<*, *> }
-            .map { property -> property as KProperty1<Any, V> }
-            .filter { property -> isPropertyTypeOf(property, type) }
+            .filter { it is KProperty1<*, *> }
+            .map { it as KProperty1<Any, V> }
+            .filter { isPropertyTypeOf(it, type) }
 
     /** Get all properties of the instance for a required types */
     fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> =
         getKProperties(instance, type)
-            .map { property -> property.getter.call(instance) as V}
+            .map { it(instance) as V}
             .toList()
 
     /** Check if the property value has required type */
@@ -389,16 +390,7 @@ internal object Utils {
     fun getPropertyNames(instance: Any): Map<Short, String> {
         return getKProperties(instance, PropertyNullable::class)
             .toList()
-            .map { it.getter.call(instance).index to it.name }
-            .toMap();
-    }
-
-
-    /** Get a maps: index to name */
-    fun getPropertyNamesOrig(instance: Any): Map<Short, String> {
-        return getKProperties(instance, PropertyNullable::class)
-            .toList()
-            .map { it.getter.call(instance).index to it.name }
+            .map { it(instance).index to it.name }
             .toMap();
     }
 }
