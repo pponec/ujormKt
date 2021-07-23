@@ -80,9 +80,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
     }
+    /** Returns a property name introduced by a simple domain name */
+    fun info(): String = "${entityClass.simpleName}.$name"
 
     /** Name of property */
-    operator fun invoke(): String = name
+    operator fun invoke(): String = info()
 
     /** Criterion evaluates the true value always */
     fun forAll(value: V): ValueCriterion<D, V> {
@@ -204,7 +206,7 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
         index: Short,
         name: String,
         getter: (D) -> V,
-        setter: (D, V?) -> Unit,
+        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("$index") },
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
@@ -264,7 +266,7 @@ enum class ValueOperatorEnum : ValueOperator {
             @Suppress("UNCHECKED_CAST")
             (a as Comparable<V>).compareTo(b)
         } else {
-            throw IllegalStateException("Unsupported comparation for ${property.valueClass}")
+            throw IllegalStateException("Unsupported comparation for ${property.info()}")
         }
     }
 }
@@ -336,7 +338,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
             //@Suppress("UNCHECKED_CAST")
             (a as Comparable<T>).compareTo(b)
         } else {
-            throw IllegalStateException("Unsupported comparation for ${this.property.valueClass}")
+            throw IllegalStateException("Unsupported comparation for ${property.info()}")
         }
     }
 
@@ -397,7 +399,7 @@ abstract class EntityModel<D : Any>(
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = { d, v -> }
+        setter: (D, V?) -> Unit
     ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */

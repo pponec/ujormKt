@@ -49,9 +49,10 @@ fun main() {
     _user.name.set(user, "James")
     _user.parent.set(user, null)
 
-    assert("id" == _user.id(), { "id" })
-    assert("id" == _user.id.name, { "id" })
-    assert("id" == _user.id.toString(), { "id" })
+    assert(_user.id.name == "id", { "property name" })
+    assert(_user.id.toString() == "id", { "property name" })
+    assert(_user.id() == "User.id", { "property name" })
+    assert(_user.id.info() == "User.id", { "property name" })
 
     val properties: List<PropertyNullable<User, Any>> = EntityModelProvider.user._properties
     assert(properties.size == 4, { "Count of properties" })
