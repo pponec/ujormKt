@@ -25,6 +25,11 @@ import kotlin.streams.toList
 
 interface Operator
 
+interface ValueOperator : Operator {
+    /** Evaluate condition */
+    fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?): Boolean
+}
+
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val entityClass: KClass<D>
     val operator: OP
@@ -81,17 +86,17 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 
     /** Value operator */
     infix fun EQ(value: V): ValueCriterion<D, V> {
-        return ValueCriterion(this, ValueOperator.EQ, value)
+        return ValueCriterion(this, ValueOperatorEnum.EQ, value)
     }
 
     /** Value operator */
     infix fun GT(value: V): ValueCriterion<D, V> {
-        return ValueCriterion(this, ValueOperator.GT, value)
+        return ValueCriterion(this, ValueOperatorEnum.GT, value)
     }
 
     /** Value operator */
     infix fun LT(value: V): ValueCriterion<D, V> {
-        return ValueCriterion(this, ValueOperator.LT, value)
+        return ValueCriterion(this, ValueOperatorEnum.LT, value)
     }
 }
 
@@ -202,7 +207,7 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
 }
 
 /** Value operator */
-enum class ValueOperator : Operator {
+enum class ValueOperatorEnum : ValueOperator {
     EQ {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
             property.of(entity) == value
@@ -225,9 +230,6 @@ enum class ValueOperator : Operator {
     NONE {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) = false
     };
-
-    /** Evaluate condition */
-    abstract fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?): Boolean
 
     /** Comparator */
     protected fun <D : Any, V : Any> compare(entity : D, property: PropertyNullable<D, out V>, value: V?) =
