@@ -26,47 +26,53 @@ import kotlin.streams.toList
 interface Operator
 
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
-    val entityClass : KClass<D>
+    val entityClass: KClass<D>
     val operator: OP
-    fun eval(entity : D) : Boolean
-    fun not() : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>>
-            = BinaryCriterion(this, BinaryOperator.NOT, this)
+    fun eval(entity: D): Boolean
+    fun not(): Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> =
+        BinaryCriterion(this, BinaryOperator.NOT, this)
+
     /** Plain text expression */
     operator fun invoke(): String
+
     /** Extended text expression */
     override fun toString(): String
 
     infix fun AND(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.AND, crn)
     }
-    infix fun OR (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
+
+    infix fun OR(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR, crn)
     }
-    infix fun AND_NOT (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
+
+    infix fun AND_NOT(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.AND_NOT, crn)
     }
-    infix fun OR_NOT (crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
+
+    infix fun OR_NOT(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
 }
 
 /** Property descriptor for nullable values */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
-    val index : Short
-    val name : String
+    val index: Short
+    val name: String
+
     /** Is the value required (non-null) ? */
-    val required : Boolean
-    val entityClass : KClass<D>
-    val valueClass : KClass<out V>
-    val readOnly : Boolean
+    val required: Boolean
+    val entityClass: KClass<D>
+    val valueClass: KClass<out V>
+    val readOnly: Boolean
 
     /** Get a value from the entity */
-    fun of(entity : D) : V?
+    fun of(entity: D): V?
 
     /** Set a value to the entity */
-    fun set(entity: D, value: V?) : Unit
+    fun set(entity: D, value: V?): Unit
 
-    fun operate(operator : ValueOperator, value : V) : ValueCriterion<D, V> {
+    fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
     }
 
@@ -74,17 +80,17 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     operator fun invoke(): String = name
 
     /** Value operator */
-    infix fun EQ(value : V) : ValueCriterion<D, V> {
+    infix fun EQ(value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.EQ, value)
     }
 
     /** Value operator */
-    infix fun GT(value : V) : ValueCriterion<D, V> {
+    infix fun GT(value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.GT, value)
     }
 
     /** Value operator */
-    infix fun LT(value : V) : ValueCriterion<D, V> {
+    infix fun LT(value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, ValueOperator.LT, value)
     }
 }
@@ -92,25 +98,28 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 /** Property descriptor for non-null values */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     /** Get a value from the entity */
-    override fun of(entity : D) : V
+    override fun of(entity: D): V
 
     /** Set a non-null value to the entity */
-    override fun set(entity: D, value: V?) : Unit
+    override fun set(entity: D, value: V?): Unit
 }
 
 /** Abstract property descriptor */
 abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val index: Short
     override var name: String
-        internal set(value) { field = if ((field?:"").isEmpty()) value else throw IllegalStateException("Name is: $field") }
+        internal set(value) {
+            field = if ((field ?: "").isEmpty()) value else throw IllegalStateException("Name is: $field")
+        }
         public get() = field
+
     /** Required value (mon-nnull)
      * KType = typeOf<Int?>()  */
     override val entityClass: KClass<D>
     override val valueClass: KClass<V>
     override val readOnly: Boolean
 
-    constructor(index : Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>,) {
+    constructor(index: Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>) {
         this.index = index
         this.name = name
         this.entityClass = entityClass
@@ -170,7 +179,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
 }
 
 /** Property for non-null values */
-open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V> , Property<D, V> {
+open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, V> {
     override val required: Boolean get() = true
     private val getter: (D) -> V
     private val setter: (D, V?) -> Unit
@@ -211,8 +220,8 @@ enum class BinaryOperator : Operator {
 }
 
 open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
-    val left : Criterion<D, Operator, out Any?>
-    val right : Criterion<D, Operator, out Any?>
+    val left: Criterion<D, Operator, out Any?>
+    val right: Criterion<D, Operator, out Any?>
     override val operator: BinaryOperator
     override val entityClass: KClass<D> get() = left.entityClass
 
@@ -227,7 +236,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     }
 
     override fun eval(entity: D): Boolean {
-        return when(operator) {
+        return when (operator) {
             BinaryOperator.AND -> left.eval(entity) && right.eval(entity)
             BinaryOperator.OR -> left.eval(entity) || right.eval(entity)
             BinaryOperator.AND_NOT -> left.eval(entity) && !right.eval(entity)
@@ -253,8 +262,8 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 }
 
 open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
-    val property : PropertyNullable<D, out V>
-    val value : V?
+    val property: PropertyNullable<D, out V>
+    val value: V?
     override val operator: ValueOperator
     override val entityClass: KClass<D> get() = property.entityClass
 
@@ -265,11 +274,11 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 
     override fun eval(entity: D): Boolean {
-        return when(operator) {
+        return when (operator) {
             ValueOperator.ALL -> true
             ValueOperator.NONE -> false
             ValueOperator.EQ -> property.of(entity) == value
-            ValueOperator.GT ->  compare(property.of(entity), value) > 0
+            ValueOperator.GT -> compare(property.of(entity), value) > 0
             ValueOperator.GTE -> compare(property.of(entity), value) >= 0
             ValueOperator.LT -> compare(property.of(entity), value) < 0
             ValueOperator.LTE -> compare(property.of(entity), value) <= 0
@@ -287,7 +296,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
             //@Suppress("UNCHECKED_CAST")
             (a as Comparable<T>).compareTo(b)
         } else {
-            throw IllegalStateException("Unsupported comparation for ${this.property.valueClass}" )
+            throw IllegalStateException("Unsupported comparation for ${this.property.valueClass}")
         }
     }
 
@@ -301,7 +310,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     }
 
     /** A separator for String values */
-    private fun stringValueSeparator() : String {
+    private fun stringValueSeparator(): String {
         return if (value is CharSequence) "\"" else ""
     }
 }
@@ -309,26 +318,27 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 /** Interface of the domain meta-model */
 abstract class AbstractModelProvider {
     protected val SYNCHRONIZED = LazyThreadSafetyMode.SYNCHRONIZED
+
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {
-        val result : List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
+        val result: List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
         result.sortedBy { it._entityClass.simpleName }
     }
 }
 
 /** Model of the entity will be generated in the feature */
-abstract class EntityModel<D : Any> (
+abstract class EntityModel<D : Any>(
     /** Get the main domain class */
-    val _entityClass : KClass<D>,
-    private var _size : Short = 0
+    val _entityClass: KClass<D>,
+    private var _size: Short = 0
 ) {
     /** Get all properties */
     val _properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        val result : List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
+        val result: List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
         result.sortedBy { it.index }
     }
 
-    fun init() : EntityModel<D> {
+    fun init(): EntityModel<D> {
         val map = Utils.getPropertyNames(this)
         for (p in _properties) {
             val name = map.getOrDefault(p.index, "")
@@ -339,44 +349,44 @@ abstract class EntityModel<D : Any> (
 
     /** Create a non-null property */
     protected fun <V : Any> property(
-        name : String = "",
-        getter : (D) -> V,
-        setter : (D, V?) -> Unit
-    ) : Property<D, V> = PropertyImpl<D, V> (_size++, name, getter, setter, _entityClass);
+        name: String = "",
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit
+    ): Property<D, V> = PropertyImpl<D, V>(_size++, name, getter, setter, _entityClass);
 
     /** Create a non-null property */
     protected fun <V : Any> property(
-        getter : (D) -> V,
-        setter : (D, V?) -> Unit
-    ) : Property<D, V> = PropertyImpl<D, V> (_size++, "", getter, setter, _entityClass);
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit = { d, v -> null }
+    ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
-        name : String,
-        getter : (D) -> V?,
-        setter : (D, V?) -> Unit
-    ) : PropertyNullable<D, V> = PropertyNullableImpl<D, V> (_size++, name, getter, setter, _entityClass);
+        name: String,
+        getter: (D) -> V?,
+        setter: (D, V?) -> Unit
+    ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, name, getter, setter, _entityClass);
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
-        getter : (D) -> V?,
-        setter : (D, V?) -> Unit
-    ) : PropertyNullable<D, V> = PropertyNullableImpl<D, V> (_size++, "", getter, setter, _entityClass);
+        getter: (D) -> V?,
+        setter: (D, V?) -> Unit
+    ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass);
 }
 
 /** Common utilities */
 internal object Utils {
     /** Get all properties of the instance for a required types */
-    fun <V : Any> getKProperties(instance: Any, type: KClass<in V> ) : Stream<KProperty1<Any, V>> =
+    fun <V : Any> getKProperties(instance: Any, type: KClass<in V>): Stream<KProperty1<Any, V>> =
         instance::class.members.stream()
             .filter { it is KProperty1<*, *> }
             .map { it as KProperty1<Any, V> }
             .filter { isPropertyTypeOf(it, type) }
 
     /** Get all properties of the instance for a required types */
-    fun <V : Any> getProperties(instance: Any, type: KClass<in V> ) : List<V> =
+    fun <V : Any> getProperties(instance: Any, type: KClass<in V>): List<V> =
         getKProperties(instance, type)
-            .map { it(instance) as V}
+            .map { it(instance) as V }
             .toList()
 
     /** Check if the property value has required type */
