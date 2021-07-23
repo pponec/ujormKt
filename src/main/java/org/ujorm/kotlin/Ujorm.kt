@@ -397,7 +397,7 @@ abstract class EntityModel<D : Any>(
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = { d, v -> null }
+        setter: (D, V?) -> Unit = { d, v -> }
     ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */
