@@ -54,7 +54,7 @@ fun main() {
     assert(_user.id() == "User.id", { "property name" })
     assert(_user.id.info() == "User.id", { "property name" })
 
-    val properties: List<PropertyNullable<User, Any>> = EntityModelProvider.user._properties
+    val properties = EntityModelProvider.user._properties
     assert(properties.size == 4, { "Count of properties" })
     assert(properties[0].name == "id", { "property id" })
     assert(properties[1].name == "name", { "property name" })
