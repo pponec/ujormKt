@@ -201,14 +201,51 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
     override fun set(entity: D, value: V?) = setter(entity, value)
 }
 
+/** Value operator */
 enum class ValueOperator : Operator {
-    EQ,
-    LT,
-    GT,
-    LTE,
-    GTE,
-    ALL,
-    NONE
+    EQ {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+            property.of(entity) == value
+    },
+    LT {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+            compare(entity, property, value) < 0
+    },
+    GT {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+            compare(entity, property, value) > 0
+    },
+    GTE {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+            compare(entity, property, value) >= 0
+    },
+    ALL {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) = true
+    },
+    NONE {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) = false
+    };
+
+    /** Evaluate condition */
+    abstract fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?): Boolean
+
+    /** Comparator */
+    protected fun <D : Any, V : Any> compare(entity : D, property: PropertyNullable<D, out V>, value: V?) =
+        compareValues(property.of(entity), value, property)
+
+    /** Comparator */
+    protected fun <D : Any, V : Any> compareValues(a: V?, b: V?, property: PropertyNullable<D, out V>): Int {
+        if (a === b) return 0
+        if (a == null) return -1
+        if (b == null) return 1
+
+        return if (a is Comparable<*>) {
+            @Suppress("UNCHECKED_CAST")
+            (a as Comparable<V>).compareTo(b)
+        } else {
+            throw IllegalStateException("Unsupported comparation for ${property.valueClass}")
+        }
+    }
 }
 
 enum class BinaryOperator : Operator {
@@ -267,24 +304,14 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     override val operator: ValueOperator
     override val entityClass: KClass<D> get() = property.entityClass
 
-    constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V) {
+    constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V?) {
         this.property = property
         this.operator = operator
         this.value = value
     }
 
-    override fun eval(entity: D): Boolean {
-        return when (operator) {
-            ValueOperator.ALL -> true
-            ValueOperator.NONE -> false
-            ValueOperator.EQ -> property.of(entity) == value
-            ValueOperator.GT -> compare(property.of(entity), value) > 0
-            ValueOperator.GTE -> compare(property.of(entity), value) >= 0
-            ValueOperator.LT -> compare(property.of(entity), value) < 0
-            ValueOperator.LTE -> compare(property.of(entity), value) <= 0
-            else -> throw java.lang.UnsupportedOperationException("Unsupported operator $operator")
-        }
-    }
+    override fun eval(entity: D): Boolean =
+        operator.evaluate(entity, property, value)
 
     /** Private comparator */
     private fun <T : Any> compare(a: T?, b: T?): Int {
