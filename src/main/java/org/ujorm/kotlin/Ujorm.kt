@@ -327,16 +327,14 @@ abstract class EntityModel<D : Any> (
         result.sortedBy { it.index }
     }
 
-//    //TODO:
-//    init {
-//        val map = Utils.getPropertyNames(this, PropertyNullable::class)
-//        for (p in _properties) {
-//            if (p.name.isEmpty() && p is AbstractProperty) {
-//                p.name = map[p.index]
-//                    ?: throw IllegalStateException("Inknown name for ${p.entityClass.simpleName}[${p.index}]")
-//            }
-//        }
-//    }
+    fun init() : EntityModel<D> {
+        val map = Utils.getPropertyNames(this)
+        for (p in _properties) {
+            val name = map.getOrDefault(p.index, "")
+            if (!name.isEmpty() && p is AbstractProperty) p.name = name
+        }
+        return this;
+    }
 
     /** Create a non-null property */
     protected fun <V : Any> property(
@@ -389,6 +387,15 @@ internal object Utils {
 
     /** Get a maps: index to name */
     fun getPropertyNames(instance: Any): Map<Short, String> {
+        return getKProperties(instance, PropertyNullable::class)
+            .toList()
+            .map { it.getter.call(instance).index to it.name }
+            .toMap();
+    }
+
+
+    /** Get a maps: index to name */
+    fun getPropertyNamesOrig(instance: Any): Map<Short, String> {
         return getKProperties(instance, PropertyNullable::class)
             .toList()
             .map { it.getter.call(instance).index to it.name }

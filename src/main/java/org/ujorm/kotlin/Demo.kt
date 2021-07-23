@@ -73,14 +73,13 @@ data class User constructor(
 
 /** Model of the entity will be a generated class in the feature */
 open class _User : EntityModel<User>(User::class) {
-    val id = property("id", { it.id }, { d, v -> d.id = v!! })
-    val name = property("name", { it.name }, { d, v -> d.name = v!! })
-    val born = property("born", { it.born }, { d, v -> d.born = v!! })
-    val parent = propertyN6e("parent", { it.parent }, { d, v -> d.parent = v })
+    val id = property({ it.id }, { d, v -> d.id = v!! })
+    val name = property({ it.name }, { d, v -> d.name = v!! })
+    val born = property({ it.born }, { d, v -> d.born = v!! })
+    val parent = propertyN6e({ it.parent }, { d, v -> d.parent = v })
 }
 
 /** Model provider of entity */
 object EntityModelProvider : AbstractModelProvider() {
-    val user = _User()
-
+    val user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().init() as _User }
 }
