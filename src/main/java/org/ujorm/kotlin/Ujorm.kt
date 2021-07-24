@@ -213,7 +213,7 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
         index: Short,
         name: String,
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("$index") },
+        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("${entityClass.simpleName}.$index") },
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
@@ -406,7 +406,7 @@ abstract class EntityModel<D : Any>(
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
-        setter: (D, V?) -> Unit
+        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("${_entityClass.simpleName}.${_size})") }
     ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */
