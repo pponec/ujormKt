@@ -76,9 +76,9 @@ data class User constructor(
 /** Model of the entity will be a generated class in the feature */
 open class _User : EntityModel<User>(User::class) {
     val id = property({ it.id })
-    val name = property({ it.name }, { d, v -> d.name = v!! })
-    val born = property({ it.born }, { d, v -> d.born = v!! })
-    val parent = propertyN6e({ it.parent }, { d, v -> d.parent = v })
+    val name = property({ it.name })
+    val born = property({ it.born })
+    val parent = propertyN6e({ it.parent })
 }
 
 /** Model provider of entity */

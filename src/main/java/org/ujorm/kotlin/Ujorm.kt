@@ -21,6 +21,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.reflect
 import kotlin.streams.toList
 
@@ -404,39 +405,38 @@ abstract class EntityModel<D : Any>(
         val map = Utils.getKPropertyMap(this)
         for (p in _properties) {
             val kProperty = map.get(p.index)
-            assignName(kProperty, p)
-            assignSetter(kProperty, p)
+                ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
+            assignName(p, kProperty)
+            assignSetter(p)
         }
         return this;
     }
 
     /** Assign a property name */
     private fun assignName(
-        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>?,
-        p: PropertyNullable<D, Any>
+        uProperty: PropertyNullable<D, Any>,
+        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>
     ) {
-        val name = kProperty?.name ?: ""
-        if (p.name.isEmpty()
+        val name = kProperty.name
+        if (uProperty.name.isEmpty()
             && !name.isEmpty()
-            && p is AbstractProperty
+            && uProperty is AbstractProperty
         ) {
-            p.name = name
+            uProperty.name = name
         }
     }
 
     /** Assign a property setter */
-    private fun assignSetter(
-        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>?,
-        p: PropertyNullable<D, Any>
-    ) {
-        if (kProperty is KMutableProperty<*>) when (p) {
+    private fun assignSetter(uProperty: PropertyNullable<D, Any>) {
+        val eProperty = uProperty.entityClass.memberProperties.find { it.name == uProperty.name }
+        if (eProperty is KMutableProperty<*>) when (uProperty) {
             is PropertyNullableImpl -> {
-                if (p.setter === Constants.UNDEFINED_SETTER)
-                    p.setter = { d, v -> kProperty.setter.call(d, v) }
+                if (uProperty.setter === Constants.UNDEFINED_SETTER)
+                    uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
             is PropertyImpl -> {
-                if (p.setter === Constants.UNDEFINED_SETTER)
-                    p.setter = { d, v -> kProperty.setter.call(d, v) }
+                if (uProperty.setter === Constants.UNDEFINED_SETTER)
+                    uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
         }
     }
@@ -458,13 +458,13 @@ abstract class EntityModel<D : Any>(
     protected fun <V : Any> propertyN6e(
         name: String,
         getter: (D) -> V?,
-        setter: (D, V?) -> Unit
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, name, getter, setter, _entityClass);
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
         getter: (D) -> V?,
-        setter: (D, V?) -> Unit
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass);
 }
 
