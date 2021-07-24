@@ -183,14 +183,14 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
 /** Property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
     override val required: Boolean get() = false
-    private val setter: (D, V?) -> Unit
     private val getter: (D) -> V?
+    private var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
 
     constructor(
         index: Short,
         name: String,
         getter: (D) -> V?,
-        setter: (D, V?) -> Unit,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
@@ -206,14 +206,24 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
 open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, V> {
     override val required: Boolean get() = true
     private val getter: (D) -> V
-    private val setter: (D, V?) -> Unit
+    internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+//        internal set(value) {
+//            field = if (field == Constants.UNDEFINED_SETTER) value
+//            else throw IllegalStateException("${entityClass}.$index")
+//        }
+        internal get() = field
 
     /** Original constructor */
     constructor(
         index: Short,
         name: String,
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("${entityClass.simpleName}.$index") },
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+//                internal set(value) {
+//            field = if (field == Constants.UNDEFINED_SETTER) value
+//            else throw IllegalStateException("${entityClass}.$index")
+//        }
+        ,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
@@ -298,6 +308,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         return when (operator) {
             BinaryOperator.AND -> left.eval(entity) && right.eval(entity)
             BinaryOperator.OR -> left.eval(entity) || right.eval(entity)
+            BinaryOperator.NOT -> !left.eval(entity)
             BinaryOperator.AND_NOT -> left.eval(entity) && !right.eval(entity)
             BinaryOperator.OR_NOT -> left.eval(entity) || !right.eval(entity)
             else -> {
@@ -400,13 +411,13 @@ abstract class EntityModel<D : Any>(
     protected fun <V : Any> property(
         name: String = "",
         getter: (D) -> V,
-        setter: (D, V?) -> Unit
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): Property<D, V> = PropertyImpl<D, V>(_size++, name, getter, setter, _entityClass);
 
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = { d, v -> throw UnsupportedOperationException("${_entityClass.simpleName}.${_size})") }
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass);
 
     /** Create a nullable property */
@@ -452,4 +463,11 @@ internal object Utils {
             .map { it(instance).index to it.name }
             .toMap();
     }
+}
+
+/** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
+object Constants {
+    /** Undefined property setter */
+    val UNDEFINED_SETTER : (d : Any, v: Any?) -> Unit = {d, v -> throw UnsupportedOperationException("read-only")}
+
 }
