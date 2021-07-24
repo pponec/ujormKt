@@ -71,6 +71,9 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val valueClass: KClass<out V>
     val readOnly: Boolean
 
+    /** A shortcut for the of() method */
+    operator fun invoke(entity: D): V? = of(entity)
+
     /** Get a value from the entity */
     fun of(entity: D): V?
 
@@ -114,6 +117,10 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 
 /** Property descriptor for non-null values */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
+
+    /** A shortcut for the of() method */
+    override operator fun invoke(entity: D): V = of(entity)
+
     /** Get a value from the entity */
     override fun of(entity: D): V
 
