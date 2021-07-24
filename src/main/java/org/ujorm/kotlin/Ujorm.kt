@@ -18,6 +18,7 @@ package org.ujorm.kotlin
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.reflect
@@ -83,6 +84,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
     }
+
     /** Returns a property name introduced by a simple domain name */
     fun info(): String = "${entityClass.simpleName}.$name"
 
@@ -184,7 +186,11 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
 open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
     override val required: Boolean get() = false
     private val getter: (D) -> V?
-    private var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+    internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+        internal set(value) {
+            field = if (field == Constants.UNDEFINED_SETTER) value
+            else throw IllegalStateException("${entityClass.simpleName}.$index")
+        }
 
     constructor(
         index: Short,
@@ -207,10 +213,10 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
     override val required: Boolean get() = true
     private val getter: (D) -> V
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-//        internal set(value) {
-//            field = if (field == Constants.UNDEFINED_SETTER) value
-//            else throw IllegalStateException("${entityClass}.$index")
-//        }
+        internal set(value) {
+            field = if (field == Constants.UNDEFINED_SETTER) value
+            else throw IllegalStateException("${entityClass.simpleName}.$index")
+        }
         internal get() = field
 
     /** Original constructor */
@@ -218,12 +224,7 @@ open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, 
         index: Short,
         name: String,
         getter: (D) -> V,
-        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-//                internal set(value) {
-//            field = if (field == Constants.UNDEFINED_SETTER) value
-//            else throw IllegalStateException("${entityClass}.$index")
-//        }
-        ,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType!!.classifier as KClass<V>,
     ) : super(index, name, entityClass, valueClass) {
@@ -270,7 +271,7 @@ enum class ValueOperatorEnum : ValueOperator {
     };
 
     /** Comparator */
-    protected fun <D : Any, V : Any> compare(entity : D, property: PropertyNullable<D, out V>, value: V?) =
+    protected fun <D : Any, V : Any> compare(entity: D, property: PropertyNullable<D, out V>, value: V?) =
         compareValues(property.of(entity), value, property)
 
     /** Comparator */
@@ -325,7 +326,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         }
     }
 
-    /** Extenced text expression */
+    /** Extended text expression */
     override fun toString(): String {
         return "${entityClass.simpleName}: ${invoke()}"
     }
@@ -398,13 +399,46 @@ abstract class EntityModel<D : Any>(
         result.sortedBy { it.index }
     }
 
+    /** Initialize all properties */
     fun init(): EntityModel<D> {
-        val map = Utils.getPropertyNames(this)
+        val map = Utils.getKPropertyMap(this)
         for (p in _properties) {
-            val name = map.getOrDefault(p.index, "")
-            if (!name.isEmpty() && p is AbstractProperty) p.name = name
+            val kProperty = map.get(p.index)
+            assignName(kProperty, p)
+            assignSetter(kProperty, p)
         }
         return this;
+    }
+
+    /** Assign a property name */
+    private fun assignName(
+        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>?,
+        p: PropertyNullable<D, Any>
+    ) {
+        val name = kProperty?.name ?: ""
+        if (p.name.isEmpty()
+            && !name.isEmpty()
+            && p is AbstractProperty
+        ) {
+            p.name = name
+        }
+    }
+
+    /** Assign a property setter */
+    private fun assignSetter(
+        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>?,
+        p: PropertyNullable<D, Any>
+    ) {
+        if (kProperty is KMutableProperty<*>) when (p) {
+            is PropertyNullableImpl -> {
+                if (p.setter === Constants.UNDEFINED_SETTER)
+                    p.setter = { d, v -> kProperty.setter.call(d, v) }
+            }
+            is PropertyImpl -> {
+                if (p.setter === Constants.UNDEFINED_SETTER)
+                    p.setter = { d, v -> kProperty.setter.call(d, v) }
+            }
+        }
     }
 
     /** Create a non-null property */
@@ -456,18 +490,17 @@ internal object Utils {
         return targetClass.isSuperclassOf(properClass)
     }
 
-    /** Get a maps: index to name */
-    fun getPropertyNames(instance: Any): Map<Short, String> {
-        return getKProperties(instance, PropertyNullable::class)
+    /** Get a maps: index to KProperty1 */
+    fun <D : Any> getKPropertyMap(instance: D): Map<Short, KProperty1<D, PropertyNullable<D, *>>> =
+        getKProperties(instance, PropertyNullable::class)
             .toList()
-            .map { it(instance).index to it.name }
-            .toMap();
-    }
+            .map { it(instance).index to it as KProperty1<D, PropertyNullable<D, *>> }
+            .toMap()
 }
 
 /** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
     /** Undefined property setter */
-    val UNDEFINED_SETTER : (d : Any, v: Any?) -> Unit = {d, v -> throw UnsupportedOperationException("read-only")}
+    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v -> throw UnsupportedOperationException("read-only") }
 
 }
