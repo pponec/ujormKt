@@ -26,7 +26,10 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.reflect
 import kotlin.streams.toList
 
-interface Operator
+interface Operator {
+    /** An operator name */
+    val name : String
+}
 
 interface ValueOperator : Operator {
     /** Evaluate condition */
@@ -321,7 +324,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
             BinaryOperator.AND_NOT -> left.eval(entity) && !right.eval(entity)
             BinaryOperator.OR_NOT -> left.eval(entity) || !right.eval(entity)
             else -> {
-                throw UnsupportedOperationException("Unsupported operator: $operator")
+                throw UnsupportedOperationException("Unsupported operator: ${operator.name}")
             }
         }
     }
@@ -329,8 +332,8 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     /** Plain text expression */
     override operator fun invoke(): String {
         return when (operator) {
-            BinaryOperator.NOT -> /**/ "$operator (${right.invoke()})"
-            else -> "(${left.invoke()}) $operator (${right.invoke()})"
+            BinaryOperator.NOT -> /**/ "${operator.name} (${right.invoke()})"
+            else -> "(${left.invoke()}) ${operator.name} (${right.invoke()})"
         }
     }
 
@@ -371,7 +374,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 
     override operator fun invoke(): String {
         val separator = stringValueSeparator()
-        return "$property $operator $separator$value$separator"
+        return "$property ${operator.name} $separator$value$separator"
     }
 
     override fun toString(): String {
