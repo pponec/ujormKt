@@ -12,11 +12,10 @@ Topical areas of use are:
 # What remains to be done
 
 - building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
-- the domain object model should be generated according to the original POJO objects in feature
 - API cleaning
 - Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
-- Integration of model filters with the `Hibernate` ORM framework
-
+- Integration of model filters to the `JPA`/`Hibernate` framework
+- the domain object model should be generated according to the original POJO objects in feature
 
 ## Usage:
 
