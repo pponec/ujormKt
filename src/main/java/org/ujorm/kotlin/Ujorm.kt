@@ -29,7 +29,7 @@ interface Operator
 
 interface ValueOperator : Operator {
     /** Evaluate condition */
-    fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?): Boolean
+    fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?): Boolean
 }
 
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
@@ -62,8 +62,8 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     }
 }
 
-/** Property descriptor for nullable values */
-interface PropertyNullable<D : Any, V : Any> : CharSequence {
+/** A root of properties */
+interface CommonProperty<D : Any, V : Any> : CharSequence {
     val index: Short
     val name: String
 
@@ -118,8 +118,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     }
 }
 
-/** Property descriptor for non-null values */
-interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
+/** A property descriptor for nullable values */
+interface NullableProperty<D : Any, V : Any> : CommonProperty<D, V>
+
+/** A property descriptor for mandatory values */
+interface MandatoryProperty<D : Any, V : Any> : CommonProperty<D, V> {
 
     /** A shortcut for the of() method */
     override operator fun invoke(entity: D): V = of(entity)
@@ -132,7 +135,7 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 }
 
 /** Abstract property descriptor */
-abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
+abstract class AbstractProperty<D : Any, V : Any> : CommonProperty<D, V> {
     override val index: Short
     override var name: String
         internal set(value) {
@@ -184,7 +187,7 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
 }
 
 /** Property descriptor for nullable values */
-open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
+open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V>, NullableProperty<D, V> {
     override val required: Boolean get() = false
     private val getter: (D) -> V?
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
@@ -210,7 +213,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V> {
 }
 
 /** Property for non-null values */
-open class PropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Property<D, V> {
+open class PropertyNonnullImpl<D : Any, V : Any> : AbstractProperty<D, V>, MandatoryProperty<D, V> {
     override val required: Boolean get() = true
     private val getter: (D) -> V
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
@@ -248,34 +251,34 @@ enum class BinaryOperator : Operator {
 /** An operator for a ValueCriterion */
 enum class ValueOperatorEnum : ValueOperator {
     EQ {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) =
             property.of(entity) == value
     },
     LT {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) =
             compare(entity, property, value) < 0
     },
     GT {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) =
             compare(entity, property, value) > 0
     },
     GTE {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) =
             compare(entity, property, value) >= 0
     },
     ALL {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) = true
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) = true
     },
     NONE {
-        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) = false
+        override fun <D : Any, V : Any> evaluate(entity: D, property: CommonProperty<D, out V>, value: V?) = false
     };
 
     /** Comparator */
-    protected fun <D : Any, V : Any> compare(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+    protected fun <D : Any, V : Any> compare(entity: D, property: CommonProperty<D, out V>, value: V?) =
         compareValues(property.of(entity), value, property)
 
     /** Comparator */
-    protected fun <D : Any, V : Any> compareValues(a: V?, b: V?, property: PropertyNullable<D, out V>): Int {
+    protected fun <D : Any, V : Any> compareValues(a: V?, b: V?, property: CommonProperty<D, out V>): Int {
         if (a === b) return 0
         if (a == null) return -1
         if (b == null) return 1
@@ -333,12 +336,12 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 }
 
 open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
-    val property: PropertyNullable<D, out V>
+    val property: CommonProperty<D, out V>
     val value: V?
     override val operator: ValueOperator
     override val entityClass: KClass<D> get() = property.entityClass
 
-    constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V?) {
+    constructor(property: CommonProperty<D, out V>, operator: ValueOperator, value: V?) {
         this.property = property
         this.operator = operator
         this.value = value
@@ -394,8 +397,8 @@ abstract class EntityModel<D : Any>(
     private var _size: Short = 0
 ) {
     /** Get all properties */
-    val _properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        val result: List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
+    val _properties: List<CommonProperty<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        val result: List<CommonProperty<D, Any>> = Utils.getProperties(this, CommonProperty::class)
         result.sortedBy { it.index }
     }
 
@@ -419,26 +422,26 @@ abstract class EntityModel<D : Any>(
         name: String = "",
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): Property<D, V> = PropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = PropertyNonnullImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): Property<D, V> = PropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = PropertyNonnullImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
         name: String,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): NullableProperty<D, V> = PropertyNullableImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): NullableProperty<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
     override fun toString() = _entityClass.simpleName ?: "?"
 }
@@ -466,16 +469,16 @@ internal object Utils {
     }
 
     /** Get a maps: index to KProperty1 */
-    fun <D : Any> getKPropertyMap(instance: D): Map<Short, KProperty1<D, PropertyNullable<D, *>>> =
-        getKProperties(instance, PropertyNullable::class)
+    fun <D : Any> getKPropertyMap(instance: D): Map<Short, KProperty1<D, CommonProperty<D, *>>> =
+        getKProperties(instance, CommonProperty::class)
             .toList()
-            .map { it(instance).index to it as KProperty1<D, PropertyNullable<D, *>> }
+            .map { it(instance).index to it as KProperty1<D, CommonProperty<D, *>> }
             .toMap()
 
     /** Assign a property name to the uProperty */
     fun <D : Any> assignName(
-        uProperty: PropertyNullable<D, Any>,
-        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>
+        uProperty: CommonProperty<D, Any>,
+        kProperty: KProperty1<EntityModel<D>, CommonProperty<EntityModel<D>, *>>
     ) {
         val name = kProperty.name
         if (uProperty.name.isEmpty()
@@ -487,14 +490,14 @@ internal object Utils {
     }
 
     /** Assign a property setter to the uProperty */
-    fun <D : Any> assignSetter(uProperty: PropertyNullable<D, Any>) {
+    fun <D : Any> assignSetter(uProperty: CommonProperty<D, Any>) {
         val eProperty = uProperty.entityClass.memberProperties.find { it.name == uProperty.name }
         if (eProperty is KMutableProperty<*>) when (uProperty) {
             is PropertyNullableImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)
                     uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
-            is PropertyImpl -> {
+            is PropertyNonnullImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)
                     uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
@@ -509,12 +512,12 @@ open class EntityBuilder<D : Any> (
     private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property : PropertyNullable<D, V>, value : Any?) {
+    fun <V: Any> set(property : NullableProperty<D, V>, value : Any?) {
         map[property.name] = value
     }
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property : Property<D, V>, value : Any) {
+    fun <V: Any> set(property : MandatoryProperty<D, V>, value : Any) {
         map[property.name] = value
     }
 

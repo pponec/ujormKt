@@ -87,7 +87,7 @@ fun useEntityBuilder() {
     val builder = _user.builder()
 
     builder.set(_user.id, 1)
-    builder.set(_user.name, "John") // TODO : Fix a nullable values
+    builder.set(_user.name, "John")
     builder.set(_user.born, LocalDate.now())
     builder.set(_user.parent, null)
 
