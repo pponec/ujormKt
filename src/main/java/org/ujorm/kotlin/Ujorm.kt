@@ -136,7 +136,8 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val index: Short
     override var name: String
         internal set(value) {
-            field = if (field.isEmpty()) value else throw IllegalStateException("Name is: $field")
+            // Note: field.isEmpty() expression throws the NullPointerException
+            field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name is: $field")
         }
 
     /** Required value (mon-nnull)
