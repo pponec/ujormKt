@@ -82,7 +82,7 @@ fun useProperties() {
     assert(_user.born.entityClass == User::class)
 }
 
-/** How to create an immutable object */
+/** Create new object by a constructor (for immutable objects) */
 fun useEntityBuilder() {
     val _user = EntityModelProvider.user
     val builder = _user.builder()

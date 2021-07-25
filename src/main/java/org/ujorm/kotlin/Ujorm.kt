@@ -532,7 +532,7 @@ open class EntityBuilder<D : Any>(
         map[property.name] = value
     }
 
-    /** Build a entity object */
+    /** Create new object by a constructor (for immutable objects) */
     fun build(): D {
         val constructor = model._entityClass.constructors
             .stream()
