@@ -415,7 +415,7 @@ abstract class EntityModel<D : Any>(
     }
 
     /** Create an Entity builder */
-    fun builder() : EntityBuilder<D> = EntityBuilder(this)
+    fun builder(): EntityBuilder<D> = EntityBuilder(this)
 
     /** Create a non-null property */
     protected fun <V : Any> property(
@@ -506,8 +506,8 @@ internal object Utils {
 }
 
 /** Entity builder */
-open class EntityBuilder<D : Any> (
-    val model : EntityModel<D>,
+open class EntityBuilder<D : Any>(
+    val model: EntityModel<D>,
 ) {
     private val map = mutableMapOf<String, Any?>()
 
@@ -522,7 +522,7 @@ open class EntityBuilder<D : Any> (
     }
 
     /** Build a entity object */
-    fun build() : D {
+    fun build(): D {
         val constructor = model._entityClass.constructors.firstOrNull()
             ?: throw IllegalStateException("No constructor found")
 
