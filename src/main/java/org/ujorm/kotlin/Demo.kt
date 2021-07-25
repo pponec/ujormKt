@@ -17,7 +17,6 @@ package org.ujorm.kotlin.demo
 
 import org.ujorm.kotlin.AbstractModelProvider
 import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.PropertyNullable
 import java.time.LocalDate
 
 /** Sample of usage */
