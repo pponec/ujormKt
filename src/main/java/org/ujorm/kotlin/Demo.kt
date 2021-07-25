@@ -71,11 +71,11 @@ fun useProperties() {
     assert(properties[1].name == "name", { "property name" })
     assert(properties[2].name == "born", { "property name" })
 
-    /** Value type */
+    // Value type
     assert(_user.id.valueClass == Int::class)
     assert(_user.born.valueClass == LocalDate::class)
 
-    /** Entity type (alias domain type) */
+    // Entity type (alias domain type)
     assert(_user.id.entityClass == User::class)
     assert(_user.born.entityClass == User::class)
 }
