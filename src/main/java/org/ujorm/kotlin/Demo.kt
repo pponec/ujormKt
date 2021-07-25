@@ -61,7 +61,6 @@ fun useProperties() {
 
     _user.name.set(user, "James")
     _user.parent.set(user, null)
-    //_user.name.set(user, null) // Throws IllegalArgumentException in the run-time
     assert(_user.id.name == "id", { "property name" })
     assert(_user.id.toString() == "id", { "property name" })
     assert(_user.id() == "User.id", { "property name" })
