@@ -39,12 +39,15 @@ interface ValueOperator : Operator {
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val entityClass: KClass<D>
     val operator: OP
-    fun eval(entity: D): Boolean
+    fun evaluate(entity: D): Boolean
     fun not(): Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> =
         BinaryCriterion(this, BinaryOperator.NOT, this)
 
     /** Plain text expression */
     operator fun invoke(): String
+
+    /** An shortcut for an evaluation */
+    operator fun invoke(entity: D) = evaluate(entity)
 
     /** Extended text expression */
     override fun toString(): String
@@ -316,13 +319,13 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
         this.right = right
     }
 
-    override fun eval(entity: D): Boolean {
+    override fun evaluate(entity: D): Boolean {
         return when (operator) {
-            BinaryOperator.AND -> left.eval(entity) && right.eval(entity)
-            BinaryOperator.OR -> left.eval(entity) || right.eval(entity)
-            BinaryOperator.NOT -> !left.eval(entity)
-            BinaryOperator.AND_NOT -> left.eval(entity) && !right.eval(entity)
-            BinaryOperator.OR_NOT -> left.eval(entity) || !right.eval(entity)
+            BinaryOperator.AND -> left(entity) && right(entity)
+            BinaryOperator.OR -> left(entity) || right(entity)
+            BinaryOperator.NOT -> !left(entity)
+            BinaryOperator.AND_NOT -> left(entity) && !right(entity)
+            BinaryOperator.OR_NOT -> left(entity) || !right(entity)
             else -> {
                 throw UnsupportedOperationException("Unsupported operator: ${operator.name}")
             }
@@ -355,7 +358,7 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
         this.value = value
     }
 
-    override fun eval(entity: D): Boolean =
+    override fun evaluate(entity: D): Boolean =
         operator.evaluate(entity, property, value)
 
     /** Private comparator */

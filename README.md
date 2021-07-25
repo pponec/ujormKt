@@ -34,10 +34,10 @@ assert(crn4.toString() == """User: (name EQ "Pavel") OR ((id GT 1) AND (id LT 99
 assert(crn5.toString() == """User: (NOT (name EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
 
 val user = User(id = 11, name = "Xaver", born = LocalDate.now())
-val noValid: Boolean = crn1.eval(user)
-val isValid: Boolean = crn4.eval(user)
-assert(!noValid, { "crn1.eval(user)" })
-assert(isValid, { "crn4.eval(user)" })
+val noValid: Boolean = crn1(user)
+val isValid: Boolean = crn4(user)
+assert(!noValid, { "crn1(user)" })
+assert(isValid, { "crn4(user)" })
 
 val userName: String = _user.name(user) // Get a name of the user
 val userId: Int = _user.id(user)
