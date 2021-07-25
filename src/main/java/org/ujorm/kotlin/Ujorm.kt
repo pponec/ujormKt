@@ -77,6 +77,9 @@ interface CommonProperty<D : Any, V : Any> : CharSequence {
     /** A shortcut for the of() method */
     operator fun invoke(entity: D): V? = of(entity)
 
+    /** A shortcut for the set() method */
+    operator fun invoke(entity: D, value: V?): Unit = set(entity, value)
+
     /** Get a value from the entity */
     fun of(entity: D): V?
 

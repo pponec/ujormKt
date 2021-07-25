@@ -43,15 +43,8 @@ fun useCriterions() {
     val user = User(id = 11, name = "Xaver", born = LocalDate.now())
     val noValid: Boolean = crn1.eval(user)
     val isValid: Boolean = crn4.eval(user)
-    val userName: String = _user.name.of(user)
-    val userId: Int = _user.id.of(user)
-    val parent: User? = _user.parent.of(user)
-    //val parentName : String = _user.name.parent.of(user) // TODO: reading the relations
     assert(!noValid, { "crn1.eval(user)" })
     assert(isValid, { "crn4.eval(user)" })
-    assert(userName == "Xaver", { "userName" })
-    assert(userId == 11, { "userId" })
-    assert(parent == null, { "userId" })
 }
 
 /** Sample of usage */
@@ -59,8 +52,16 @@ fun useProperties() {
     val _user = EntityModelProvider.user
     val user = User(id = 11, name = "Xaver", born = LocalDate.now())
 
-    _user.name.set(user, "James")
-    _user.parent.set(user, null)
+    val userName: String = _user.name(user) // Get a name of the user
+    val userId: Int = _user.id(user)
+    val parent: User? = _user.parent(user)
+    //val parentName : String = _user.name.parent(user) // TODO: reading the relations
+    assert(userName == "Xaver", { "userName" })
+    assert(userId == 11, { "userId" })
+    assert(parent == null, { "userId" })
+
+    _user.name(user, "James") // Set a name to the user
+    _user.parent(user, null)
     assert(_user.id.name == "id", { "property name" })
     assert(_user.id.toString() == "id", { "property name" })
     assert(_user.id() == "User.id", { "property name" })
