@@ -20,7 +20,7 @@ Topical areas of use are:
 ## Usage:
 
 ```kotlin
-val _user = EntityModelProvider.user
+val _user = ModelProvider.user
 
 val crn1 = _user.name EQ "Pavel"
 val crn2 = _user.id GT 1

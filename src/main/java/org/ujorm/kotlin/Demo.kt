@@ -28,7 +28,7 @@ fun main() {
 
 /** Sample of usage */
 fun useCriterions() {
-    val _user = EntityModelProvider.user
+    val _user = ModelProvider.user
 
     val crn1 = _user.name EQ "Pavel"
     val crn2 = _user.id GT 1
@@ -49,7 +49,7 @@ fun useCriterions() {
 
 /** Sample of usage */
 fun useProperties() {
-    val _user = EntityModelProvider.user
+    val _user = ModelProvider.user
     val user = User(id = 11, name = "Xaver", born = LocalDate.now())
 
     val userName: String = _user.name(user) // Get a name of the user
@@ -67,7 +67,7 @@ fun useProperties() {
     assert(_user.id() == "User.id", { "property name" })
     assert(_user.id.info() == "User.id", { "property name" })
 
-    val properties = EntityModelProvider.user._properties
+    val properties = ModelProvider.user._properties
     assert(properties.size == 4, { "Count of properties" })
     assert(properties[0].name == "id", { "property name" })
     assert(properties[1].name == "name", { "property name" })
@@ -84,7 +84,7 @@ fun useProperties() {
 
 /** Create new object by a constructor (for immutable objects) */
 fun useEntityBuilder() {
-    val _user = EntityModelProvider.user
+    val _user = ModelProvider.user
     val builder = _user.builder()
 
     builder.set(_user.id, 1)
@@ -114,7 +114,7 @@ open class _User : EntityModel<User>(User::class) {
     val parent = propertyN6e({ it.parent })
 }
 
-/** Model provider of entity */
-object EntityModelProvider : AbstractModelProvider() {
+/** Entity model provider */
+object ModelProvider : AbstractModelProvider() {
     val user by lazy(SYNCHRONIZED) { _User().init() as _User }
 }
