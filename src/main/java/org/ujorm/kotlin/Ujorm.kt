@@ -15,6 +15,7 @@
  */
 package org.ujorm.kotlin
 
+import java.lang.IllegalArgumentException
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
@@ -187,7 +188,7 @@ abstract class AbstractProperty<D : Any, V : Any> : CommonProperty<D, V> {
 }
 
 /** Property descriptor for nullable values */
-open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V>, NullableProperty<D, V> {
+open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, NullableProperty<D, V> {
     override val required: Boolean get() = false
     private val getter: (D) -> V?
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
@@ -212,8 +213,8 @@ open class PropertyNullableImpl<D : Any, V : Any> : AbstractProperty<D, V>, Null
     override fun set(entity: D, value: V?) = setter(entity, value)
 }
 
-/** Property for non-null values */
-open class PropertyNonnullImpl<D : Any, V : Any> : AbstractProperty<D, V>, MandatoryProperty<D, V> {
+/** Property for mandatory values */
+open class MandatoryPropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, MandatoryProperty<D, V> {
     override val required: Boolean get() = true
     private val getter: (D) -> V
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
@@ -236,7 +237,8 @@ open class PropertyNonnullImpl<D : Any, V : Any> : AbstractProperty<D, V>, Manda
     }
 
     override fun of(entity: D): V = getter(entity)
-    override fun set(entity: D, value: V?) = setter(entity, value)
+    override fun set(entity: D, value: V?) = setter(entity, value
+        ?: throw IllegalArgumentException("Mandatory property: ${info()}"))
 }
 
 /** An operator for a BinaryCriterion */
@@ -422,26 +424,26 @@ abstract class EntityModel<D : Any>(
         name: String = "",
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): MandatoryProperty<D, V> = PropertyNonnullImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): MandatoryProperty<D, V> = PropertyNonnullImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
         name: String,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): NullableProperty<D, V> = PropertyNullableImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
     /** Create a nullable property */
     protected fun <V : Any> propertyN6e(
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): NullableProperty<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
     override fun toString() = _entityClass.simpleName ?: "?"
 }
@@ -493,11 +495,11 @@ internal object Utils {
     fun <D : Any> assignSetter(uProperty: CommonProperty<D, Any>) {
         val eProperty = uProperty.entityClass.memberProperties.find { it.name == uProperty.name }
         if (eProperty is KMutableProperty<*>) when (uProperty) {
-            is PropertyNullableImpl -> {
+            is NullablePropertyImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)
                     uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
-            is PropertyNonnullImpl -> {
+            is MandatoryPropertyImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)
                     uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
             }
@@ -512,12 +514,12 @@ open class EntityBuilder<D : Any>(
     private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property : NullableProperty<D, V>, value : Any?) {
+    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) {
         map[property.name] = value
     }
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property : MandatoryProperty<D, V>, value : Any) {
+    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) {
         map[property.name] = value
     }
 
