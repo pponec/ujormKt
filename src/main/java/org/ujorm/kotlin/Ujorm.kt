@@ -136,7 +136,7 @@ abstract class AbstractProperty<D : Any, V : Any> : PropertyNullable<D, V> {
     override val index: Short
     override var name: String
         internal set(value) {
-            // Note: field.isEmpty() expression throws the NullPointerException
+            // Note: field.isEmpty() expression throws the NullPointerException in Kotlin 1.5.21
             field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name is: $field")
         }
 
@@ -411,6 +411,8 @@ abstract class EntityModel<D : Any>(
         return this
     }
 
+    /** Create an Entity builder */
+    fun builder() : EntityBuilder<D> = EntityBuilder(this)
 
     /** Create a non-null property */
     protected fun <V : Any> property(
@@ -496,6 +498,29 @@ internal object Utils {
             }
         }
     }
+}
+
+/** Entity builder */
+open class EntityBuilder<D : Any> (
+    val model : EntityModel<D>,
+) {
+    private val map = mutableMapOf<Short, Any?>()
+
+    /** Set a value to an internal store */
+    fun <V: Any> set(property : PropertyNullable<D, V>, value : Any?) {
+        map[property.index] = value
+    }
+
+    /** Set a value to an internal store */
+    fun <V: Any> set(property : Property<D, V>, value : Any) {
+        map[property.index] = value
+    }
+
+    /** Build a entity object */
+    fun build() : D {
+        TODO("Call constructor")
+    }
+
 }
 
 /** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */

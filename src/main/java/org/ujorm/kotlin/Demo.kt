@@ -23,6 +23,7 @@ import java.time.LocalDate
 fun main() {
     useCriterions()
     useProperties()
+    //useEntityBuilder()
 }
 
 /** Sample of usage */
@@ -78,6 +79,20 @@ fun useProperties() {
     // Entity type (alias domain type)
     assert(_user.id.entityClass == User::class)
     assert(_user.born.entityClass == User::class)
+}
+
+/** How to create an immutable object */
+fun useEntityBuilder() {
+    val _user = EntityModelProvider.user
+    val builder = _user.builder()
+
+    builder.set(_user.id, 1)
+    builder.set(_user.name, "John") // TODO : Fix a nullable values
+    builder.set(_user.born, LocalDate.now())
+    builder.set(_user.parent, null)
+
+    val user : User = builder.build()
+    assert(user.id == 1)
 }
 
 /** An entity */
