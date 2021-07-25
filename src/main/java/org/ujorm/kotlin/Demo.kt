@@ -23,7 +23,7 @@ import java.time.LocalDate
 fun main() {
     useCriterions()
     useProperties()
-    //useEntityBuilder()
+    useEntityBuilder()
 }
 
 /** Sample of usage */
@@ -93,6 +93,7 @@ fun useEntityBuilder() {
 
     val user : User = builder.build()
     assert(user.id == 1)
+    assert(user.name == "John")
 }
 
 /** An entity */

@@ -439,6 +439,8 @@ abstract class EntityModel<D : Any>(
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): PropertyNullable<D, V> = PropertyNullableImpl<D, V>(_size++, "", getter, setter, _entityClass)
+
+    override fun toString() = _entityClass.simpleName ?: "?"
 }
 
 /** Common utilities */
@@ -504,23 +506,32 @@ internal object Utils {
 open class EntityBuilder<D : Any> (
     val model : EntityModel<D>,
 ) {
-    private val map = mutableMapOf<Short, Any?>()
+    private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
     fun <V: Any> set(property : PropertyNullable<D, V>, value : Any?) {
-        map[property.index] = value
+        map[property.name] = value
     }
 
     /** Set a value to an internal store */
     fun <V: Any> set(property : Property<D, V>, value : Any) {
-        map[property.index] = value
+        map[property.name] = value
     }
 
     /** Build a entity object */
     fun build() : D {
-        TODO("Call constructor")
+        val constructor = model._entityClass.constructors.firstOrNull()
+            ?: throw IllegalStateException("No constructor found")
+
+        val params = constructor.parameters
+            .stream()
+            .map { kParam -> map[kParam.name] }
+            .toArray();
+
+        return constructor.call(*params)
     }
 
+    override fun toString() = model._entityClass.simpleName ?: "?"
 }
 
 /** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
