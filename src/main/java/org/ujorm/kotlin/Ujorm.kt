@@ -534,14 +534,15 @@ open class EntityBuilder<D : Any>(
 
     /** Build a entity object */
     fun build(): D {
-        val constructor = model._entityClass.constructors.firstOrNull()
-            ?: throw IllegalStateException("No constructor found")
-
+        val constructor = model._entityClass.constructors
+            .stream()
+            .filter{ c -> c.parameters.size == map.size}
+            .findFirst()
+            .orElseThrow {IllegalStateException("No constructor[${map.size}] found")}
         val params = constructor.parameters
             .stream()
             .map { kParam -> map[kParam.name] }
             .toArray();
-
         return constructor.call(*params)
     }
 
