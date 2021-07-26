@@ -1,6 +1,6 @@
 # ujormKt
 
-A very early prototype of the `Kotlin` library for modelling filters using a domain object meta-model.
+A very early prototype of the Kotlin library for modelling filters of domain objects.
 Assembled filters work on common POJO objects.
 The solution was inspired by the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework, but this code is completely new.
 Topical areas of use are:
@@ -22,41 +22,40 @@ Topical areas of use are:
 ```kotlin
 val _user = ModelProvider.user
 
-val crn1 = _user.name EQ "Pavel"
+val crn1 = _user.nickname EQ "Pavel"
 val crn2 = _user.id GT 1
 val crn3 = _user.id LT 99
 val crn4 = crn1 OR (crn2 AND crn3)
 val crn5 = crn1.not() OR (crn2 AND crn3)
-assert(crn1.toString() == """User: name EQ "Pavel"""")
+assert(crn1.toString() == """User: nickname EQ "Pavel"""")
 assert(crn2.toString() == """User: id GT 1""")
-assert(crn4.toString() == """User: (name EQ "Pavel") OR ((id GT 1) AND (id LT 99))""")
-assert(crn5.toString() == """User: (NOT (name EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
+assert(crn4.toString() == """User: (nickname EQ "Pavel") OR ((id GT 1) AND (id LT 99))""")
+assert(crn5.toString() == """User: (NOT (nickname EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
 
-val user = User(id = 11, name = "Xaver", born = LocalDate.now())
+val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
 val noValid: Boolean = crn1(user)
 val isValid: Boolean = crn4(user)
 assert(!noValid, { "crn1(user)" })
 assert(isValid, { "crn4(user)" })
 
-val userName: String = _user.name(user) // Get a name of the user
+val userName: String = _user.nickname(user) // Get a name of the user
 val userId: Int = _user.id(user)
 val parent: User? = _user.parent(user)
-//val parentName : String = _user.name.parent(user) // TODO: reading the relations
 assert(userName == "Xaver", { "userName" })
 assert(userId == 11, { "userId" })
 assert(parent == null, { "userId" })
 
-_user.name(user, "James") // Set a name to the user
+_user.nickname(user, "James") // Set a name to the user
 _user.parent(user, null)
 assert(_user.id.name == "id", { "property name" })
 assert(_user.id.toString() == "id", { "property name" })
-assert(_user.id() == "User.id", { "property name" })
 assert(_user.id.info() == "User.id", { "property name" })
+assert(_user.id() == "User.id", { "property name" })
 
-val properties = EntityModelProvider.user._properties
+val properties = ModelProvider.user._properties
 assert(properties.size == 4, { "Count of properties" })
 assert(properties[0].name == "id", { "property name" })
-assert(properties[1].name == "name", { "property name" })
+assert(properties[1].name == "nickname", { "property name" })
 assert(properties[2].name == "born", { "property name" })
 
 // Value type

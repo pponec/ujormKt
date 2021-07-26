@@ -30,17 +30,17 @@ fun main() {
 fun useCriterions() {
     val _user = ModelProvider.user
 
-    val crn1 = _user.name EQ "Pavel"
+    val crn1 = _user.nickname EQ "Pavel"
     val crn2 = _user.id GT 1
     val crn3 = _user.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
     val crn5 = crn1.not() OR (crn2 AND crn3)
-    assert(crn1.toString() == """User: name EQ "Pavel"""")
+    assert(crn1.toString() == """User: nickname EQ "Pavel"""")
     assert(crn2.toString() == """User: id GT 1""")
-    assert(crn4.toString() == """User: (name EQ "Pavel") OR ((id GT 1) AND (id LT 99))""")
-    assert(crn5.toString() == """User: (NOT (name EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
+    assert(crn4.toString() == """User: (nickname EQ "Pavel") OR ((id GT 1) AND (id LT 99))""")
+    assert(crn5.toString() == """User: (NOT (nickname EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
 
-    val user = User(id = 11, name = "Xaver", born = LocalDate.now())
+    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
     val noValid: Boolean = crn1(user)
     val isValid: Boolean = crn4(user)
     assert(!noValid, { "crn1(user)" })
@@ -50,9 +50,9 @@ fun useCriterions() {
 /** Sample of usage */
 fun useProperties() {
     val _user = ModelProvider.user
-    val user = User(id = 11, name = "Xaver", born = LocalDate.now())
+    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
 
-    val userName: String = _user.name(user) // Get a name of the user
+    val userName: String = _user.nickname(user) // Get a name of the user
     val userId: Int = _user.id(user)
     val parent: User? = _user.parent(user)
     //val parentName : String = _user.name.parent(user) // TODO: reading the relations
@@ -60,17 +60,17 @@ fun useProperties() {
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
 
-    _user.name(user, "James") // Set a name to the user
+    _user.nickname(user, "James") // Set a name to the user
     _user.parent(user, null)
     assert(_user.id.name == "id", { "property name" })
     assert(_user.id.toString() == "id", { "property name" })
-    assert(_user.id() == "User.id", { "property name" })
     assert(_user.id.info() == "User.id", { "property name" })
+    assert(_user.id() == "User.id", { "property name" })
 
     val properties = ModelProvider.user._properties
     assert(properties.size == 4, { "Count of properties" })
     assert(properties[0].name == "id", { "property name" })
-    assert(properties[1].name == "name", { "property name" })
+    assert(properties[1].name == "nickname", { "property name" })
     assert(properties[2].name == "born", { "property name" })
 
     // Value type
@@ -88,20 +88,20 @@ fun useEntityBuilder() {
     val builder = _user.builder()
 
     builder.set(_user.id, 1)
-    builder.set(_user.name, "John")
+    builder.set(_user.nickname, "John")
     //builder.set(_user.name, null) // Compilator fails
     builder.set(_user.born, LocalDate.now())
     builder.set(_user.parent, null)
 
     val user : User = builder.build()
     assert(user.id == 1)
-    assert(user.name == "John")
+    assert(user.nickname == "John")
 }
 
 /** An entity */
 data class User constructor(
     var id: Int,
-    var name: String,
+    var nickname: String,
     var born: LocalDate,
     var parent: User? = null
 )
@@ -109,7 +109,7 @@ data class User constructor(
 /** Model of the entity will be a generated class in the feature */
 open class _User : EntityModel<User>(User::class) {
     val id = property({ it.id })
-    val name = property({ it.name })
+    val nickname = property({ it.nickname })
     val born = property({ it.born })
     val parent = propertyN6e({ it.parent })
 }

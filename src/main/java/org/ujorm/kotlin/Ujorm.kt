@@ -83,14 +83,14 @@ interface CommonProperty<D : Any, V : Any> : CharSequence {
     /** A shortcut for the of() method */
     operator fun invoke(entity: D): V? = of(entity)
 
-    /** A shortcut for the set() method */
-    operator fun invoke(entity: D, value: V?): Unit = set(entity, value)
+    /** A shortcut for the setValue() method */
+    operator fun invoke(entity: D, value: V?): Unit = setValue(entity, value)
 
     /** Get a value from the entity */
     fun of(entity: D): V?
 
     /** Set a value to the entity */
-    fun set(entity: D, value: V?): Unit
+    fun setValue(entity: D, value: V?): Unit
 
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -141,7 +141,7 @@ interface MandatoryProperty<D : Any, V : Any> : CommonProperty<D, V> {
     override fun of(entity: D): V
 
     /** Set a non-null value to the entity */
-    override fun set(entity: D, value: V?): Unit
+    override fun setValue(entity: D, value: V?): Unit
 }
 
 /** Abstract property descriptor */
@@ -219,7 +219,7 @@ open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Null
     }
 
     override fun of(entity: D): V? = getter(entity)
-    override fun set(entity: D, value: V?) = setter(entity, value)
+    override fun setValue(entity: D, value: V?) = setter(entity, value)
 }
 
 /** Property for mandatory values */
@@ -246,7 +246,7 @@ open class MandatoryPropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Man
     }
 
     override fun of(entity: D): V = getter(entity)
-    override fun set(entity: D, value: V?) = setter(entity, value
+    override fun setValue(entity: D, value: V?) = setter(entity, value
         ?: throw IllegalArgumentException("Mandatory property: ${info()}"))
 }
 
