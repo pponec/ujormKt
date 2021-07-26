@@ -14,7 +14,7 @@ Topical areas of use are:
 - building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
 - API cleaning
 - Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
-- Integration of model filters to the `JPA`/`Hibernate` framework
+- Integrate the model filters with the `JPA`/`Hibernate` framework
 - the domain object model should be generated according to the original POJO objects in feature
 
 ## Usage:
