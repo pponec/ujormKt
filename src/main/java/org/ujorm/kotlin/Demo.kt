@@ -15,8 +15,9 @@
  */
 package org.ujorm.kotlin.demo
 
-import org.ujorm.kotlin.AbstractModelProvider
-import org.ujorm.kotlin.EntityModel
+import org.ujorm.kotlin.ModelProvider
+import org.ujorm.kotlin.model.User
+import org.ujorm.kotlin.model.user
 import java.time.LocalDate
 
 /** Sample of usage */
@@ -96,25 +97,4 @@ fun useEntityBuilder() {
     val user : User = builder.build()
     assert(user.id == 1)
     assert(user.nickname == "John")
-}
-
-/** An entity */
-data class User constructor(
-    var id: Int,
-    var nickname: String,
-    var born: LocalDate,
-    var parent: User? = null
-)
-
-/** Model of the entity will be a generated class in the feature */
-open class _User : EntityModel<User>(User::class) {
-    val id = property({ it.id })
-    val nickname = property({ it.nickname })
-    val born = property({ it.born })
-    val parent = propertyN6e({ it.parent })
-}
-
-/** Entity model provider */
-object ModelProvider : AbstractModelProvider() {
-    val user by lazy(SYNCHRONIZED) { _User().init() as _User }
 }
