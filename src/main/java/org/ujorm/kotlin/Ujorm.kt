@@ -15,14 +15,21 @@
  */
 package org.ujorm.kotlin
 
+import io.vertx.core.impl.logging.LoggerFactory
 import java.lang.IllegalArgumentException
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaGetter
+import kotlin.reflect.jvm.javaSetter
 import kotlin.reflect.jvm.reflect
 import kotlin.streams.toList
 
@@ -129,10 +136,17 @@ interface CommonProperty<D : Any, V : Any> : CharSequence {
 }
 
 /** A property descriptor for nullable values */
-interface NullableProperty<D : Any, V : Any> : CommonProperty<D, V>
+interface NullableProperty<D : Any, V : Any> : CommonProperty<D, V> {
+    /** Getter */
+    val getter: (D) -> V?
+
+}
 
 /** A property descriptor for mandatory values */
 interface MandatoryProperty<D : Any, V : Any> : CommonProperty<D, V> {
+
+    /** Getter */
+    val getter: (D) -> V
 
     /** A shortcut for the of() method */
     override operator fun invoke(entity: D): V = of(entity)
@@ -158,13 +172,15 @@ abstract class AbstractProperty<D : Any, V : Any> : CommonProperty<D, V> {
     override val entityClass: KClass<D>
     override val valueClass: KClass<V>
     override val readOnly: Boolean
+    val defaultValue: () -> V?
 
-    constructor(index: Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>) {
+    constructor(index: Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>, defaultValue : () -> V?) {
         this.index = index
         this.name = name
         this.entityClass = entityClass
         this.valueClass = valueClass
         this.readOnly = false // TODO: set the value according to property type
+        this.defaultValue = defaultValue
     }
 
     /** For a CharSequence implementation */
@@ -199,7 +215,7 @@ abstract class AbstractProperty<D : Any, V : Any> : CommonProperty<D, V> {
 /** Property descriptor for nullable values */
 open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, NullableProperty<D, V> {
     override val required: Boolean get() = false
-    private val getter: (D) -> V?
+    override val getter: (D) -> V?
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
         internal set(value) {
             field = if (field == Constants.UNDEFINED_SETTER) value
@@ -213,7 +229,8 @@ open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Null
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType.classifier as KClass<V>,
-    ) : super(index, name, entityClass, valueClass) {
+        defaultValue: () -> V?,
+    ) : super(index, name, entityClass, valueClass, defaultValue) {
         this.getter = getter
         this.setter = setter
     }
@@ -225,7 +242,7 @@ open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Null
 /** Property for mandatory values */
 open class MandatoryPropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, MandatoryProperty<D, V> {
     override val required: Boolean get() = true
-    private val getter: (D) -> V
+    override val getter: (D) -> V
     internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
         internal set(value) {
             field = if (field == Constants.UNDEFINED_SETTER) value
@@ -240,7 +257,8 @@ open class MandatoryPropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Man
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType.classifier as KClass<V>,
-    ) : super(index, name, entityClass, valueClass) {
+        defaultValue: () -> V,
+    ) : super(index, name, entityClass, valueClass, defaultValue) {
         this.getter = getter
         this.setter = setter
     }
@@ -416,10 +434,12 @@ abstract class EntityModel<D : Any>(
     /** Initialize all properties */
     fun init(): EntityModel<D> {
         val map = Utils.getKPropertyMap(this)
+        val propertyProvider : KPropertyProvider<D> = KPropertyProvider(_entityClass)
         for (p in _properties) {
             val kProperty = map.get(p.index)
                 ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
-            Utils.assignName(p, kProperty)
+            //Utils.assignNameOrig(p, kProperty)
+            Utils.assignName(p, propertyProvider)
             Utils.assignSetter(p)
         }
         return this
@@ -432,27 +452,31 @@ abstract class EntityModel<D : Any>(
     protected fun <V : Any> property(
         name: String = "",
         getter: (D) -> V,
+        defaultValue : () -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, name, getter, setter, _entityClass, defaultValue = defaultValue)
 
     /** Create a non-null property */
     protected fun <V : Any> property(
         getter: (D) -> V,
+        defaultValue : () -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass, defaultValue = defaultValue)
 
     /** Create a nullable property */
-    protected fun <V : Any> propertyN6e(
+    protected fun <V : Any> propertyNle(
         name: String,
         getter: (D) -> V?,
+        defaultValue : () -> V? = {null},
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
+    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass, defaultValue = defaultValue)
 
     /** Create a nullable property */
-    protected fun <V : Any> propertyN6e(
+    protected fun <V : Any> propertyNle(
         getter: (D) -> V?,
+        defaultValue : () -> V? = {null},
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
+    ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, "", getter, setter, _entityClass, defaultValue = defaultValue)
 
     override fun toString() = _entityClass.simpleName ?: "?"
 }
@@ -487,16 +511,32 @@ internal object Utils {
             .toMap()
 
     /** Assign a property name to the uProperty */
-    fun <D : Any> assignName(
+    @Deprecated(message = "Use the method assignName() rather")
+    fun <D : Any> assignNameOrig(
         uProperty: CommonProperty<D, Any>,
         kProperty: KProperty1<EntityModel<D>, CommonProperty<EntityModel<D>, *>>
     ) {
         val name = kProperty.name
-        if (uProperty.name.isEmpty()
-            && !name.isEmpty()
+        if (!name.isEmpty()
+            && uProperty.name.isEmpty()
             && uProperty is AbstractProperty
         ) {
             uProperty.name = name
+        }
+    }
+
+    /** Assign a property name to the uProperty */
+    fun <D : Any> assignName(
+        uProperty: CommonProperty<D, Any>,
+        kPropertyProvider: KPropertyProvider<D>
+    ) {
+        if (uProperty.name.isEmpty() && uProperty is AbstractProperty) {
+            val getter = when (uProperty) {
+                is NullableProperty -> uProperty.getter
+                is MandatoryProperty -> uProperty.getter
+                else -> error("Unsupported property ${uProperty.index}")
+            }
+            uProperty.name = kPropertyProvider.findProperty { getter }.name
         }
     }
 
@@ -548,6 +588,43 @@ open class EntityBuilder<D : Any>(
 
     override fun toString() = model._entityClass.simpleName ?: "?"
 }
+
+open class KPropertyProvider<T> {
+    private val proxy : T
+    private val handler : ProxyHandler<T> = ProxyHandler()
+
+    constructor(entityClass: KClass<*>) {
+        proxy = Proxy.newProxyInstance(entityClass.java.classLoader, arrayOf(entityClass.java), handler) as T
+    }
+
+    fun findProperty( getter : (d : T) -> Any) : KProperty1<T, *> {
+        val value : Any = getter(proxy); // Call the handler
+        if (value != null) LoggerFactory.getLogger("KPropertyProvider")?.trace("Value: " + value)
+        return handler.lastProperty as KProperty1<T, *>
+    }
+
+    class ProxyHandler<T> : InvocationHandler {
+        var lastProperty : KProperty1<*, *>? = null
+        override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
+            lastProperty = when (method.declaringClass.kotlin) {
+                Any::class -> { error("Unsupported method: $method") }
+                else -> { method.kotlinProperty ?: error("Unsupported method: $method") }
+            }
+            return null // The value
+        }
+    }
+}
+
+/** Check Kotlin property */
+internal val Method.kotlinProperty: KProperty1<*, *>? get() {
+    for (prop in declaringClass.kotlin.declaredMemberProperties) {
+        if (prop.javaGetter == this || prop is KMutableProperty<*> && prop.javaSetter == this) {
+            return prop
+        }
+    }
+    return null
+}
+
 
 /** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
