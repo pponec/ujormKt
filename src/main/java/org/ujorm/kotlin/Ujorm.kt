@@ -174,7 +174,13 @@ abstract class AbstractProperty<D : Any, V : Any> : CommonProperty<D, V> {
     override val readOnly: Boolean
     val defaultValue: () -> V?
 
-    constructor(index: Short, name: String, entityClass: KClass<D>, valueClass: KClass<V>, defaultValue : () -> V?) {
+    constructor(
+        index: Short,
+        name: String,
+        entityClass: KClass<D>,
+        valueClass: KClass<V>,
+        defaultValue : () -> V? =  Constants.NULLABLE_PROVIDER
+    ) {
         this.index = index
         this.name = name
         this.entityClass = entityClass
@@ -229,7 +235,7 @@ open class NullablePropertyImpl<D : Any, V : Any> : AbstractProperty<D, V>, Null
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         entityClass: KClass<D>,
         valueClass: KClass<V> = getter.reflect()!!.returnType.classifier as KClass<V>,
-        defaultValue: () -> V?,
+        defaultValue: () -> V? = Constants.NULLABLE_PROVIDER
     ) : super(index, name, entityClass, valueClass, defaultValue) {
         this.getter = getter
         this.setter = setter
@@ -370,7 +376,10 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
     override val operator: ValueOperator
     override val entityClass: KClass<D> get() = property.entityClass
 
-    constructor(property: CommonProperty<D, out V>, operator: ValueOperator, value: V?) {
+    constructor(
+        property: CommonProperty<D, out V>,
+        operator: ValueOperator, value: V?
+    ) {
         this.property = property
         this.operator = operator
         this.value = value
@@ -448,6 +457,8 @@ abstract class EntityModel<D : Any>(
     /** Create an Entity builder */
     fun builder(): EntityBuilder<D> = EntityBuilder(this)
 
+    //fun build(Pair<Any, Any> pair) =
+
     /** Create a non-null property */
     protected fun <V : Any> property(
         name: String = "",
@@ -467,14 +478,14 @@ abstract class EntityModel<D : Any>(
     protected fun <V : Any> propertyNle(
         name: String,
         getter: (D) -> V?,
-        defaultValue : () -> V? = {null},
+        defaultValue : () -> V? = Constants.NULLABLE_PROVIDER,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass, defaultValue = defaultValue)
 
     /** Create a nullable property */
     protected fun <V : Any> propertyNle(
         getter: (D) -> V?,
-        defaultValue : () -> V? = {null},
+        defaultValue : () -> V? = Constants.NULLABLE_PROVIDER,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, "", getter, setter, _entityClass, defaultValue = defaultValue)
 
@@ -563,13 +574,15 @@ open class EntityBuilder<D : Any>(
     private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) {
+    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) : EntityBuilder<D> {
         map[property.name] = value
+        return this
     }
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) {
+    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) : EntityBuilder<D> {
         map[property.name] = value
+        return this
     }
 
     /** Create new object by a constructor (for immutable objects) */
@@ -598,9 +611,9 @@ open class KPropertyProvider<T> {
     }
 
     fun findProperty( getter : (d : T) -> Any) : KProperty1<T, *> {
-        val value : Any = getter(proxy); // Call the handler
+        val value : Any = getter.invoke(proxy); // Call the handler
         if (value != null) LoggerFactory.getLogger("KPropertyProvider")?.trace("Value: " + value)
-        return handler.lastProperty as KProperty1<T, *>
+        return handler?.lastProperty as KProperty1<T, *> ?: throw IllegalArgumentException("No property")
     }
 
     class ProxyHandler<T> : InvocationHandler {
@@ -630,5 +643,7 @@ internal val Method.kotlinProperty: KProperty1<*, *>? get() {
 object Constants {
     /** Undefined property setter */
     val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v -> throw UnsupportedOperationException("read-only") }
+    /** Nullable provider */
+    val NULLABLE_PROVIDER = {null}
 
 }

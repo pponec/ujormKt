@@ -41,7 +41,11 @@ fun useCriterions() {
     assert(crn4.toString() == """User: (nickname EQ "Pavel") OR ((id GT 1) AND (id LT 99))""")
     assert(crn5.toString() == """User: (NOT (nickname EQ "Pavel")) OR ((id GT 1) AND (id LT 99))""")
 
-    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
+    val user = _user.builder()
+        .set(_user.id, 11)
+        .set(_user.nickname, "Xaver")
+        .set(_user.born, LocalDate.now())
+        .build()
     val noValid: Boolean = crn1(user)
     val isValid: Boolean = crn4(user)
     assert(!noValid, { "crn1(user)" })
@@ -51,7 +55,11 @@ fun useCriterions() {
 /** Sample of usage */
 fun useProperties() {
     val _user = ModelProvider.user
-    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
+    val user = _user.builder()
+        .set(_user.id, 11)
+        .set(_user.nickname, "Xaver")
+        .set(_user.born, LocalDate.now())
+        .build()
 
     val userName: String = _user.nickname(user) // Get a name of the user
     val userId: Int = _user.id(user)
@@ -87,12 +95,11 @@ fun useProperties() {
 fun useEntityBuilder() {
     val _user = ModelProvider.user
     val builder = _user.builder()
-
-    builder.set(_user.id, 1)
-    builder.set(_user.nickname, "John")
-    //builder.set(_user.name, null) // Compilator fails
-    builder.set(_user.born, LocalDate.now())
-    builder.set(_user.parent, null)
+      .set(_user.id, 1)
+      .set(_user.nickname, "John")
+    //.set(_user.name, null) // Compilator fails
+      .set(_user.born, LocalDate.now())
+      .set(_user.parent, null)
 
     val user : User = builder.build()
     assert(user.id == 1)
