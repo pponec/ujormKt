@@ -17,7 +17,7 @@ open class _User : EntityModel<User>(User::class) {
     val id = property({ it.id })
     val nickname = property({ it.nickname })
     val born = property({ it.born })
-    val parent = propertyN6e({ it.parent })
+    val parent = propertyNle({ it.parent })
 }
 
 /**

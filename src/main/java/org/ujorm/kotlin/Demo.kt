@@ -86,15 +86,14 @@ fun useProperties() {
 /** Create new object by a constructor (for immutable objects) */
 fun useEntityBuilder() {
     val _user = ModelProvider.user
-    val builder = _user.builder()
+    val user : User = _user.builder()
+        .set(_user.id, 1)
+        .set(_user.nickname, "John")
+        //.set(_user.name, null) // Compilator fails
+        .set(_user.born, LocalDate.now())
+        .set(_user.parent, null)
+        .build()
 
-    builder.set(_user.id, 1)
-    builder.set(_user.nickname, "John")
-    //builder.set(_user.name, null) // Compilator fails
-    builder.set(_user.born, LocalDate.now())
-    builder.set(_user.parent, null)
-
-    val user : User = builder.build()
     assert(user.id == 1)
     assert(user.nickname == "John")
 }

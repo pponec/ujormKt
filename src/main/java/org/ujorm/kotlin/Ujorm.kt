@@ -442,14 +442,14 @@ abstract class EntityModel<D : Any>(
     ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
     /** Create a nullable property */
-    protected fun <V : Any> propertyN6e(
+    protected fun <V : Any> propertyNle(
         name: String,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
     /** Create a nullable property */
-    protected fun <V : Any> propertyN6e(
+    protected fun <V : Any> propertyNle(
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
@@ -523,13 +523,15 @@ open class EntityBuilder<D : Any>(
     private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) {
+    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) : EntityBuilder<D> {
         map[property.name] = value
+        return this;
     }
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) {
+    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) : EntityBuilder<D> {
         map[property.name] = value
+        return this;
     }
 
     /** Create new object by a constructor (for immutable objects) */
