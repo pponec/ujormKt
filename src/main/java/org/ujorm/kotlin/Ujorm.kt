@@ -428,27 +428,35 @@ abstract class EntityModel<D : Any>(
     /** Create an Entity builder */
     fun builder(): EntityBuilder<D> = EntityBuilder(this)
 
-    /** Create a non-null property */
+    /** Create a non-null property.
+     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
+     **/
     protected fun <V : Any> property(
         name: String = "",
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
-    /** Create a non-null property */
+    /** Create a non-null property.
+     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
+     **/
     protected fun <V : Any> property(
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
 
-    /** Create a nullable property */
+    /** Create a nullable property.
+     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
+     **/
     protected fun <V : Any> propertyNle(
         name: String,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): NullableProperty<D, V> = NullablePropertyImpl<D, V>(_size++, name, getter, setter, _entityClass)
 
-    /** Create a nullable property */
+    /** Create a nullable property.
+     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
+     **/
     protected fun <V : Any> propertyNle(
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
