@@ -16,6 +16,7 @@
 package org.ujorm.kotlin.demo
 
 import org.ujorm.kotlin.ModelProvider
+import org.ujorm.kotlin.model.Department
 import org.ujorm.kotlin.model.User
 import org.ujorm.kotlin.model.user
 import java.time.LocalDate
@@ -55,21 +56,21 @@ fun useProperties() {
 
     val userName: String = _user.nickname(user) // Get a name of the user
     val userId: Int = _user.id(user)
-    val parent: User? = _user.parent(user)
+    val parent: User? = _user.invitedFrom(user)
     //val parentName : String = _user.name.parent(user) // TODO: reading the relations
     assert(userName == "Xaver", { "userName" })
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
 
     _user.nickname(user, "James") // Set a name to the user
-    _user.parent(user, null)
+    _user.invitedFrom(user, null)
     assert(_user.id.name == "id", { "property name" })
     assert(_user.id.toString() == "id", { "property name" })
     assert(_user.id.info() == "User.id", { "property name" })
     assert(_user.id() == "User.id", { "property name" })
 
     val properties = ModelProvider.user._properties
-    assert(properties.size == 4, { "Count of properties" })
+    assert(properties.size == 5, { "Count of properties" })
     assert(properties[0].name == "id", { "property name" })
     assert(properties[1].name == "nickname", { "property name" })
     assert(properties[2].name == "born", { "property name" })
@@ -91,7 +92,8 @@ fun useEntityBuilder() {
         .set(_user.nickname, "John")
         //.set(_user.name, null) // Compilator fails
         .set(_user.born, LocalDate.now())
-        .set(_user.parent, null)
+        .set(_user.department, Department(2, "B"))
+        .set(_user.invitedFrom, null)
         .build()
 
     assert(user.id == 1)
