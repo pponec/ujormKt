@@ -1,8 +1,8 @@
 package org.ujorm.kotlin.model
 
-import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.ModelProvider
+import org.ujorm.kotlin.*
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 /** An user entity */
 data class User constructor(
@@ -21,6 +21,32 @@ open class _User : EntityModel<User>(User::class) {
     val department = property({ it.department })
     val invitedFrom = propertyNle({ it.invitedFrom })
 }
+
+interface IDomain<D : Any> {
+    fun container(): PropertyFactory<D>
+    fun domain() : KClass<D>
+}
+
+interface IUser : IDomain<User> {
+    override fun domain() = User::class
+    val id get() = container().property({ it.id })
+    val nickname get() =  container().property({ it.nickname })
+    val born get() =  container().property({ it.born })
+    val department get() =  container().property({ it.department })
+    //val invitedFrom get() = container().property({ it.invitedFrom })
+}
+
+class PropertyFactory <D : Any>(
+/** Get the main domain class */
+val _entityClass: KClass<D>,
+private var _size: Short = 0
+) {
+    public fun <V : Any> property(
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+    ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
+}
+
 
 /**
  * Return a default entity sequence of
