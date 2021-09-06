@@ -8,6 +8,8 @@ interface Duck {
     default String quack() {
         return "QUACK";
     }
+    String name();
+    Integer age();
 }
 
 public class ProxyDemo {
@@ -17,17 +19,32 @@ public class ProxyDemo {
         Duck duck = (Duck) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{targetClass}, (proxy, method, args) -> {
-                    final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
-                    constructor.setAccessible(true);
-                    return constructor.newInstance(targetClass)
-                            .in(targetClass)
-                            .unreflectSpecial(method, targetClass)
-                            .bindTo(proxy)
-                            .invokeWithArguments();
+                    if (method.isDefault()) {
+                        final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
+                        constructor.setAccessible(true);
+                        return constructor.newInstance(targetClass)
+                                .in(targetClass)
+                                .unreflectSpecial(method, targetClass)
+                                .bindTo(proxy)
+                                .invokeWithArguments();
+                    } else switch (method.getName()) {
+                        case "name": return "XYZ";
+                        default: return null;
+                    }
                 }
         );
 
         String value = duck.quack();
         System.out.println(value);
+
+        String name = duck.name();
+        System.out.println(name);
+
+        Integer age = duck.age();
+        System.out.println(age);
+
+
+
+
     }
 }
