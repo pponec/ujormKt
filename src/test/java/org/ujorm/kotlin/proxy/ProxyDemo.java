@@ -17,7 +17,7 @@ public class ProxyDemo {
         Duck duck = (Duck) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{targetClass}, (proxy, method, args) -> {
-                    Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
+                    final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
                     constructor.setAccessible(true);
                     return constructor.newInstance(targetClass)
                             .in(targetClass)

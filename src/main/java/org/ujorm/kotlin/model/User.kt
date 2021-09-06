@@ -27,7 +27,7 @@ interface IDomain<D : Any> {
     fun domain() : KClass<D>
 }
 
-interface IUser : IDomain<User> {
+interface _User2 : IDomain<User> {
     override fun domain() = User::class
     val id get() = container().property({ it.id })
     val nickname get() =  container().property({ it.nickname })
