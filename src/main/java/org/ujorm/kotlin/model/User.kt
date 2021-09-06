@@ -22,12 +22,14 @@ open class _User : EntityModel<User>(User::class) {
     val invitedFrom = propertyNle({ it.invitedFrom })
 }
 
-interface IDomain<D : Any> {
+/** Abstract entity model */
+interface AbstractEntityModel<D : Any> {
     fun _context(): PropertyFactory<D>
     fun domain(): KClass<D>
 }
 
-interface _User2 : IDomain<User> {
+/** User model */
+interface _User2 : AbstractEntityModel<User> {
     override fun domain() = User::class
     val id get() = _context().property({ it.id })
     val nickname get() = _context().property({ it.nickname })
@@ -42,6 +44,12 @@ class PropertyFactory<D : Any>(
     private var _size: Short = 0
 ) {
     public fun <V : Any> property(
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+    ): MandatoryProperty<D, V> = property("", getter, setter)
+
+    public fun <V : Any> property(
+        name: String = "",
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
