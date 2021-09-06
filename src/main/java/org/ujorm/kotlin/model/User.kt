@@ -23,23 +23,23 @@ open class _User : EntityModel<User>(User::class) {
 }
 
 interface IDomain<D : Any> {
-    fun container(): PropertyFactory<D>
-    fun domain() : KClass<D>
+    fun _context(): PropertyFactory<D>
+    fun domain(): KClass<D>
 }
 
 interface _User2 : IDomain<User> {
     override fun domain() = User::class
-    val id get() = container().property({ it.id })
-    val nickname get() =  container().property({ it.nickname })
-    val born get() =  container().property({ it.born })
-    val department get() =  container().property({ it.department })
+    val id get() = _context().property({ it.id })
+    val nickname get() = _context().property({ it.nickname })
+    val born get() = _context().property({ it.born })
+    val department get() = _context().property({ it.department })
     //val invitedFrom get() = container().property({ it.invitedFrom })
 }
 
-class PropertyFactory <D : Any>(
-/** Get the main domain class */
-val _entityClass: KClass<D>,
-private var _size: Short = 0
+class PropertyFactory<D : Any>(
+    /** Get the main domain class */
+    val _entityClass: KClass<D>,
+    private var _size: Short = 0
 ) {
     public fun <V : Any> property(
         getter: (D) -> V,

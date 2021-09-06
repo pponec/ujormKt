@@ -43,8 +43,5 @@ public class ProxyDemo {
         Integer age = duck.age();
         System.out.println(age);
 
-
-
-
     }
 }
