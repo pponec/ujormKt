@@ -13,14 +13,15 @@ interface Duck {
 public class ProxyDemo {
 
     public static void main(String[] a) {
+        final Class<?> targetClass = Duck.class;
         Duck duck = (Duck) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
-                new Class[]{Duck.class}, (proxy, method, args) -> {
+                new Class[]{targetClass}, (proxy, method, args) -> {
                     Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
                     constructor.setAccessible(true);
-                    return constructor.newInstance(Duck.class)
-                            .in(Duck.class)
-                            .unreflectSpecial(method, Duck.class)
+                    return constructor.newInstance(targetClass)
+                            .in(targetClass)
+                            .unreflectSpecial(method, targetClass)
                             .bindTo(proxy)
                             .invokeWithArguments();
                 }
