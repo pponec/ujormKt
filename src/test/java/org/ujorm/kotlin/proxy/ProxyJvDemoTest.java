@@ -12,14 +12,14 @@ public class ProxyJvDemoTest {
 
     @Test
     public void testProxy1() {
-        final Class<JDuck> targetClass = JDuck.class;
+        final Class<JDuck> entityClass = JDuck.class;
         final InvocationHandler handler = (proxy, method, args) -> {
             if (method.isDefault()) {
                 final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
                 constructor.setAccessible(true);
-                return constructor.newInstance(targetClass)
-                        .in(targetClass)
-                        .unreflectSpecial(method, targetClass)
+                return constructor.newInstance(entityClass)
+                        .in(entityClass)
+                        .unreflectSpecial(method, entityClass)
                         .bindTo(proxy)
                         .invokeWithArguments();
             } else switch (method.getName()) {
@@ -30,7 +30,7 @@ public class ProxyJvDemoTest {
             }
         };
 
-        final JDuck duck = newProxy(targetClass, handler);
+        final JDuck duck = newProxy(entityClass, handler);
         String value = duck.quack();
         String name = duck.name();
         Integer age = duck.age();
@@ -42,14 +42,14 @@ public class ProxyJvDemoTest {
 
     @Test
     public void testProxy2() {
-        final Class<KDuck> targetClass = KDuck.class;
+        final Class<KDuck> entityClass = KDuck.class;
         final InvocationHandler handler = (proxy, method, args) -> {
             if (method.isDefault()) {
                 final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class);
                 constructor.setAccessible(true);
-                return constructor.newInstance(targetClass)
-                        .in(targetClass)
-                        .unreflectSpecial(method, targetClass)
+                return constructor.newInstance(entityClass)
+                        .in(entityClass)
+                        .unreflectSpecial(method, entityClass)
                         .bindTo(proxy)
                         .invokeWithArguments();
             } else switch (method.getName()) {
@@ -60,7 +60,7 @@ public class ProxyJvDemoTest {
             }
         };
 
-        final KDuck duck = newProxy(targetClass, handler);
+        final KDuck duck = newProxy(entityClass, handler);
         String value = duck.quack();
         String name = duck.name();
         Integer age = duck.age();
@@ -71,10 +71,10 @@ public class ProxyJvDemoTest {
     }
 
     @NotNull
-    private <T> T newProxy(Class<T> targetClass, InvocationHandler handler) {
+    private <T> T newProxy(Class<T> entityClass, InvocationHandler handler) {
         return (T) Proxy.newProxyInstance(
-                targetClass.getClassLoader(),
-                new Class[]{targetClass}, handler);
+                entityClass.getClassLoader(),
+                new Class[]{entityClass}, handler);
     }
 
 }
