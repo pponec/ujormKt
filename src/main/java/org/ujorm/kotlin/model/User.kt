@@ -24,17 +24,17 @@ open class _User : EntityModel<User>(User::class) {
 
 /** Abstract entity model */
 interface AbstractEntityModel<D : Any> {
-    fun _context(): PropertyFactory<D>
+    val _context: PropertyFactory<D>
     fun domain(): KClass<D>
 }
 
 /** User model */
 interface _User2 : AbstractEntityModel<User> {
     override fun domain() = User::class
-    val id get() = _context().property({ it.id })
-    val nickname get() = _context().property({ it.nickname })
-    val born get() = _context().property({ it.born })
-    val department get() = _context().property({ it.department })
+    val id get() = _context({ it.id })
+    val nickname get() = _context({ it.nickname })
+    val born get() = _context({ it.born })
+    val department get() = _context({ it.department })
     //val invitedFrom get() = container().property({ it.invitedFrom })
 }
 
@@ -53,6 +53,11 @@ class PropertyFactory<D : Any>(
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
     ): MandatoryProperty<D, V> = MandatoryPropertyImpl<D, V>(_size++, "", getter, setter, _entityClass)
+
+    operator fun <V : Any> invoke(
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+    ): MandatoryProperty<D, V> = property("", getter, setter)
 }
 
 
