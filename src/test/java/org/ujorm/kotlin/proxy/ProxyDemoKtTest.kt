@@ -9,15 +9,14 @@ import java.lang.reflect.Proxy
 class ProxyDemoKtTest {
     @Test
     fun testProxy() {
-        val targetClass: Class<*> = DuckKt::class.java
+        val entityClass: Class<*> = DuckKt::class.java
         val handler = InvocationHandler { proxy, method, args ->
             if (method.isDefault) {
-                val constructor =
-                    MethodHandles.Lookup::class.java.getDeclaredConstructor(Class::class.java)
+                val constructor = MethodHandles.Lookup::class.java.getDeclaredConstructor(Class::class.java)
                 constructor.isAccessible = true
-                constructor.newInstance(targetClass)
-                    .`in`(targetClass)
-                    .unreflectSpecial(method, targetClass)
+                constructor.newInstance(entityClass)
+                    .`in`(entityClass)
+                    .unreflectSpecial(method, entityClass)
                     .bindTo(proxy)
                     .invokeWithArguments()
             } else {
@@ -28,7 +27,7 @@ class ProxyDemoKtTest {
             }
         }
         val duck = Proxy.newProxyInstance(
-            targetClass.classLoader, arrayOf(targetClass), handler
+            entityClass.classLoader, arrayOf(entityClass), handler
         ) as DuckKt
         val value = duck.quack()
         val name = duck.name()

@@ -157,6 +157,7 @@
                 </executions>
                 <configuration>
                     <jvmTarget>1.8</jvmTarget>
+                    <args>-Xjvm-default=all</args>
                 </configuration>
             </plugin>
             <plugin>
