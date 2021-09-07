@@ -6,10 +6,10 @@ import java.lang.invoke.MethodHandles
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Proxy
 
-class ProxyDemoKtTest {
+class ProxyKtDemoTest {
     @Test
     fun testProxy() {
-        val entityClass: Class<*> = DuckKt::class.java
+        val entityClass: Class<*> = KDuck::class.java
         val handler = InvocationHandler { proxy, method, args ->
             if (method.isDefault) {
                 val constructor = MethodHandles.Lookup::class.java.getDeclaredConstructor(Class::class.java)
@@ -28,7 +28,7 @@ class ProxyDemoKtTest {
         }
         val duck = Proxy.newProxyInstance(
             entityClass.classLoader, arrayOf(entityClass), handler
-        ) as DuckKt
+        ) as KDuck
         val value = duck.quack()
         val name = duck.name()
         val age = duck.age()
@@ -36,13 +36,4 @@ class ProxyDemoKtTest {
         Assertions.assertEquals("XYZ", name)
         Assertions.assertEquals(null, age)
     }
-}
-
-internal interface DuckKt {
-    fun quack(): String {
-        return "QUACK"
-    }
-
-    fun name(): String
-    fun age(): Int?
 }

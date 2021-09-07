@@ -8,7 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
-public class ProxyDemoTest {
+public class ProxyJvDemoTest {
 
     @Test
     public void testProxy1() {
