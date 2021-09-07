@@ -1,20 +1,15 @@
 package org.ujorm.kotlin.proxy;
 
+import org.junit.jupiter.api.*;
+
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 
-interface Duck {
-    default String quack() {
-        return "QUACK";
-    }
-    String name();
-    Integer age();
-}
+public class ProxyDemoTest {
 
-public class ProxyDemo {
-
-    public static void main(String[] a) {
+    @Test
+    public void testProxy() {
         final Class<?> targetClass = Duck.class;
         Duck duck = (Duck) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
@@ -28,20 +23,31 @@ public class ProxyDemo {
                                 .bindTo(proxy)
                                 .invokeWithArguments();
                     } else switch (method.getName()) {
-                        case "name": return "XYZ";
-                        default: return null;
+                        case "name":
+                            return "XYZ";
+                        default:
+                            return null;
                     }
                 }
         );
 
         String value = duck.quack();
-        System.out.println(value);
-
         String name = duck.name();
-        System.out.println(name);
-
         Integer age = duck.age();
-        System.out.println(age);
 
+        Assertions.assertEquals("QUACK", value);
+        Assertions.assertEquals("XYZ", name);
+        Assertions.assertEquals(null, age);
     }
+
+}
+
+interface Duck {
+    default String quack() {
+        return "QUACK";
+    }
+
+    String name();
+
+    Integer age();
 }
