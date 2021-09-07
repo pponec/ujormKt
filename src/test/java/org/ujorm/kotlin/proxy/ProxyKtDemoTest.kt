@@ -55,9 +55,11 @@ class ProxyKtDemoTest {
         val value = duck.quack()
         val name = duck.name()
         val age = duck.age()
+        val alias = duck.alias
         Assertions.assertEquals("QUACK", value)
         Assertions.assertEquals("XYZ", name)
         Assertions.assertEquals(null, age)
+        Assertions.assertEquals("Donald", alias) //(!)
     }
 
     private fun <T> newProxy(entityClass: Class<T>, handler: InvocationHandler): T {
