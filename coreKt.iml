@@ -37,25 +37,25 @@
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.5.21" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.5.20-RC" level="project" />
-    <orderEntry type="library" name="Maven: io.vertx:vertx-core:4.1.0" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-common:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-handler-proxy:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec-socks:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec-http:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec-http2:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-resolver:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-resolver-dns:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec-dns:4.1.65.Final" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.3" level="project" />
-    <orderEntry type="library" name="Maven: io.vertx:vertx-web:4.1.0" level="project" />
-    <orderEntry type="library" name="Maven: io.vertx:vertx-web-common:4.1.0" level="project" />
-    <orderEntry type="library" name="Maven: io.vertx:vertx-auth-common:4.1.0" level="project" />
-    <orderEntry type="library" name="Maven: io.vertx:vertx-bridge-common:4.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.5.21" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-core:4.2.0" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-common:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler-proxy:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-socks:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-http:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-http2:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-resolver:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-resolver-dns:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-dns:4.1.69.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.4" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-web:4.2.0" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-web-common:4.2.0" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-auth-common:4.2.0" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-bridge-common:4.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test:1.5.21" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter:5.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-api:5.8.1" level="project" />
