@@ -304,15 +304,15 @@ enum class ValueOperatorEnum : ValueOperator {
 }
 
 open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
-    val left: Criterion<D, Operator, out Any?>
-    val right: Criterion<D, Operator, out Any?>
+    val left: Criterion<D, Operator, Any?>
+    val right: Criterion<D, Operator, Any?>
     override val operator: BinaryOperator
     override val entityClass: KClass<D> get() = left.entityClass
 
     constructor(
-        left: Criterion<D, out Operator, out Any?>,
+        left: Criterion<D, Operator, Any?>,
         operator: BinaryOperator,
-        right: Criterion<D, out Operator, out Any?>
+        right: Criterion<D, Operator, Any?>
     ) {
         this.left = left
         this.operator = operator
