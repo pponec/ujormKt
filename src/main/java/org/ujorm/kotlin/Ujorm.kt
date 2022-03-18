@@ -15,7 +15,6 @@
  */
 package org.ujorm.kotlin
 
-import java.lang.IllegalArgumentException
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
@@ -28,7 +27,7 @@ import kotlin.streams.toList
 
 interface Operator {
     /** An operator name */
-    val name : String
+    val name: String
 }
 
 interface ValueOperator : Operator {
@@ -531,28 +530,28 @@ open class EntityBuilder<D : Any>(
     private val map = mutableMapOf<String, Any?>()
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: NullableProperty<D, V>, value: Any?) : EntityBuilder<D> {
+    fun <V : Any> set(property: NullableProperty<D, V>, value: Any?): EntityBuilder<D> {
         map[property.name] = value
-        return this;
+        return this
     }
 
     /** Set a value to an internal store */
-    fun <V: Any> set(property: MandatoryProperty<D, V>, value: Any) : EntityBuilder<D> {
+    fun <V : Any> set(property: MandatoryProperty<D, V>, value: Any): EntityBuilder<D> {
         map[property.name] = value
-        return this;
+        return this
     }
 
     /** Create new object by a constructor (for immutable objects) */
     fun build(): D {
         val constructor = model._entityClass.constructors
             .stream()
-            .filter{ c -> c.parameters.size == map.size}
+            .filter { c -> c.parameters.size == map.size }
             .findFirst()
-            .orElseThrow {IllegalStateException("No constructor[${map.size}] found")}
+            .orElseThrow { IllegalStateException("No constructor[${map.size}] found") }
         val params = constructor.parameters
             .stream()
             .map { kParam -> map[kParam.name] }
-            .toArray();
+            .toArray()
         return constructor.call(*params)
     }
 

@@ -1,4 +1,4 @@
-package org.ujorm.kotlin
+package org.ujorm.kotlin.model.provider
 
 import org.ujorm.kotlin.AbstractModelProvider
 

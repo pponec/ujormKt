@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2021 Pavel Ponec, https://github.com/pponec
+ * Copyright 2021-2022 Pavel Ponec, https://github.com/pponec
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.ujorm.kotlin.demo
 
-import org.ujorm.kotlin.ModelProvider
+import org.ujorm.kotlin.MandatoryProperty
+import org.ujorm.kotlin.ValueCriterion
 import org.ujorm.kotlin.model.Department
 import org.ujorm.kotlin.model.User
+import org.ujorm.kotlin.model.provider.ModelProvider
 import org.ujorm.kotlin.model.user
 import java.time.LocalDate
 
@@ -31,6 +33,10 @@ fun main() {
 /** Sample of usage */
 fun useCriterions() {
     val _user = ModelProvider.user
+
+    val userId : MandatoryProperty<User, Int> = _user.id;
+    val crn0 : ValueCriterion<User, Int> = userId EQ 123
+    assert(crn0.toString() == "User: id EQ 123")
 
     val crn1 = _user.nickname EQ "Pavel"
     val crn2 = _user.id GT 1
@@ -57,7 +63,11 @@ fun useProperties() {
     val userName: String = _user.nickname(user) // Get a name of the user
     val userId: Int = _user.id(user)
     val parent: User? = _user.invitedFrom(user)
-    //val parentName : String = _user.name.parent(user) // TODO: reading the relations
+
+    // TODO(ponec): read an attribute of the relation:
+    //val userDepartmentName : MandatoryProperty<User, String> = _user.department().name;
+    //val departmentName : String = userDepartmentName(user)
+
     assert(userName == "Xaver", { "userName" })
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
@@ -87,7 +97,7 @@ fun useProperties() {
 /** Create new object by a constructor (for immutable objects) */
 fun useEntityBuilder() {
     val _user = ModelProvider.user
-    val user : User = _user.builder()
+    val user: User = _user.builder()
         .set(_user.id, 1)
         .set(_user.nickname, "John")
         //.set(_user.name, null) // Compilator fails
