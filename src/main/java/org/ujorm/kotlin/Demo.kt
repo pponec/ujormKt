@@ -15,7 +15,7 @@
  */
 package org.ujorm.kotlin.demo
 
-import org.ujorm.kotlin.MandatoryProperty
+import org.ujorm.kotlin.Property
 import org.ujorm.kotlin.ValueCriterion
 import org.ujorm.kotlin.model.Department
 import org.ujorm.kotlin.model.User
@@ -34,8 +34,8 @@ fun main() {
 fun useCriterions() {
     val _user = ModelProvider.user
 
-    val userId : MandatoryProperty<User, Int> = _user.id;
-    val crn0 : ValueCriterion<User, Int> = userId EQ 123
+    val userId: Property<User, Int> = _user.id
+    val crn0: ValueCriterion<User, Int> = userId EQ 123
     assert(crn0.toString() == "User: id EQ 123")
 
     val crn1 = _user.nickname EQ "Pavel"
@@ -60,9 +60,9 @@ fun useProperties() {
     val _user = ModelProvider.user
     val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
 
-    val userName: String = _user.nickname(user) // Get a name of the user
-    val userId: Int = _user.id(user)
-    val parent: User? = _user.invitedFrom(user)
+    val userName: String = _user.nickname[user] // Get a name of the user
+    val userId: Int = _user.id[user]
+    val parent: User? = _user.invitedFrom[user]
 
     // TODO(ponec): read an attribute of the relation:
     //val userDepartmentName : MandatoryProperty<User, String> = _user.department().name;
@@ -72,18 +72,18 @@ fun useProperties() {
     assert(userId == 11, { "userId" })
     assert(parent == null, { "userId" })
 
-    _user.nickname(user, "James") // Set a name to the user
-    _user.invitedFrom(user, null)
-    assert(_user.id.name == "id", { "property name" })
-    assert(_user.id.toString() == "id", { "property name" })
-    assert(_user.id.info() == "User.id", { "property name" })
-    assert(_user.id() == "User.id", { "property name" })
+    _user.nickname[user] = "James" // Set a name to the user
+    _user.invitedFrom[user] = null
+    assert(_user.id.name == "id") { "property name" }
+    assert(_user.id.toString() == "id") { "property name" }
+    assert(_user.id.info() == "User.id") { "property name" }
+    assert(_user.id() == "User.id") { "property name" }
 
     val properties = ModelProvider.user._properties
-    assert(properties.size == 5, { "Count of properties" })
-    assert(properties[0].name == "id", { "property name" })
-    assert(properties[1].name == "nickname", { "property name" })
-    assert(properties[2].name == "born", { "property name" })
+    assert(properties.size == 5) { "Count of properties" }
+    assert(properties[0].name == "id") { "property name" }
+    assert(properties[1].name == "nickname") { "property name" }
+    assert(properties[2].name == "born") { "property name" }
 
     // Value type
     assert(_user.id.valueClass == Int::class)
