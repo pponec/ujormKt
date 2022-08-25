@@ -13,7 +13,7 @@ internal class DemoKtTest {
 
     @Test
     fun classTest() {
-        var xxx : KClass<User> = User::class;
+        var xxx : KClass<User> = User::class
         assert(xxx != null)
     }
 }

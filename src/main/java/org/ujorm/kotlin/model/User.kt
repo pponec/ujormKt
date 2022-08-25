@@ -3,7 +3,6 @@ package org.ujorm.kotlin.model
 import org.ujorm.kotlin.*
 import org.ujorm.kotlin.model.provider.ModelProvider
 import java.time.LocalDate
-import kotlin.reflect.KClass
 
 /** An user entity */
 data class User constructor(

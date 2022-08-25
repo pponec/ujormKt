@@ -10,7 +10,7 @@ internal class GenericTest {
 
     @Test
     fun getGenericClassTest() {
-        val generic = Generic();
+        val generic = Generic()
 
         val list1: List<String> = arrayListOf()
         val clazz = generic.retrieveSomething(list1)
