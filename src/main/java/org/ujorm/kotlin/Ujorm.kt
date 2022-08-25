@@ -76,16 +76,13 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val valueClass: KClass<out V> //  KClass<out V>
     /** Is the property value read-only? */
     val readOnly: Boolean
-
     /** Is the value nullable? */
     val nullable: Boolean
-    val getter: (D) -> V?
-    val setter: (D, V?) -> Unit
 
     /** Get a value from the entity */
-    operator fun get(entity: D): V? = getter.invoke(entity)
+    operator fun get(entity: D): V?
     /** Set a value to the entity */
-    operator fun set(entity: D, value: V?): Unit = setter.invoke(entity, value)
+    operator fun set(entity: D, value: V?): Unit
 
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -136,8 +133,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 
 /** API of the property descriptor */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
-    override val getter: (D) -> V
-    override operator fun get(entity: D): V = getter.invoke(entity)
+    override operator fun get(entity: D): V
 }
 
 /** An implementation of the property descriptor for nullable values */
@@ -146,7 +142,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
     override var name: String
         internal set(value) {
             // Note: field.isEmpty() expression throws the NullPointerException in Kotlin 1.5.21
-            field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name is: $field")
+            field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name was assigned to: $field")
         }
     override val entityClass: KClass<D>
     override val valueClass: KClass<V> //  KClass<out V>
@@ -154,9 +150,13 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
 
     /** Is the value nullable or required ? */
     override val nullable: Boolean
-    override val getter: (D) -> V?
-    override var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-        internal set(value) {
+    override fun get(entity: D): V? = getter.invoke(entity)
+    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+    /** Value provider is not the part of API */
+    open internal val getter: (D) -> V?
+    /** Value writer is not the part of API */
+    open internal var setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
+        set(value) {
             field = if (field == Constants.UNDEFINED_SETTER) value
             else throw IllegalStateException("${entityClass.simpleName}.$index")
         }
@@ -207,17 +207,19 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
 }
 
 /** An implementation of the property descriptor */
-class PropertyImpl<D : Any, V : Any>(
-    index: UByte,
-    name: String,
-    getter: (D) -> V,
-    setter: (D, V?) -> Unit,
-    entityClass: KClass<D>,
-    valueClass: KClass<V>,
-    readOnly: Boolean,
-    nullable: Boolean
-) : Property<D, V>,
-    PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
+class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
+
+    constructor(
+        index: UByte,
+        name: String,
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit,
+        entityClass: KClass<D>,
+        valueClass: KClass<V>,
+        readOnly: Boolean,
+        nullable: Boolean
+    ) : super(index, name, getter, setter, entityClass, valueClass, readOnly, nullable)
+
     override val getter: (D) -> V = super.getter as (D) -> V
     override fun get(entity: D): V = getter.invoke(entity)
 }
