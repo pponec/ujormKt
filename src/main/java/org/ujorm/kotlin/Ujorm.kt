@@ -82,7 +82,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     /** Get a value from the entity */
     operator fun get(entity: D): V?
     /** Set a value to the entity */
-    operator fun set(entity: D, value: V?): Unit
+    operator fun set(entity: D, value: V?)
 
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
@@ -138,18 +138,18 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 
 /** An implementation of the property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, CharSequence {
-    override val index: UByte
+    final override val index: UByte
     override var name: String
         internal set(value) {
             // Note: field.isEmpty() expression throws the NullPointerException in Kotlin 1.5.21
             field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name was assigned to: $field")
         }
-    override val entityClass: KClass<D>
-    override val valueClass: KClass<V> //  KClass<out V>
-    override val readOnly: Boolean
+    final override val entityClass: KClass<D>
+    final override val valueClass: KClass<V> //  KClass<out V>
+    final override val readOnly: Boolean
 
     /** Is the value nullable or required ? */
-    override val nullable: Boolean
+    final override val nullable: Boolean
     override fun get(entity: D): V? = getter.invoke(entity)
     override fun set(entity: D, value: V?) = setter.invoke(entity, value)
     /** Value provider is not the part of API */
@@ -279,7 +279,7 @@ enum class ValueOperatorEnum : ValueOperator {
     }
 }
 
-open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
+class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
     val left: Criterion<D, Operator, Any?>
     val right: Criterion<D, Operator, Any?>
     override val operator: BinaryOperator
@@ -325,7 +325,7 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
     }
 }
 
-open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
+class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
     val property: PropertyNullable<D, out V>
     val value: V?
     override val operator: ValueOperator
@@ -371,7 +371,6 @@ open class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V>
 
 /** Interface of the domain meta-model */
 abstract class AbstractModelProvider {
-    protected val SYNCHRONIZED = LazyThreadSafetyMode.SYNCHRONIZED
 
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {
@@ -543,7 +542,7 @@ open class EntityBuilder<D : Any>(
     override fun toString() = model._entityClass.simpleName ?: "?"
 }
 
-/** @see https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
+/** See: https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
     /** Undefined property setter */
     val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v -> throw UnsupportedOperationException("read-only") }

@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.demo
+package org.ujorm.kotlin
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
