@@ -207,18 +207,17 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
 }
 
 /** An implementation of the property descriptor */
-class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
-
-    constructor(
-        index: UByte,
-        name: String,
-        getter: (D) -> V,
-        setter: (D, V?) -> Unit,
-        entityClass: KClass<D>,
-        valueClass: KClass<V>,
-        readOnly: Boolean,
-        nullable: Boolean
-    ) : super(index, name, getter, setter, entityClass, valueClass, readOnly, nullable)
+class PropertyImpl<D : Any, V : Any>(
+    index: UByte,
+    name: String,
+    getter: (D) -> V,
+    setter: (D, V?) -> Unit,
+    entityClass: KClass<D>,
+    valueClass: KClass<V>,
+    readOnly: Boolean,
+    nullable: Boolean
+) : Property<D, V>,
+    PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
 
     override val getter: (D) -> V = super.getter as (D) -> V
     override fun get(entity: D): V = getter.invoke(entity)
