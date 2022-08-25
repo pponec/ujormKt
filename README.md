@@ -38,25 +38,25 @@ val isValid: Boolean = crn4(user)
 assert(!noValid, { "crn1(user)" })
 assert(isValid, { "crn4(user)" })
 
-val userName: String = _user.nickname(user) // Get a name of the user
-val userId: Int = _user.id(user)
-val parent: User? = _user.parent(user)
+val userName: String = _user.nickname[user] // Get a name of the user
+val userId: Int = _user.id[user]
+val parent: User? = _user.invitedFrom[user]
 assert(userName == "Xaver", { "userName" })
 assert(userId == 11, { "userId" })
 assert(parent == null, { "userId" })
 
-_user.nickname(user, "James") // Set a name to the user
-_user.parent(user, null)
-assert(_user.id.name == "id", { "property name" })
-assert(_user.id.toString() == "id", { "property name" })
-assert(_user.id.info() == "User.id", { "property name" })
-assert(_user.id() == "User.id", { "property name" })
+_user.nickname[user] = "James" // Set a name to the user
+_user.invitedFrom[user] = null
+assert(_user.id.name == "id") { "property name" }
+assert(_user.id.toString() == "id") { "property name" }
+assert(_user.id.info() == "User.id") { "property name" }
+assert(_user.id() == "User.id") { "property name" }
 
 val properties = ModelProvider.user._properties
-assert(properties.size == 4, { "Count of properties" })
-assert(properties[0].name == "id", { "property name" })
-assert(properties[1].name == "nickname", { "property name" })
-assert(properties[2].name == "born", { "property name" })
+assert(properties.size == 5) { "Count of properties" }
+assert(properties[0].name == "id") { "property name" }
+assert(properties[1].name == "nickname") { "property name" }
+assert(properties[2].name == "born") { "property name" }
 
 // Value type
 assert(_user.id.valueClass == Int::class)
@@ -65,7 +65,7 @@ assert(_user.born.valueClass == LocalDate::class)
 // Entity type (alias domain type)
 assert(_user.id.entityClass == User::class)
 assert(_user.born.entityClass == User::class)
-``````
+```
 
 ## Class diagram
 
