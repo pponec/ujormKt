@@ -307,9 +307,12 @@ open class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, 
 
     /** Plain text expression */
     override operator fun invoke(): String {
+        val brackets = right.operator !== BinaryOperator.AND
+        val lBracket = if (brackets) "(" else ""
+        val rBracket = if (brackets) ")" else ""
         return when (operator) {
-            BinaryOperator.NOT -> /**/ "${operator.name} (${right.invoke()})"
-            else -> "(${left.invoke()}) ${operator.name} (${right.invoke()})"
+            BinaryOperator.NOT -> /**/ "${operator.name} $lBracket${right.invoke()}$rBracket"
+            else -> "(${left.invoke()}) ${operator.name} $lBracket${right.invoke()}$rBracket"
         }
     }
 
