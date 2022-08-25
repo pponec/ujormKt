@@ -1,3 +1,4 @@
+//@file:JvmName("XDuck")
 package org.ujorm.kotlin.proxy
 
 interface KDuck {
