@@ -220,6 +220,9 @@ class PropertyImpl<D : Any, V : Any>(
     PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
 
     override val getter: (D) -> V = super.getter as (D) -> V
+    override fun set(entity: D, value: V?) = setter.invoke(entity, value
+        ?: throw IllegalArgumentException("Notnull value is required"))
+
     override fun get(entity: D): V = getter.invoke(entity)
 }
 

@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin.demo
+package org.ujorm.kotlin
 
-import org.ujorm.kotlin.Property
-import org.ujorm.kotlin.ValueCriterion
 import org.ujorm.kotlin.model.Department
 import org.ujorm.kotlin.model.User
 import org.ujorm.kotlin.model.provider.ModelProvider
