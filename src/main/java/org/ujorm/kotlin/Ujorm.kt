@@ -528,25 +528,31 @@ internal object Utils {
 open class EntityBuilder<D : Any>(
     val model: EntityModel<D>,
 ) {
-    private val map = mutableMapOf<String, Any?>()
+    private val map = linkedMapOf<UByte, Any?>()
 
     /** Set a value to an internal store */
     fun <V : Any> set(property: PropertyNullable<D, V>, value: Any?): EntityBuilder<D> {
-        map[property.name] = value
+        map[property.index] = value
         return this
     }
 
-    /** Create new object by a constructor (for immutable objects) */
+    /** Check required properties and create new object by a constructor
+     * (for immutable objects) */
     fun build(): D {
         val constructor = model._entityClass.constructors
             .stream()
             .filter { c -> c.parameters.size == map.size }
             .findFirst()
             .orElseThrow { IllegalStateException("No constructor[${map.size}] found") }
-        val params = constructor.parameters
-            .stream()
-            .map { kParam -> map[kParam.name] }
-            .toArray()
+
+        // Check all required values:
+        model._properties.forEach {
+            if (!it.nullable && map[it.index] == null) {
+                throw IllegalArgumentException( "${it()} has no value")
+            }
+        }
+
+        val params = map.values.toTypedArray()
         return constructor.call(*params)
     }
 

@@ -1,7 +1,7 @@
 package org.ujorm.kotlin
 
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.model.User
+import org.ujorm.kotlin.model.Employee
 import kotlin.reflect.KClass
 
 internal class DemoKtTest {
@@ -13,7 +13,7 @@ internal class DemoKtTest {
 
     @Test
     fun classTest() {
-        var xxx : KClass<User> = User::class
+        var xxx : KClass<Employee> = Employee::class
         assert(xxx != null)
     }
 }

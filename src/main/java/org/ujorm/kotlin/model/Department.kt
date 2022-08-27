@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.model
 
 import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.model.provider.ModelProvider
+import org.ujorm.kotlin.config.ModelProvider
 import java.time.LocalDate
 
 /** An Department entity */
@@ -12,11 +12,11 @@ data class Department constructor(
 )
 
 /** Model of the entity can be a generated class in the feature */
-open class _Department : EntityModel<Department>(Department::class) {
+open class Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
     val created = property { it.created }
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.Department by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _Department().close() as _Department }
+val ModelProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Departments().close() as Departments }

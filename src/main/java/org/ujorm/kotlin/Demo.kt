@@ -15,97 +15,114 @@
  */
 package org.ujorm.kotlin
 
+import org.ujorm.kotlin.model.Employee
+import org.ujorm.kotlin.config.ModelProvider
 import org.ujorm.kotlin.model.Department
-import org.ujorm.kotlin.model.User
-import org.ujorm.kotlin.model.provider.ModelProvider
-import org.ujorm.kotlin.model.user
+import org.ujorm.kotlin.model.employees
 import java.time.LocalDate
 
 /** Sample of usage */
 fun main() {
-    useCriterions()
-    useProperties()
-    useEntityBuilder()
+    basicSkills()
+    criterions()
+    moreInfo()
+    entityBuilder()
 }
 
 /** Sample of usage */
-fun useCriterions() {
-    val _user = ModelProvider.user
+fun basicSkills() {
+    val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
+    val employees = ModelProvider.employees // MetaModel
 
-    val userId: Property<User, Int> = _user.id
-    val crn0: ValueCriterion<User, Int> = userId EQ 123
-    assert(crn0.toString() == "User: id EQ 123")
+    // Read and Write values by entity meta-model:
+    val id = employees.id[employee]
+    val name = employees.name[employee]
+    val contractDay = employees.contractDay[employee]
+    val department = employees.department[employee]
+    val supervisor = employees.supervisor[employee]
+    employees.id[employee] = id
+    employees.name[employee] = name
+    employees.contractDay[employee] = contractDay
+    employees.department[employee] = department
+    employees.supervisor[employee] = supervisor
 
-    val crn1 = _user.nickname EQ "Pavel"
-    val crn2 = _user.id GT 1
-    val crn3 = _user.id LT 99
+    // Relations and composed properties: (TODO)
+    //val employeeDepartmentName : Property<Employee, String> = employees.department.name;
+    //val departmentName : String = employeeDepartmentName[employee]
+    //employeeDepartmentName[employee] = departmentName
+}
+
+/** Sample of usage */
+fun criterions() {
+    val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
+    val employees = ModelProvider.employees // MetaModel
+
+    // Criterion conditions:
+    val crn1 = employees.name EQ "Lucy"
+    val crn2 = employees.id GT 1
+    val crn3 = employees.id LT 99
     val crn4 = crn1 OR (crn2 AND crn3)
     val crn5 = crn1.not() OR (crn2 AND crn3)
-    assert(crn1.toString() == """User: nickname EQ "Pavel"""")
-    assert(crn2.toString() == """User: id GT 1""")
-    assert(crn4.toString() == """User: (nickname EQ "Pavel") OR (id GT 1) AND (id LT 99)""")
-    assert(crn5.toString() == """User: (NOT (nickname EQ "Pavel")) OR (id GT 1) AND (id LT 99)""")
+    val noValid: Boolean = crn1(employee)
+    val isValid: Boolean = crn4(employee)
 
-    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
-    val noValid: Boolean = crn1(user)
-    val isValid: Boolean = crn4(user)
-    assert(!noValid, { "crn1(user)" })
-    assert(isValid, { "crn4(user)" })
+    // Criterion logs:
+    assert(!noValid, { "crn1(employee)" })
+    assert(isValid, { "crn4(employee)" })
+    assert(crn1.toString() == """Employee: name EQ "Lucy"""")
+    assert(crn2.toString() == """Employee: id GT 1""")
+    assert(crn4.toString() == """Employee: (name EQ "Lucy") OR (id GT 1) AND (id LT 99)""")
+    assert(crn5.toString() == """Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (id LT 99)""")
 }
 
 /** Sample of usage */
-fun useProperties() {
-    val _user = ModelProvider.user
-    val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
+fun moreInfo() {
+    val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
+    val employees = ModelProvider.employees
 
-    val userName: String = _user.nickname[user] // Get a name of the user
-    val userId: Int = _user.id[user]
-    val parent: User? = _user.invitedFrom[user]
+    val id: Int = employees.id[employee]
+    val name: String = employees.name[employee] // Get a name of the employee
+    val supervisor: Employee? = employees.supervisor[employee]
 
-    // TODO(ponec): read an attribute of the relation:
-    //val userDepartmentName : MandatoryProperty<User, String> = _user.department().name;
-    //val departmentName : String = userDepartmentName(user)
+    assert(name == "John", { "employee name" })
+    assert(id == 11, { "employee id" })
+    assert(supervisor == null, { "employee supervisor " })
 
-    assert(userName == "Xaver", { "userName" })
-    assert(userId == 11, { "userId" })
-    assert(parent == null, { "userId" })
+    employees.name[employee] = "James" // Set a name to the user
+    employees.supervisor[employee] = null
+    assert(employees.id.name == "id") { "property name" }
+    assert(employees.id.toString() == "id") { "property name" }
+    assert(employees.id.info() == "Employee.id") { "property name" }
+    assert(employees.id() == "Employee.id") { "property name" }
 
-    _user.nickname[user] = "James" // Set a name to the user
-    _user.invitedFrom[user] = null
-    assert(_user.id.name == "id") { "property name" }
-    assert(_user.id.toString() == "id") { "property name" }
-    assert(_user.id.info() == "User.id") { "property name" }
-    assert(_user.id() == "User.id") { "property name" }
-
-    val properties = ModelProvider.user._properties
+    val properties = ModelProvider.employees._properties
     assert(properties.size == 5) { "Count of properties" }
     assert(properties[0].name == "id") { "property name" }
-    assert(properties[1].name == "nickname") { "property name" }
-    assert(properties[2].name == "born") { "property name" }
+    assert(properties[1].name == "name") { "property name" }
+    assert(properties[2].name == "contract_day") { "property name" } // User defined name
     assert(properties[3].name == "department") { "property name" }
-    assert(properties[4].name == "invited_from") { "property name" } // User defined name
+    assert(properties[4].name == "supervisor") { "property name" }
 
     // Value type
-    assert(_user.id.valueClass == Int::class)
-    assert(_user.born.valueClass == LocalDate::class)
+    assert(employees.id.valueClass == Int::class)
+    assert(employees.contractDay.valueClass == LocalDate::class)
 
     // Entity type (alias domain type)
-    assert(_user.id.entityClass == User::class)
-    assert(_user.born.entityClass == User::class)
+    assert(employees.id.entityClass == Employee::class)
+    assert(employees.contractDay.entityClass == Employee::class)
 }
 
 /** Create new object by a constructor (for immutable objects) */
-fun useEntityBuilder() {
-    val _user = ModelProvider.user
-    val user: User = _user.builder()
-        .set(_user.id, 1)
-        .set(_user.nickname, "John")
-        //.set(_user.name, null) // Compilator fails
-        .set(_user.born, LocalDate.now())
-        .set(_user.department, Department(2, "B"))
-        .set(_user.invitedFrom, null)
+fun entityBuilder() {
+    val employees = ModelProvider.employees
+    val employee: Employee = employees.builder()
+        .set(employees.id, 1)
+        .set(employees.name, "John")
+        .set(employees.contractDay, LocalDate.now())
+        .set(employees.department, Department(2, "B"))
+        .set(employees.supervisor, null) // Supervisor is optional
         .build()
 
-    assert(user.id == 1)
-    assert(user.nickname == "John")
+    assert(employee.id == 1)
+    assert(employee.name == "John")
 }
