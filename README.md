@@ -19,6 +19,8 @@ Topical areas of use are:
 
 ## Usage:
 
+Presentation of basic skills with entity model:
+
 ```kotlin
 val _user = ModelProvider.user
 
@@ -57,6 +59,8 @@ assert(properties.size == 5) { "Count of properties" }
 assert(properties[0].name == "id") { "property name" }
 assert(properties[1].name == "nickname") { "property name" }
 assert(properties[2].name == "born") { "property name" }
+assert(properties[3].name == "department") { "property name" }
+assert(properties[4].name == "invited_from") { "property name" } 
 
 // Value type
 assert(_user.id.valueClass == Int::class)
@@ -65,6 +69,29 @@ assert(_user.born.valueClass == LocalDate::class)
 // Entity type (alias domain type)
 assert(_user.id.entityClass == User::class)
 assert(_user.born.entityClass == User::class)
+```
+
+Building domain entity model:
+
+```kotlin
+data class User constructor(
+    var id: Int,
+    var nickname: String,
+    var born: LocalDate,
+    var department: Department = Department(1, "A"),
+    var invitedFrom: User? = null
+)
+
+open class _User : EntityModel<User>(User::class) {
+    val id = property { it.id }
+    val nickname = property { it.nickname }
+    val born = property { it.born }
+    val department = property { it.department }
+    val invitedFrom = propertyNullable("invited_from") { it.invitedFrom }
+}
+
+/** Initialize, register and close the entity model. */
+val ModelProvider.user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().close() as _User }
 ```
 
 ## Class diagram
