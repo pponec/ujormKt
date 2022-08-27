@@ -23,6 +23,7 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.full.memberProperties
 
+/** Common condition operator */
 interface Operator {
     /** An operator name */
     val name: String
@@ -33,7 +34,7 @@ interface ValueOperator : Operator {
     fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?): Boolean
 }
 
-/** API of the condition */
+/** API of the object condition */
 interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     val entityClass: KClass<D>
     val operator: OP
