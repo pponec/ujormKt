@@ -22,7 +22,5 @@ open class _User : EntityModel<User>(User::class) {
     val invitedFrom = propertyNullable("invited_from") { it.invitedFrom }
 }
 
-/**
- * Return a default entity sequence of
- */
-val ModelProvider.user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().init() as _User }
+/** Initialize, register and close the entity model. */
+val ModelProvider.user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().close() as _User }

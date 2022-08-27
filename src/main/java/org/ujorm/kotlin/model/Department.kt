@@ -18,5 +18,5 @@ open class _Department : EntityModel<Department>(Department::class) {
     val created = property { it.created }
 }
 
-/** Return a default entity sequence of */
-val ModelProvider.Department by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _Department().init() as _Department }
+/** Initialize, register and close the entity model. */
+val ModelProvider.Department by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _Department().close() as _Department }

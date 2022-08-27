@@ -221,8 +221,7 @@ class PropertyImpl<D : Any, V : Any>(
     PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
 
     override val getter: (D) -> V = super.getter as (D) -> V
-    override fun set(entity: D, value: V?) = setter.invoke(
-        entity, value
+    override fun set(entity: D, value: V?) = setter.invoke(entity, value
             ?: throw IllegalArgumentException("Notnull value is required")
     )
 
@@ -394,14 +393,14 @@ abstract class EntityModel<D : Any>(
         result.sortedBy { it.index }
     }
 
-    /** Initialize all properties */
-    fun init(): EntityModel<D> {
+    /** Initialize, register and close the entity model. */
+    fun close(): EntityModel<D> {
         val map = Utils.getKPropertyMap(this)
         for (p in _properties) {
             val kProperty = map.get(p.index)
                 ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
             Utils.assignName(p, kProperty)
-            Utils.assignSetter(p)
+            Utils.assignSetter(p, kProperty)
         }
         return this
     }
@@ -424,9 +423,7 @@ abstract class EntityModel<D : Any>(
         noinline getter: (D) -> V
     ) = property(V::class, getter, name = name)
 
-    /** Create a nonnull property.
-     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
-     **/
+    /** Create new not-null Property model using the method with all necessary parameters. */
     protected fun <V : Any> property(
         valueClass: KClass<V>,
         getter: (D) -> V,
@@ -436,31 +433,29 @@ abstract class EntityModel<D : Any>(
         _size++, name, getter, setter, _entityClass, valueClass, false, false
     )
 
-    /** Create a non-null property.
+    /** Create new non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> propertyNullable(
         name: String,
         noinline getter: (D) -> V?,
-    ) = property(V::class, getter, name = name)
+    ) = propertyNullable(V::class, getter, name = name)
 
-    /** Create a non-null property.
+    /** Create new non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> propertyNullable(
         noinline getter: (D) -> V?
-    ) = property(V::class, getter)
+    ) = propertyNullable(V::class, getter)
 
 
-    /** Create a nonnull property.
-     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
-     **/
-    protected fun <V : Any> property(
+    /** Creates new not-null Property model using the method with all necessary parameters. */
+    protected fun <V : Any> propertyNullable(
         valueClass: KClass<V>,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         name: String = ""
-    ) = PropertyNullableImpl(
+    ) : PropertyNullable<D, V> = PropertyNullableImpl(
         _size++, name, getter, setter, _entityClass, valueClass, false, true
     )
 
@@ -498,8 +493,10 @@ internal object Utils {
 
     /** Assign a property name to the uProperty */
     fun <D : Any> assignName(
+        /** Ujorm property */
         uProperty: PropertyNullable<D, Any>,
-        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>
+        /** Kotlin property */
+        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>,
     ) {
         val name = kProperty.name
         if (uProperty.name.isEmpty()
@@ -511,8 +508,13 @@ internal object Utils {
     }
 
     /** Assign a property setter to the uProperty */
-    fun <D : Any> assignSetter(uProperty: PropertyNullable<D, Any>) {
-        val eProperty = uProperty.entityClass.memberProperties.find { it.name == uProperty.name }
+    fun <D : Any> assignSetter(
+        /** Ujorm property */
+        uProperty: PropertyNullable<D, Any>,
+        /** Kotlin property */
+        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>,
+    ) {
+        val eProperty = uProperty.entityClass.memberProperties.find { it.name == kProperty.name }
         if (eProperty is KMutableProperty<*>) when (uProperty) {
             is PropertyNullableImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)

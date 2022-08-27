@@ -82,6 +82,8 @@ fun useProperties() {
     assert(properties[0].name == "id") { "property name" }
     assert(properties[1].name == "nickname") { "property name" }
     assert(properties[2].name == "born") { "property name" }
+    assert(properties[3].name == "department") { "property name" }
+    assert(properties[4].name == "invited_from") { "property name" } // User defined name
 
     // Value type
     assert(_user.id.valueClass == Int::class)
