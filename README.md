@@ -1,4 +1,4 @@
-# ujormKt
+# UjormKt
 
 A very early prototype of the Kotlin library for modelling filters of domain objects.
 Assembled filters work on common POJO objects.
