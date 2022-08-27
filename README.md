@@ -22,53 +22,31 @@ Topical areas of use are:
 Presentation of basic skills with entity model:
 
 ```kotlin
-val _user = ModelProvider.user
+val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
+val employees = ModelProvider.employees
 
-val crn1 = _user.nickname EQ "Pavel"
-val crn2 = _user.id GT 1
-val crn3 = _user.id LT 99
-val crn4 = crn1 OR (crn2 AND crn3)
-val crn5 = crn1.not() OR (crn2 AND crn3)
-assert(crn1.toString() == """User: nickname EQ "Pavel"""")
-assert(crn2.toString() == """User: id GT 1""")
-assert(crn4.toString() == """User: (nickname EQ "Pavel") OR (id GT 1) AND (id LT 99)""")
-assert(crn5.toString() == """User: (NOT (nickname EQ "Pavel")) OR (id GT 1) AND (id LT 99)""")
+val id: Int = employees.id[employee]
+val name: String = employees.name[employee] // Get a name of the employee
+val supervisor: Employee? = employees.supervisor[employee]
 
-val user = User(id = 11, nickname = "Xaver", born = LocalDate.now())
-val noValid: Boolean = crn1(user)
-val isValid: Boolean = crn4(user)
-assert(!noValid, { "crn1(user)" })
-assert(isValid, { "crn4(user)" })
+assert(name == "John", { "employee name" })
+assert(id == 11, { "employee id" })
+assert(supervisor == null, { "employee supervisor " })
 
-val userName: String = _user.nickname[user] // Get a name of the user
-val userId: Int = _user.id[user]
-val parent: User? = _user.invitedFrom[user]
-assert(userName == "Xaver", { "userName" })
-assert(userId == 11, { "userId" })
-assert(parent == null, { "userId" })
+employees.name[employee] = "James" // Set a name to the user
+employees.supervisor[employee] = null
+assert(employees.id.name == "id") { "property name" }
+assert(employees.id.toString() == "id") { "property name" }
+assert(employees.id.info() == "Employee.id") { "property name" }
+assert(employees.id() == "Employee.id") { "property name" }
 
-_user.nickname[user] = "James" // Set a name to the user
-_user.invitedFrom[user] = null
-assert(_user.id.name == "id") { "property name" }
-assert(_user.id.toString() == "id") { "property name" }
-assert(_user.id.info() == "User.id") { "property name" }
-assert(_user.id() == "User.id") { "property name" }
-
-val properties = ModelProvider.user._properties
+val properties = ModelProvider.employees._properties
 assert(properties.size == 5) { "Count of properties" }
 assert(properties[0].name == "id") { "property name" }
-assert(properties[1].name == "nickname") { "property name" }
-assert(properties[2].name == "born") { "property name" }
+assert(properties[1].name == "name") { "property name" }
+assert(properties[2].name == "contract_day") { "property name" } // User defined name
 assert(properties[3].name == "department") { "property name" }
-assert(properties[4].name == "invited_from") { "property name" } 
-
-// Value type
-assert(_user.id.valueClass == Int::class)
-assert(_user.born.valueClass == LocalDate::class)
-
-// Entity type (alias domain type)
-assert(_user.id.entityClass == User::class)
-assert(_user.born.entityClass == User::class)
+assert(properties[4].name == "supervisor") { "property name" }
 ```
 
 Building domain entity model:
