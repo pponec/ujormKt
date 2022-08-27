@@ -13,9 +13,9 @@ data class Department constructor(
 
 /** Model of the entity can be a generated class in the feature */
 open class _Department : EntityModel<Department>(Department::class) {
-    val id = property({ it.id })
-    val name = property({ it.name })
-    val created = property({ it.created })
+    val id = property { it.id }
+    val name = property { it.name }
+    val created = property { it.created }
 }
 
 /** Return a default entity sequence of */

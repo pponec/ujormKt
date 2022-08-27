@@ -171,7 +171,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
         valueClass: KClass<V>, // KClass<out V>
         readOnly: Boolean = false,
         nullable: Boolean = false,
-        ) {
+    ) {
         this.index = index
         this.name = name
         this.entityClass = entityClass
@@ -221,8 +221,10 @@ class PropertyImpl<D : Any, V : Any>(
     PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
 
     override val getter: (D) -> V = super.getter as (D) -> V
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value
-        ?: throw IllegalArgumentException("Notnull value is required"))
+    override fun set(entity: D, value: V?) = setter.invoke(
+        entity, value
+            ?: throw IllegalArgumentException("Notnull value is required")
+    )
 
     override fun get(entity: D): V = getter.invoke(entity)
 }
@@ -411,51 +413,57 @@ abstract class EntityModel<D : Any>(
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> property(
-        name: String,
-        noinline getter: (D) -> V,
-        noinline setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ) = propertyInternal(getter, setter, V::class, name)
+        noinline getter: (D) -> V
+    ) = property(V::class, getter)
 
     /** Create a non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> property(
-        noinline getter: (D) -> V,
-        noinline setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ) = propertyInternal(getter, setter, V::class)
-
+        name: String,
+        noinline getter: (D) -> V
+    ) = property(V::class, getter, name = name)
 
     /** Create a nonnull property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
-    protected fun <V : Any> propertyInternal(
+    protected fun <V : Any> property(
+        valueClass: KClass<V>,
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        valueClass: KClass<V>,
-        name: String = ""
-    ): Property<D, V> = PropertyImpl<D, V>(
-        _size++, "", getter, setter, _entityClass, valueClass, false, false)
+        name: String = "",
+    ): Property<D, V> = PropertyImpl(
+        _size++, name, getter, setter, _entityClass, valueClass, false, false
+    )
 
     /** Create a non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> propertyNullable(
+        name: String,
         noinline getter: (D) -> V?,
-        noinline setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER
-    ) = propertyNullableInternal(getter, setter, V::class)
+    ) = property(V::class, getter, name = name)
+
+    /** Create a non-null property.
+     * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
+     **/
+    inline protected fun <reified V : Any> propertyNullable(
+        noinline getter: (D) -> V?
+    ) = property(V::class, getter)
 
 
     /** Create a nonnull property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
-    protected fun <V : Any> propertyNullableInternal(
+    protected fun <V : Any> property(
+        valueClass: KClass<V>,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        valueClass: KClass<V>,
         name: String = ""
+    ) = PropertyNullableImpl(
+        _size++, name, getter, setter, _entityClass, valueClass, false, true
+    )
 
-    ) = PropertyNullableImpl<D, V>(
-        _size++, "", getter, setter, _entityClass, valueClass, false, true)
     override fun toString() = _entityClass.simpleName ?: "null"
 }
 

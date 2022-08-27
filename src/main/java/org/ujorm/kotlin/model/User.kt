@@ -15,11 +15,11 @@ data class User constructor(
 
 /** Model of the entity can be a generated class in the feature */
 open class _User : EntityModel<User>(User::class) {
-    val id = property({ it.id })
-    val nickname = property({ it.nickname })
-    val born = property({ it.born })
-    val department = property({ it.department })
-    val invitedFrom = propertyNullable({ it.invitedFrom })
+    val id = property { it.id }
+    val nickname = property { it.nickname }
+    val born = property { it.born }
+    val department = property { it.department }
+    val invitedFrom = propertyNullable("invited_from") { it.invitedFrom }
 }
 
 /**
