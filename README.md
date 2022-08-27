@@ -23,53 +23,62 @@ Presentation of basic skills with entity model:
 
 ```kotlin
 val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
-val employees = ModelProvider.employees
+val employees = ModelProvider.employees // Entity meta-model
 
-val id: Int = employees.id[employee]
-val name: String = employees.name[employee] // Get a name of the employee
-val supervisor: Employee? = employees.supervisor[employee]
+// Read and Write values by entity meta-model:
+val id = employees.id[employee]
+val name = employees.name[employee]
+val contractDay = employees.contractDay[employee]
+val department = employees.department[employee]
+val supervisor = employees.supervisor[employee]
+employees.id[employee] = id
+employees.name[employee] = name
+employees.contractDay[employee] = contractDay
+employees.department[employee] = department
+employees.supervisor[employee] = supervisor
 
-assert(name == "John", { "employee name" })
-assert(id == 11, { "employee id" })
-assert(supervisor == null, { "employee supervisor " })
+// Criterion conditions:
+val crn1 = employees.name EQ "Lucy"
+val crn2 = employees.id GT 1
+val crn3 = employees.id LT 99
+val crn4 = crn1 OR (crn2 AND crn3)
+val crn5 = crn1.not() OR (crn2 AND crn3)
+val noValid: Boolean = crn1(employee)
+val isValid: Boolean = crn4(employee)
 
-employees.name[employee] = "James" // Set a name to the user
-employees.supervisor[employee] = null
-assert(employees.id.name == "id") { "property name" }
-assert(employees.id.toString() == "id") { "property name" }
-assert(employees.id.info() == "Employee.id") { "property name" }
-assert(employees.id() == "Employee.id") { "property name" }
-
-val properties = ModelProvider.employees._properties
-assert(properties.size == 5) { "Count of properties" }
-assert(properties[0].name == "id") { "property name" }
-assert(properties[1].name == "name") { "property name" }
-assert(properties[2].name == "contract_day") { "property name" } // User defined name
-assert(properties[3].name == "department") { "property name" }
-assert(properties[4].name == "supervisor") { "property name" }
+// Criterion logs:
+assert(!noValid, { "crn1(employee)" })
+assert(isValid, { "crn4(employee)" })
+assert(crn1.toString() == """Employee: name EQ "Lucy"""")
+assert(crn2.toString() == """Employee: id GT 1""")
+assert(crn4.toString() == """Employee: (name EQ "Lucy") OR (id GT 1) AND (id LT 99)""")
+assert(crn5.toString() == """Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (id LT 99)""")
 ```
 
 Building domain entity model:
 
 ```kotlin
-data class User constructor(
+data class Employee constructor(
     var id: Int,
-    var nickname: String,
-    var born: LocalDate,
+    var name: String,
+    var contractDay: LocalDate,
     var department: Department = Department(1, "A"),
-    var invitedFrom: User? = null
+    var supervisor: Employee? = null
 )
 
-open class _User : EntityModel<User>(User::class) {
+/** Model of the entity can be a generated class in the feature */
+open class Employess : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
-    val nickname = property { it.nickname }
-    val born = property { it.born }
+    val name = property { it.name }
+    val contractDay = property("contract_day") { it.contractDay }
     val department = property { it.department }
-    val invitedFrom = propertyNullable("invited_from") { it.invitedFrom }
+    val supervisor = propertyNullable { it.supervisor }
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.user by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { _User().close() as _User }
+val ModelProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { 
+    Employess().close() as Employess 
+}
 ```
 
 ## Class diagram

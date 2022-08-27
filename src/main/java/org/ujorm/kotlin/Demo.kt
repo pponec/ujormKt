@@ -32,7 +32,7 @@ fun main() {
 /** Sample of usage */
 fun basicSkills() {
     val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
-    val employees = ModelProvider.employees // MetaModel
+    val employees = ModelProvider.employees // Entity meta-model
 
     // Read and Write values by entity meta-model:
     val id = employees.id[employee]
@@ -46,7 +46,7 @@ fun basicSkills() {
     employees.department[employee] = department
     employees.supervisor[employee] = supervisor
 
-    // Relations and composed properties: (TODO)
+    // Relations with composed properties: (TODO)
     //val employeeDepartmentName : Property<Employee, String> = employees.department.name;
     //val departmentName : String = employeeDepartmentName[employee]
     //employeeDepartmentName[employee] = departmentName
