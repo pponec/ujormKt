@@ -77,8 +77,10 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     val valueClass: KClass<out V> //  KClass<out V>
     /** Is the property value read-only? */
     val readOnly: Boolean
-    /** Is the value nullable? */
+    /** Variables of this property can have null value. */
     val nullable: Boolean
+    /** Variables of this property must be non-null. */
+    val required get() = !nullable
 
     /** Get a value from the entity */
     operator fun get(entity: D): V?
@@ -532,6 +534,7 @@ open class EntityBuilder<D : Any>(
 
     /** Set a value to an internal store */
     fun <V : Any> set(property: PropertyNullable<D, V>, value: Any?): EntityBuilder<D> {
+        property.nullable
         map[property.index] = value
         return this
     }
@@ -547,7 +550,7 @@ open class EntityBuilder<D : Any>(
 
         // Check all required values:
         model._properties.forEach {
-            if (!it.nullable && map[it.index] == null) {
+            if (it.required && map[it.index] == null) {
                 throw IllegalArgumentException( "${it()} has no value")
             }
         }
