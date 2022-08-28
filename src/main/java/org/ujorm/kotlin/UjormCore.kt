@@ -567,6 +567,8 @@ open class EntityBuilder<D : Any>(
 /** See: https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
     /** Undefined property setter */
-    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v -> throw UnsupportedOperationException("read-only") }
+    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = {
+            d, v -> throw UnsupportedOperationException("read-only")
+    }
 
 }
