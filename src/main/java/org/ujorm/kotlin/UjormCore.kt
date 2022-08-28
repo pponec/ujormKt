@@ -390,15 +390,18 @@ abstract class EntityModel<D : Any>(
     private var _size: UByte = 0U
 ) {
     /** Get all properties */
-    val _properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    private val properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         val result: List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
         result.sortedBy { it.index }
     }
 
+    /** Provides the property model */
+    fun properties() = properties
+
     /** Initialize, register and close the entity model. */
     fun close(): EntityModel<D> {
         val map = Utils.getKPropertyMap(this)
-        for (p in _properties) {
+        for (p in properties) {
             val kProperty = map.get(p.index)
                 ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
             Utils.assignName(p, kProperty)
@@ -528,14 +531,14 @@ internal object Utils {
 
 /** Entity builder */
 open class EntityBuilder<D : Any>(
-    val model: EntityModel<D>,
+    private val model: EntityModel<D>,
 ) {
-    private val map = linkedMapOf<UByte, Any?>()
+    /** Object values */
+    private val values = arrayOfNulls<Any?>(model.properties().size)
 
     /** Set a value to an internal store */
     fun <V : Any> set(property: PropertyNullable<D, V>, value: Any?): EntityBuilder<D> {
-        property.nullable
-        map[property.index] = value
+        values[property.index.toInt()] = value
         return this
     }
 
@@ -544,19 +547,18 @@ open class EntityBuilder<D : Any>(
     fun build(): D {
         val constructor = model._entityClass.constructors
             .stream()
-            .filter { c -> c.parameters.size == map.size }
+            .filter { c -> c.parameters.size == values.size }
             .findFirst()
-            .orElseThrow { IllegalStateException("No constructor[${map.size}] found") }
+            .orElseThrow { IllegalStateException("No constructor[${values.size}] found") }
 
         // Check all required values:
-        model._properties.forEach {
-            if (it.required && map[it.index] == null) {
+        model.properties().forEach {
+            if (it.required && values[it.index.toInt()] == null) {
                 throw IllegalArgumentException( "${it()} has no value")
             }
         }
 
-        val params = map.values.toTypedArray()
-        return constructor.call(*params)
+        return constructor.call(*values)
     }
 
     override fun toString() = model._entityClass.simpleName ?: "?"

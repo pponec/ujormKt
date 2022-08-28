@@ -95,7 +95,7 @@ fun moreInfo() {
     assert(employees.id.info() == "Employee.id") { "property name" }
     assert(employees.id() == "Employee.id") { "property name" }
 
-    val properties = ModelProvider.employees._properties
+    val properties = ModelProvider.employees.properties()
     assert(properties.size == 5) { "Count of properties" }
     assert(properties[0].name == "id") { "property name" }
     assert(properties[1].name == "name") { "property name" }

@@ -4,12 +4,10 @@ import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.model.Employee
 import kotlin.reflect.KClass
 
-internal class DemoKtTest {
+internal class DemoCoreTest {
 
     @Test
-    fun mainTest() {
-        main()
-    }
+    fun mainTest() = main()
 
     @Test
     fun classTest() {
