@@ -211,7 +211,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
 }
 
 /** An implementation of the property descriptor */
-class PropertyImpl<D : Any, V : Any>(
+open class PropertyImpl<D : Any, V : Any>(
     index: UByte,
     name: String,
     getter: (D) -> V,
