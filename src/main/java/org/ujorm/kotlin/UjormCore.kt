@@ -379,29 +379,93 @@ abstract class AbstractModelProvider {
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {
         val result: List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
-        result.sortedBy { it._entityClass.simpleName }
+        result.sortedBy { it.properties().entityClass.simpleName }
     }
 }
 
-/** Model of the entity will be generated in the feature */
-abstract class EntityModel<D : Any>(
+/** Model for entity properties. */
+class Properties<D : Any>(
+    /** Entity meta-model */
+    val entityModel: EntityModel<D>,
     /** Get the main domain class */
-    val _entityClass: KClass<D>,
-    private var _size: UByte = 0U
+    val entityClass: KClass<D>,
 ) {
-    /** Get all properties */
-    private val properties: List<PropertyNullable<D, Any>> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        val result: List<PropertyNullable<D, Any>> = Utils.getProperties(this, PropertyNullable::class)
-        result.sortedBy { it.index }
+    var list: List<PropertyNullable<D, Any>> = mutableListOf()
+        internal set(value) {
+            field = if (!this.closed) value
+            else throw IllegalArgumentException("Model is closed")
+        }
+    val size = list.size
+    val closed: Boolean = !(this.list is MutableList)
+
+    /** Initialize and close the entity model. */
+    fun close() {
+        if (closed) return
+        val map = Utils.getKPropertyMap(entityModel)
+        for (p in list) {
+            val kProperty = map.get(p.index)
+                ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
+            Utils.assignName(p, kProperty)
+            Utils.assignSetter(p, kProperty)
+        }
+        list = list.toList() // Create immutable list.
     }
 
-    /** Provides the property model */
-    fun properties() = properties
+    /** Create an Entity builder */
+    fun builder(): EntityBuilder<D> = EntityBuilder(entityModel)
+
+    /** Create new not-null Property model using the method with all necessary parameters. */
+    fun <V : Any> createProperty(
+        valueClass: KClass<V>,
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
+        name: String = "",
+    ): Property<D, V> {
+        val result = PropertyImpl(
+            list.size.toUByte(),
+            name, getter, setter, entityClass, valueClass, false, false
+        )
+        addToList(result)
+        return result
+    }
+
+    /** Creates new not-null Property model using the method with all necessary parameters. */
+    fun <V : Any> createPropertyNullable(
+        valueClass: KClass<V>,
+        getter: (D) -> V?,
+        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
+        name: String = ""
+    ): PropertyNullable<D, V> {
+        val result = PropertyNullableImpl(
+            list.size.toUByte(),
+            name, getter, setter, entityClass, valueClass, false, true
+        )
+        addToList(result)
+        return result
+    }
+
+    /** Add property to the list */
+    fun addToList(item: PropertyNullable<D, *>) {
+        if (closed) throw IllegalArgumentException("Model is closed")
+        val _list = list as MutableList<PropertyNullable<D, *>>
+        _list.add(item)
+    }
+
+    override fun toString() = entityClass.simpleName ?: "null"
+}
+
+/** Implementations of the EntityModels cam be generated in the feature. */
+abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
+    /** Property builder properties */
+    private val propertyBuilder = Properties(this, entityClass)
+
+    /** Provide a property model by the interface */
+    fun properties() = propertyBuilder
 
     /** Initialize, register and close the entity model. */
     fun close(): EntityModel<D> {
         val map = Utils.getKPropertyMap(this)
-        for (p in properties) {
+        for (p in propertyBuilder.list) {
             val kProperty = map.get(p.index)
                 ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
             Utils.assignName(p, kProperty)
@@ -410,15 +474,16 @@ abstract class EntityModel<D : Any>(
         return this
     }
 
-    /** Create an Entity builder */
-    fun builder(): EntityBuilder<D> = EntityBuilder(this)
+    /** Create an Entity builder (TODO: removedid) */
+    @Deprecated("see properties")
+    fun builder(): EntityBuilder<D> = propertyBuilder.builder()
 
     /** Create a non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> property(
         noinline getter: (D) -> V
-    ) = property(V::class, getter)
+    ) = properties().createProperty(V::class, getter)
 
     /** Create a non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
@@ -426,17 +491,8 @@ abstract class EntityModel<D : Any>(
     inline protected fun <reified V : Any> property(
         name: String,
         noinline getter: (D) -> V
-    ) = property(V::class, getter, name = name)
+    ) = properties().createProperty(V::class, getter, name = name)
 
-    /** Create new not-null Property model using the method with all necessary parameters. */
-    protected fun <V : Any> property(
-        valueClass: KClass<V>,
-        getter: (D) -> V,
-        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        name: String = "",
-    ): Property<D, V> = PropertyImpl(
-        _size++, name, getter, setter, _entityClass, valueClass, false, false
-    )
 
     /** Create new non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
@@ -444,27 +500,16 @@ abstract class EntityModel<D : Any>(
     inline protected fun <reified V : Any> propertyNullable(
         name: String,
         noinline getter: (D) -> V?,
-    ) = propertyNullable(V::class, getter, name = name)
+    ) = properties().createPropertyNullable(V::class, getter, name = name)
 
     /** Create new non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> propertyNullable(
         noinline getter: (D) -> V?
-    ) = propertyNullable(V::class, getter)
+    ) = properties().createPropertyNullable(V::class, getter)
 
-
-    /** Creates new not-null Property model using the method with all necessary parameters. */
-    protected fun <V : Any> propertyNullable(
-        valueClass: KClass<V>,
-        getter: (D) -> V?,
-        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        name: String = ""
-    ) : PropertyNullable<D, V> = PropertyNullableImpl(
-        _size++, name, getter, setter, _entityClass, valueClass, false, true
-    )
-
-    override fun toString() = _entityClass.simpleName ?: "null"
+    override fun toString() = properties().toString()
 }
 
 /** Common utilities */
@@ -529,7 +574,7 @@ internal object Utils {
     }
 }
 
-/** Entity builder */
+/** Data Entity builder */
 open class EntityBuilder<D : Any>(
     private val model: EntityModel<D>,
 ) {
@@ -545,30 +590,30 @@ open class EntityBuilder<D : Any>(
     /** Check required properties and create new object by a constructor
      * (for immutable objects) */
     fun build(): D {
-        val constructor = model._entityClass.constructors
+        val constructor = model.properties().entityClass.constructors
             .stream()
             .filter { c -> c.parameters.size == values.size }
             .findFirst()
             .orElseThrow { IllegalStateException("No constructor[${values.size}] found") }
 
         // Check all required values:
-        model.properties().forEach {
+        model.properties().list.forEach {
             if (it.required && values[it.index.toInt()] == null) {
-                throw IllegalArgumentException( "${it()} has no value")
+                throw IllegalArgumentException("${it()} has no value")
             }
         }
 
         return constructor.call(*values)
     }
 
-    override fun toString() = model._entityClass.simpleName ?: "?"
+    override fun toString() = model.properties().entityClass.simpleName ?: "?"
 }
 
 /** See: https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
     /** Undefined property setter */
-    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = {
-            d, v -> throw UnsupportedOperationException("read-only")
+    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v ->
+        throw UnsupportedOperationException("read-only")
     }
 
 }
