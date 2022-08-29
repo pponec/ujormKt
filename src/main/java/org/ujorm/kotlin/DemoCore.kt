@@ -115,7 +115,7 @@ fun moreInfo() {
 /** Create new object by a constructor (for immutable objects) */
 fun entityBuilder() {
     val employees = ModelProvider.employees
-    val employee: Employee = employees.utils().builder()
+    val employee: Employee = employees.builder()
         .set(employees.id, 1)
         .set(employees.name, "John")
         .set(employees.contractDay, LocalDate.now())

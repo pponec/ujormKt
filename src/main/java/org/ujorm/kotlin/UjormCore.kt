@@ -469,7 +469,6 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun close(): EntityModel<D> = propertyBuilder.close()
 
     /** Create an Entity builder (TODO: removedid) */
-    @Deprecated("see the properties attribute")
     fun builder(): EntityBuilder<D> = propertyBuilder.builder()
 
     /** Create a non-null property.
@@ -569,15 +568,15 @@ internal object Utils {
 }
 
 /** Data Entity builder */
-open class EntityBuilder<D : Any>(
-    private val model: EntityModel<D>,
-) {
+open class EntityBuilder<D : Any> {
+    /** Entity model */
+    private val model: EntityModel<D>
     /** Object values */
     private val values : Array<Any?>
 
-    init {
-        val size : Int = model.utils().size
-        values = arrayOfNulls<Any?>(size)
+    constructor(model: EntityModel<D>) {
+        this.model = model
+        this.values = arrayOfNulls<Any?>(model.utils().size)
     }
 
     /** Set a value to an internal store */
