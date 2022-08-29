@@ -95,7 +95,7 @@ fun moreInfo() {
     assert(employees.id.info() == "Employee.id") { "property name" }
     assert(employees.id() == "Employee.id") { "property name" }
 
-    val properties = ModelProvider.employees.properties()
+    val properties = ModelProvider.employees.utils().properties
     assert(properties.size == 5) { "Count of properties" }
     assert(properties[0].name == "id") { "property name" }
     assert(properties[1].name == "name") { "property name" }
@@ -115,7 +115,7 @@ fun moreInfo() {
 /** Create new object by a constructor (for immutable objects) */
 fun entityBuilder() {
     val employees = ModelProvider.employees
-    val employee: Employee = employees.builder()
+    val employee: Employee = employees.utils().builder()
         .set(employees.id, 1)
         .set(employees.name, "John")
         .set(employees.contractDay, LocalDate.now())

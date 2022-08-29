@@ -15,6 +15,7 @@
  */
 package org.ujorm.kotlin
 
+import java.util.Collections
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
@@ -379,36 +380,38 @@ abstract class AbstractModelProvider {
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {
         val result: List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
-        result.sortedBy { it.properties().entityClass.simpleName }
+        result.sortedBy { it.utils().entityClass.simpleName }
     }
 }
 
-/** Model for entity properties. */
-class Properties<D : Any>(
+/** Utlilities for entity properties */
+class PropertyUtils<D : Any>(
     /** Entity meta-model */
     val entityModel: EntityModel<D>,
     /** Get the main domain class */
     val entityClass: KClass<D>,
 ) {
-    var list: List<PropertyNullable<D, Any>> = mutableListOf()
-        internal set(value) {
-            field = if (!this.closed) value
-            else throw IllegalArgumentException("Model is closed")
-        }
-    val size = list.size
-    val closed: Boolean = !(this.list is MutableList)
+    var properties: List<PropertyNullable<D, Any>> = mutableListOf()
+        private set(value) { field = value }
+    val size get() = properties.size
+
+    var closed: Boolean = false
+        private set(value) { field = value }
 
     /** Initialize and close the entity model. */
-    fun close() {
-        if (closed) return
-        val map = Utils.getKPropertyMap(entityModel)
-        for (p in list) {
-            val kProperty = map.get(p.index)
-                ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
-            Utils.assignName(p, kProperty)
-            Utils.assignSetter(p, kProperty)
+    fun close() : EntityModel<D> {
+        if (!closed) {
+            closed = true
+            properties = Collections.unmodifiableList(properties)
+            val kPropertyArray = Utils.getKPropertyMap(entityModel)
+            for (p in properties) {
+                val kProperty = kPropertyArray[p.index]
+                    ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
+                Utils.assignName(p, kProperty)
+                Utils.assignSetter(p, kProperty)
+            }
         }
-        list = list.toList() // Create immutable list.
+        return entityModel
     }
 
     /** Create an Entity builder */
@@ -422,7 +425,7 @@ class Properties<D : Any>(
         name: String = "",
     ): Property<D, V> {
         val result = PropertyImpl(
-            list.size.toUByte(),
+            properties.size.toUByte(),
             name, getter, setter, entityClass, valueClass, false, false
         )
         addToList(result)
@@ -437,7 +440,7 @@ class Properties<D : Any>(
         name: String = ""
     ): PropertyNullable<D, V> {
         val result = PropertyNullableImpl(
-            list.size.toUByte(),
+            properties.size.toUByte(),
             name, getter, setter, entityClass, valueClass, false, true
         )
         addToList(result)
@@ -447,35 +450,26 @@ class Properties<D : Any>(
     /** Add property to the list */
     fun addToList(item: PropertyNullable<D, *>) {
         if (closed) throw IllegalArgumentException("Model is closed")
-        val _list = list as MutableList<PropertyNullable<D, *>>
+        val _list = properties as MutableList<PropertyNullable<D, *>>
         _list.add(item)
     }
 
-    override fun toString() = entityClass.simpleName ?: "null"
+    override fun toString() = "${entityClass.simpleName ?: ""}[${size}]"
 }
 
 /** Implementations of the EntityModels cam be generated in the feature. */
 abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** Property builder properties */
-    private val propertyBuilder = Properties(this, entityClass)
+    private val propertyBuilder = PropertyUtils(this, entityClass)
 
-    /** Provide a property model by the interface */
-    fun properties() = propertyBuilder
+    /** The provider must be a method because the entiry attributes are reserved for the Entity model. */
+    fun utils() = propertyBuilder
 
-    /** Initialize, register and close the entity model. */
-    fun close(): EntityModel<D> {
-        val map = Utils.getKPropertyMap(this)
-        for (p in propertyBuilder.list) {
-            val kProperty = map.get(p.index)
-                ?: throw IllegalStateException("Property not found: ${p.entityClass.simpleName}.${p.index}")
-            Utils.assignName(p, kProperty)
-            Utils.assignSetter(p, kProperty)
-        }
-        return this
-    }
+    /** Initialize and close the entity model. */
+    fun close(): EntityModel<D> = propertyBuilder.close()
 
     /** Create an Entity builder (TODO: removedid) */
-    @Deprecated("see properties")
+    @Deprecated("see the properties attribute")
     fun builder(): EntityBuilder<D> = propertyBuilder.builder()
 
     /** Create a non-null property.
@@ -483,7 +477,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
      **/
     inline protected fun <reified V : Any> property(
         noinline getter: (D) -> V
-    ) = properties().createProperty(V::class, getter)
+    ) = utils().createProperty(V::class, getter)
 
     /** Create a non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
@@ -491,7 +485,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     inline protected fun <reified V : Any> property(
         name: String,
         noinline getter: (D) -> V
-    ) = properties().createProperty(V::class, getter, name = name)
+    ) = utils().createProperty(V::class, getter, name = name)
 
 
     /** Create new non-null property.
@@ -500,16 +494,16 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     inline protected fun <reified V : Any> propertyNullable(
         name: String,
         noinline getter: (D) -> V?,
-    ) = properties().createPropertyNullable(V::class, getter, name = name)
+    ) = utils().createPropertyNullable(V::class, getter, name = name)
 
     /** Create new non-null property.
      * NOTE: The property field must heave the same as the original Entity, or use the same name by a name argument.
      **/
     inline protected fun <reified V : Any> propertyNullable(
         noinline getter: (D) -> V?
-    ) = properties().createPropertyNullable(V::class, getter)
+    ) = utils().createPropertyNullable(V::class, getter)
 
-    override fun toString() = properties().toString()
+    override fun toString() = utils().toString()
 }
 
 /** Common utilities */
@@ -579,7 +573,12 @@ open class EntityBuilder<D : Any>(
     private val model: EntityModel<D>,
 ) {
     /** Object values */
-    private val values = arrayOfNulls<Any?>(model.properties().size)
+    private val values : Array<Any?>
+
+    init {
+        val size : Int = model.utils().size
+        values = arrayOfNulls<Any?>(size)
+    }
 
     /** Set a value to an internal store */
     fun <V : Any> set(property: PropertyNullable<D, V>, value: Any?): EntityBuilder<D> {
@@ -590,14 +589,14 @@ open class EntityBuilder<D : Any>(
     /** Check required properties and create new object by a constructor
      * (for immutable objects) */
     fun build(): D {
-        val constructor = model.properties().entityClass.constructors
+        val constructor = model.utils().entityClass.constructors
             .stream()
             .filter { c -> c.parameters.size == values.size }
             .findFirst()
             .orElseThrow { IllegalStateException("No constructor[${values.size}] found") }
 
         // Check all required values:
-        model.properties().list.forEach {
+        model.utils().properties.forEach {
             if (it.required && values[it.index.toInt()] == null) {
                 throw IllegalArgumentException("${it()} has no value")
             }
@@ -606,7 +605,7 @@ open class EntityBuilder<D : Any>(
         return constructor.call(*values)
     }
 
-    override fun toString() = model.properties().entityClass.simpleName ?: "?"
+    override fun toString() = model.utils().entityClass.simpleName ?: "?"
 }
 
 /** See: https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
