@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.model
+package org.ujorm.kotlin.model.direct
 
 import org.ujorm.kotlin.*
 import org.ujorm.kotlin.config.ModelProvider

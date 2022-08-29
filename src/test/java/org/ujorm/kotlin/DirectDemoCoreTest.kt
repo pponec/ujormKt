@@ -1,10 +1,10 @@
 package org.ujorm.kotlin
 
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.model.Employee
+import org.ujorm.kotlin.model.direct.*
 import kotlin.reflect.KClass
 
-internal class DemoCoreTest {
+internal class DirectDemoCoreTest {
 
     @Test
     fun mainTest() = main()

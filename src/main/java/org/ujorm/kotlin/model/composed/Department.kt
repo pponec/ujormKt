@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.model
+package org.ujorm.kotlin.model.composed
 
 import org.ujorm.kotlin.EntityModel
 import org.ujorm.kotlin.config.ModelProvider

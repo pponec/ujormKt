@@ -15,10 +15,8 @@
  */
 package org.ujorm.kotlin
 
-import org.ujorm.kotlin.model.Employee
+import org.ujorm.kotlin.model.direct.*
 import org.ujorm.kotlin.config.ModelProvider
-import org.ujorm.kotlin.model.Department
-import org.ujorm.kotlin.model.employees
 import java.time.LocalDate
 
 /** Sample of usage */
