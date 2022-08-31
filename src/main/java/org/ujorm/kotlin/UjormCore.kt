@@ -82,6 +82,13 @@ interface PropertyMetadata<D : Any, V : Any> {
     val nullable: Boolean
     /** Variables of this property must be non-null. */
     val required get() = !nullable
+
+    /** Get any name always */
+    fun name(): String = try {
+            this.name
+        } catch (ex: IllegalStateException) {
+            "null"
+        }
 }
 
 /** API of the property descriptor for a nullable values */
@@ -116,14 +123,6 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
         this.nullable = nullable
     }
 
-    override fun toString(): String {
-        try {
-            return name
-        } catch (ex: IllegalStateException) {
-            return "null"
-        }
-    }
-
     /** Equals */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -138,6 +137,17 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
     /** HashCode */
     override fun hashCode(): Int {
         return entityClass.hashCode() * 31 + name.hashCode()
+    }
+
+    override fun toString(): String {
+        return "PropertyMetadata" +
+                "( index=$index" +
+                ", name='$name()'" +
+                ", entityClass=${entityClass.simpleName}" +
+                ", valueClass=${valueClass.simpleName}" +
+                ", readOnly=$readOnly" +
+                ", nullable=$nullable" +
+                ")"
     }
 }
 
@@ -235,7 +245,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
     }
 
     override fun toString(): String {
-        return metadata.toString()
+        return metadata.name()
     }
 
     override fun equals(other: Any?): Boolean {
