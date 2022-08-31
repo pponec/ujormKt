@@ -88,26 +88,26 @@ fun moreInfo() {
 
     employees.name[employee] = "James" // Set a name to the user
     employees.supervisor[employee] = null
-    assert(employees.id.name == "id") { "property name" }
+    assert(employees.id.metadata().name == "id") { "property name" }
     assert(employees.id.toString() == "id") { "property name" }
     assert(employees.id.info() == "Employee.id") { "property name" }
     assert(employees.id() == "Employee.id") { "property name" }
 
     val properties = ModelProvider.employees.utils().properties
     assert(properties.size == 5) { "Count of properties" }
-    assert(properties[0].name == "id") { "property name" }
-    assert(properties[1].name == "name") { "property name" }
-    assert(properties[2].name == "contract_day") { "property name" } // User defined name
-    assert(properties[3].name == "department") { "property name" }
-    assert(properties[4].name == "supervisor") { "property name" }
+    assert(properties[0].metadata().name == "id") { "property name" }
+    assert(properties[1].metadata().name == "name") { "property name" }
+    assert(properties[2].metadata().name == "contract_day") { "property name" } // User defined name
+    assert(properties[3].metadata().name == "department") { "property name" }
+    assert(properties[4].metadata().name == "supervisor") { "property name" }
 
     // Value type
-    assert(employees.id.valueClass == Int::class)
-    assert(employees.contractDay.valueClass == LocalDate::class)
+    assert(employees.id.metadata().valueClass == Int::class)
+    assert(employees.contractDay.metadata().valueClass == LocalDate::class)
 
     // Entity type (alias domain type)
-    assert(employees.id.entityClass == Employee::class)
-    assert(employees.contractDay.entityClass == Employee::class)
+    assert(employees.id.metadata().entityClass == Employee::class)
+    assert(employees.contractDay.metadata().entityClass == Employee::class)
 }
 
 /** Create new object by a constructor (for immutable objects) */
