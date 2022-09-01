@@ -15,19 +15,11 @@
  */
 package org.ujorm.kotlin.model
 
-import org.ujorm.kotlin.Property
-import org.ujorm.kotlin.PropertyImpl
-import java.util.Collections
-import java.util.stream.Stream
+import org.ujorm.kotlin.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.full.memberProperties
 
 /** Entity composed model */
-abstract class EntityComposedModel <D : Any, V : Any> : PropertyImpl<D, V> {
+abstract class EntityComposedModel<D : Any, V : Any> : PropertyImpl<D, V> {
     /** A name */
     val propertyPrefix: Property<D, *>?
 
@@ -43,5 +35,43 @@ abstract class EntityComposedModel <D : Any, V : Any> : PropertyImpl<D, V> {
         propertyPrefix: Property<D, *>?
     ) : super(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
         this.propertyPrefix = propertyPrefix
+    }
+}
+
+class ComposedProperty<D : Any, M : Any, V : Any> private constructor(
+    private val primaryProperty: PropertyNullable<D, M>,
+    private val secondaryProperty: PropertyNullable<M, V>,
+    private val metaData: PropertyMetadata<D, V>,
+) : PropertyNullable<D, V> {
+
+    companion object {
+        fun <D : Any, M : Any, V : Any> of(
+            primaryProperty: PropertyNullable<D, M>,
+            secondaryProperty: PropertyNullable<M, V>
+        ) {
+            val data = PropertyMetadataImpl<D, V>(
+                    index = primaryProperty.data().index,
+                    name = "${primaryProperty.data().name}.${secondaryProperty.data().name}",
+                    entityClass = primaryProperty.data().entityClass,
+                    valueClass = secondaryProperty.data().valueClass,
+                    readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly,
+                    nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable,
+            );
+            // return ComposedProperty(primaryProperty, secondaryProperty, data)
+            TODO("call constructor")
+        }
+    }
+
+    override fun data(): PropertyMetadata<D, V> = data
+
+    override fun get(entity: D): V? {
+        val entity2 = primaryProperty[entity]
+        return if (entity2 != null) secondaryProperty[entity2] else null;
+    }
+
+    override fun set(entity: D, value: V?) {
+        val entity2 = primaryProperty[entity]
+            ?: throw IllegalArgumentException("Value of property {$primaryProperty} is null")
+        secondaryProperty.set(entity2, value)
     }
 }

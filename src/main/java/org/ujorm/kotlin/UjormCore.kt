@@ -75,7 +75,7 @@ interface PropertyMetadata<D : Any, V : Any> {
     val index: UByte
     val name: String
     val entityClass: KClass<D>
-    val valueClass: KClass<out V> //  KClass<out V>
+    val valueClass: KClass<V> //  KClass<out V>
     /** Is the property value read-only? */
     val readOnly: Boolean
     /** Variables of this property can have null value. */
