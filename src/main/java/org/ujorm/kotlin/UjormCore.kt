@@ -154,7 +154,7 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
 
 /** API of the property descriptor for a nullable values */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
-    fun metadata() : PropertyMetadata<D, V>
+    fun data() : PropertyMetadata<D, V>
 
     /** Get a value from the entity */
     operator fun get(entity: D): V?
@@ -166,7 +166,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     }
 
     /** Returns a property name introduced by a simple domain name */
-    fun info(): String = "${metadata().entityClass.simpleName}.${metadata().name}"
+    fun info(): String = "${data().entityClass.simpleName}.${data().name}"
 
     /** Name of property */
     operator fun invoke(): String = info()
@@ -199,13 +199,13 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     // --- CharSequence implementation ---
 
     /** For a CharSequence implementation */
-    override val length: Int get() = metadata().name.length
+    override val length: Int get() = data().name.length
 
     /** For a CharSequence implementation */
-    override fun get(index: Int): Char = metadata().name[index]
+    override fun get(index: Int): Char = data().name[index]
 
     /** For a CharSequence implementation */
-    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = metadata().name.subSequence(startIndex, endIndex)
+    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = data().name.subSequence(startIndex, endIndex)
 }
 
 /** API of the property descriptor */
@@ -216,7 +216,7 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 /** An implementation of the property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, CharSequence {
     private val metadata: PropertyMetadata<D, V>
-    override fun metadata() = metadata
+    override fun data() = metadata
     override fun get(entity: D): V? = getter.invoke(entity)
     override fun set(entity: D, value: V?) = setter.invoke(entity, value)
 
@@ -252,7 +252,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         other as PropertyNullable<*, *>
-        if (metadata != other.metadata()) return false
+        if (metadata != other.data()) return false
         return true
     }
 
@@ -385,7 +385,7 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
     val property: PropertyNullable<D, out V>
     val value: V?
     override val operator: ValueOperator
-    override val entityClass: KClass<D> get() = property.metadata().entityClass
+    override val entityClass: KClass<D> get() = property.data().entityClass
 
     constructor(property: PropertyNullable<D, out V>, operator: ValueOperator, value: V?) {
         this.property = property
@@ -416,7 +416,7 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
     }
 
     override fun toString(): String {
-        return "${property.metadata().entityClass.simpleName}: ${invoke()}"
+        return "${property.data().entityClass.simpleName}: ${invoke()}"
     }
 
     /** A separator for String values */
@@ -456,8 +456,8 @@ class PropertyUtils<D : Any>(
             properties = Collections.unmodifiableList(properties)
             val kPropertyArray = Utils.getKPropertyMap(entityModel)
             for (p in properties) {
-                val kProperty = kPropertyArray[p.metadata().index]
-                    ?: throw IllegalStateException("Property not found: ${p.metadata().entityClass.simpleName}.${p.metadata().index}")
+                val kProperty = kPropertyArray[p.data().index]
+                    ?: throw IllegalStateException("Property not found: ${p.data().entityClass.simpleName}.${p.data().index}")
                 Utils.assignName(p, kProperty)
                 Utils.assignSetter(p, kProperty)
             }
@@ -582,7 +582,7 @@ internal object Utils {
     fun <D : Any> getKPropertyMap(instance: D): Map<UByte, KProperty1<D, PropertyNullable<D, *>>> =
         getKProperties(instance, PropertyNullable::class)
             .toList()
-            .map { it(instance).metadata().index to it as KProperty1<D, PropertyNullable<D, *>> }
+            .map { it(instance).data().index to it as KProperty1<D, PropertyNullable<D, *>> }
             .toMap()
 
     /** Assign a property name to the uProperty */
@@ -593,11 +593,11 @@ internal object Utils {
         kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>,
     ) {
         val name = kProperty.name
-        if (uProperty.metadata().name.isEmpty()
+        if (uProperty.data().name.isEmpty()
             && !name.isEmpty()
             && uProperty is PropertyNullableImpl
         ) {
-            (uProperty.metadata() as PropertyMetadataImpl).name = name
+            (uProperty.data() as PropertyMetadataImpl).name = name
         }
     }
 
@@ -608,7 +608,7 @@ internal object Utils {
         /** Kotlin property */
         kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>,
     ) {
-        val eProperty = uProperty.metadata().entityClass.memberProperties.find { it.name == kProperty.name }
+        val eProperty = uProperty.data().entityClass.memberProperties.find { it.name == kProperty.name }
         if (eProperty is KMutableProperty<*>) when (uProperty) {
             is PropertyNullableImpl -> {
                 if (uProperty.setter === Constants.UNDEFINED_SETTER)
@@ -632,7 +632,7 @@ open class EntityBuilder<D : Any> {
 
     /** Set a value to an internal store */
     fun <V : Any> set(property: PropertyNullable<D, V>, value: Any?): EntityBuilder<D> {
-        values[property.metadata().index.toInt()] = value
+        values[property.data().index.toInt()] = value
         return this
     }
 
@@ -647,7 +647,7 @@ open class EntityBuilder<D : Any> {
 
         // Check all required values:
         model.utils().properties.forEach {
-            if (it.metadata().required && values[it.metadata().index.toInt()] == null) {
+            if (it.data().required && values[it.data().index.toInt()] == null) {
                 throw IllegalArgumentException("${it()} has no value")
             }
         }

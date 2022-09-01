@@ -88,26 +88,26 @@ fun moreInfo() {
 
     employees.name[employee] = "James" // Set a name to the user
     employees.supervisor[employee] = null
-    assert(employees.id.metadata().name == "id") { "property name" }
-    assert(employees.id.toString() == "id") { "property name" }
-    assert(employees.id.info() == "Employee.id") { "property name" }
-    assert(employees.id() == "Employee.id") { "property name" }
+    assert(employees.id.data().name == "id") { "property id" }
+    assert(employees.id.toString() == "id") { "property id" }
+    assert(employees.id.info() == "Employee.id") { "property id" }
+    assert(employees.id() == "Employee.id") { "property id" }
 
     val properties = ModelProvider.employees.utils().properties
     assert(properties.size == 5) { "Count of properties" }
-    assert(properties[0].metadata().name == "id") { "property name" }
-    assert(properties[1].metadata().name == "name") { "property name" }
-    assert(properties[2].metadata().name == "contract_day") { "property name" } // User defined name
-    assert(properties[3].metadata().name == "department") { "property name" }
-    assert(properties[4].metadata().name == "supervisor") { "property name" }
+    assert(properties[0].data().name == "id") { "property id" }
+    assert(properties[1].data().name == "name") { "property name" }
+    assert(properties[2].data().name == "contract_day") { "property contract_day" } // User defined name
+    assert(properties[3].data().name == "department") { "property department" }
+    assert(properties[4].data().name == "supervisor") { "property supervisor" }
 
     // Value type
-    assert(employees.id.metadata().valueClass == Int::class)
-    assert(employees.contractDay.metadata().valueClass == LocalDate::class)
+    assert(employees.id.data().valueClass == Int::class)
+    assert(employees.contractDay.data().valueClass == LocalDate::class)
 
     // Entity type (alias domain type)
-    assert(employees.id.metadata().entityClass == Employee::class)
-    assert(employees.contractDay.metadata().entityClass == Employee::class)
+    assert(employees.id.data().entityClass == Employee::class)
+    assert(employees.contractDay.data().entityClass == Employee::class)
 }
 
 /** Create new object by a constructor (for immutable objects) */
