@@ -49,7 +49,7 @@ class ComposedProperty<D : Any, M : Any, V : Any> private constructor(
             primaryProperty: PropertyNullable<D, M>,
             secondaryProperty: PropertyNullable<M, V>
         ) {
-            val data = PropertyMetadataImpl<D, V>(
+            val data : PropertyMetadata<D, V> = PropertyMetadataImpl(
                     index = primaryProperty.data().index,
                     name = "${primaryProperty.data().name}.${secondaryProperty.data().name}",
                     entityClass = primaryProperty.data().entityClass,
@@ -57,7 +57,7 @@ class ComposedProperty<D : Any, M : Any, V : Any> private constructor(
                     readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly,
                     nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable,
             );
-            // return ComposedProperty(primaryProperty, secondaryProperty, data)
+            //return ComposedProperty<D, M, V>(primaryProperty, secondaryProperty, data)
             TODO("call constructor")
         }
     }
