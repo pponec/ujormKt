@@ -16,7 +16,6 @@
 package org.ujorm.kotlin
 
 import org.ujorm.kotlin.model.direct.*
-import org.ujorm.kotlin.config.ModelProvider
 import java.time.LocalDate
 
 /** Sample of usage */

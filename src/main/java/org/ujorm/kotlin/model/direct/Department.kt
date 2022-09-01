@@ -1,7 +1,6 @@
 package org.ujorm.kotlin.model.direct
 
 import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.config.ModelProvider
 import java.time.LocalDate
 
 /** An Department entity */

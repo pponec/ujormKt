@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.model.composed
 //
 //import org.ujorm.kotlin.*
-//import org.ujorm.kotlin.config.ModelProvider
+//import org.ujorm.kotlin.model.direct.ModelProvider
 //import java.time.LocalDate
 //
 ///** An user entity */

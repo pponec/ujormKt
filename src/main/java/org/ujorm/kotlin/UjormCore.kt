@@ -156,6 +156,11 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
 
+    /** Ascending sort request */
+    fun asc() : SortingProperty<D, V> = SortingProperty(this, true)
+    /** Descending sort request */
+    fun desc() : SortingProperty<D, V> = SortingProperty(this, false)
+
     /** Get a value from the entity */
     operator fun get(entity: D): V?
     /** Set a value to the entity */
@@ -617,6 +622,11 @@ internal object Utils {
         }
     }
 }
+
+/** Sorting property */
+class SortingProperty<D : Any, V : Any> (
+    val property : PropertyNullable<D, V>,
+    val asc : Boolean)
 
 /** Data Entity builder */
 open class EntityBuilder<D : Any> {
