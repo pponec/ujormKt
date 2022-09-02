@@ -38,31 +38,29 @@ abstract class EntityComposedModel<D : Any, V : Any> : PropertyImpl<D, V> {
     }
 }
 
-class ComposedProperty<D : Any, M : Any, V : Any> private constructor(
-    private val primaryProperty: PropertyNullable<D, M>,
-    private val secondaryProperty: PropertyNullable<M, V>,
-    private val metaData: PropertyMetadata<D, V>,
-) : PropertyNullable<D, V> {
+class ComposedProperty<D : Any, M : Any, V : Any> : PropertyNullable<D, V>{
+    private val primaryProperty: PropertyNullable<D, M>
+    private val secondaryProperty: PropertyNullable<M, V>
+    private val metaData: PropertyMetadata<D, V>
 
-    companion object {
-        fun <D : Any, M : Any, V : Any> of(
-            primaryProperty: PropertyNullable<D, M>,
-            secondaryProperty: PropertyNullable<M, V>
-        ) {
-            val data : PropertyMetadata<D, V> = PropertyMetadataImpl(
+    constructor(
+        primaryProperty: PropertyNullable<D, M>,
+        secondaryProperty: PropertyNullable<M, V>,
+        metaData: PropertyMetadata<D, V>
+    ) {
+        this.primaryProperty = primaryProperty
+        this.secondaryProperty = secondaryProperty
+        this.metaData = PropertyMetadataImpl(
                     index = primaryProperty.data().index,
                     name = "${primaryProperty.data().name}.${secondaryProperty.data().name}",
                     entityClass = primaryProperty.data().entityClass,
                     valueClass = secondaryProperty.data().valueClass,
                     readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly,
                     nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable,
-            );
-            //return ComposedProperty<D, M, V>(primaryProperty, secondaryProperty, data)
-            TODO("call constructor")
-        }
+            )
     }
 
-    override fun data(): PropertyMetadata<D, V> = data
+    override fun data() = this.metaData
 
     override fun get(entity: D): V? {
         val entity2 = primaryProperty[entity]
