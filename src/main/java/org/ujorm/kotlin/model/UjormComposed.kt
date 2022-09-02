@@ -53,7 +53,7 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 
 class ComposedProperty<D : Any, M : Any, V : Any>(
     private val metaData: ComposedPropertyMetadata<D, M, V>
-    ) : PropertyNullable<D, V>{
+    ) : PropertyNullable<D, V> {
 
     override fun data() = this.metaData
 
