@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2021 Pavel Ponec, https://github.com/pponec
+ * Copyright 2021-2022 Pavel Ponec, https://github.com/pponec
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,30 +82,23 @@ interface PropertyMetadata<D : Any, V : Any> {
     val nullable: Boolean
     /** Variables of this property must be non-null. */
     val required get() = !nullable
-
-    /** Get any name always */
-    fun name(): String = try {
-            this.name
-        } catch (ex: IllegalStateException) {
-            "null"
-        }
 }
 
 /** API of the property descriptor for a nullable values */
 class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
 
-    final override val index: UByte
-    override var name: String
+    override val index: UByte
+    override var name: String = ""
         internal set(value) {
-            // Note: field.isEmpty() expression throws the NullPointerException in Kotlin 1.5.21
-            field = if (field?.isEmpty() ?: true) value else throw IllegalStateException("Name was assigned to: $field")
+            field = if (field.isEmpty()) value
+            else throw IllegalStateException("Name was assigned to: $field")
         }
-    final override val entityClass: KClass<D>
-    final override val valueClass: KClass<V> //  KClass<out V>
-    final override val readOnly: Boolean
+    override val entityClass: KClass<D>
+    override val valueClass: KClass<V> //  KClass<out V>
+    override val readOnly: Boolean
 
     /** Is the value nullable or required ? */
-    final override val nullable: Boolean
+    override val nullable: Boolean
 
     constructor(
         index: UByte,
@@ -258,7 +251,7 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
     }
 
     override fun toString(): String {
-        return metadata.name()
+        return metadata.name
     }
 
     override fun equals(other: Any?): Boolean {
@@ -684,14 +677,22 @@ object Constants {
     }
 }
 
-
 class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     val primaryProperty: PropertyNullable<D, M>,
     val secondaryProperty: PropertyNullable<M, V>
 ) : PropertyMetadata<D, V> {
 
     override val index: UByte get() = primaryProperty.data().index
-    override val name: String get() = "${primaryProperty.data().name}.${secondaryProperty.data().name}"
+    @Volatile
+    override var name: String = ""
+        internal set(value) { field = value }
+        get() {
+            if (field.isEmpty()) { // Lazy initialization:
+                field = "${primaryProperty.data().name}.${secondaryProperty.data().name}"
+            }
+            return field
+        }
+
     override val entityClass: KClass<D> get() = primaryProperty.data().entityClass
     override val valueClass: KClass<V> get() = secondaryProperty.data().valueClass
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
@@ -700,26 +701,42 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 
 /** Composed nullable property implementation */
 open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNullable<D, V> {
-    protected val metaData: ComposedPropertyMetadata<D, M, V>
+    protected val metadata: ComposedPropertyMetadata<D, M, V>
 
     constructor(
         leftProperty : PropertyNullable<D, M>,
         righProperty : PropertyNullable<M, V>
     ) {
-       this.metaData = ComposedPropertyMetadata(leftProperty, righProperty)
+       this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
     }
 
-    override fun data() = this.metaData
+    override fun data() = this.metadata
 
     override fun get(entity: D): V? {
-        val entity2 = metaData.primaryProperty[entity]
-        return if (entity2 != null) metaData.secondaryProperty[entity2] else null;
+        val entity2 = metadata.primaryProperty[entity]
+        return if (entity2 != null) metadata.secondaryProperty[entity2] else null;
     }
 
     override fun set(entity: D, value: V?) {
-        val entity2 = metaData.primaryProperty[entity]
+        val entity2 = metadata.primaryProperty[entity]
             ?: throw IllegalArgumentException("Value of property ${info()} is null")
-        metaData.secondaryProperty.set(entity2, value)
+        metadata.secondaryProperty.set(entity2, value)
+    }
+
+    override fun toString(): String {
+        return metadata.name
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as PropertyNullable<*, *>
+        if (metadata != other.data()) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return metadata.hashCode()
     }
 }
 
