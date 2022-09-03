@@ -201,6 +201,10 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
         return ValueCriterion(this, ValueOperatorEnum.LT, value)
     }
 
+    /** Creeate new composite property  */
+    fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) =
+        ComposedPropertyNullableImpl(this, nextProperty)
+
     // --- CharSequence implementation ---
 
     /** For a CharSequence implementation */
@@ -216,6 +220,10 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 /** API of the property descriptor */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     override operator fun get(entity: D): V
+
+    /** Creeate new composite property  */
+    fun <N: Any> plus(nextProperty : Property<V, N>) =
+        ComposedPropertyImpl(this, nextProperty)
 }
 
 /** An implementation of the property descriptor for nullable values */
