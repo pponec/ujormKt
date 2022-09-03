@@ -202,7 +202,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     }
 
     /** Creeate new composite property  */
-    fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) =
+    operator fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) : PropertyNullable<D, N> =
         ComposedPropertyNullableImpl(this, nextProperty)
 
     // --- CharSequence implementation ---
@@ -222,7 +222,7 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     override operator fun get(entity: D): V
 
     /** Creeate new composite property  */
-    fun <N: Any> plus(nextProperty : Property<V, N>) =
+    operator fun <N: Any> plus(nextProperty : Property<V, N>) : Property<D, N> =
         ComposedPropertyImpl(this, nextProperty)
 }
 
@@ -718,17 +718,17 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     override fun set(entity: D, value: V?) {
         val entity2 = metaData.primaryProperty[entity]
-            ?: throw IllegalArgumentException("Value of property {$metaData.primaryProperty} is null")
+            ?: throw IllegalArgumentException("Value of property ${info()} is null")
         metaData.secondaryProperty.set(entity2, value)
     }
 }
 
 /** Composed non-null property implementation */
-class ComposedPropertyImpl<D : Any, M : Any, V : Any> : PropertyNullable<D, V>, ComposedPropertyNullableImpl<D, M, V> {
+class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, ComposedPropertyNullableImpl<D, M, V> {
     constructor(
         leftProperty: Property<D, M>,
         righProperty: Property<M, V>
     ) : super(leftProperty, righProperty)
     override fun get(entity: D): V = super<ComposedPropertyNullableImpl>.get(entity)
-        ?: throw IllegalArgumentException("Value of property {${metaData.name} is null")
+        ?: throw IllegalArgumentException("Value of property ${info()} is null")
 }
