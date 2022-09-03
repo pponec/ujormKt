@@ -29,7 +29,8 @@ fun main() {
 /** Sample of usage */
 fun basicSkills() {
     val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
-    val employees = ModelProvider.employees // Entity meta-model
+    val employees = ModelProvider.employees // Employee Entity meta-model
+    val departments = ModelProvider.departments // Department Entity meta-model
 
     // Read and Write values by entity meta-model:
     val id = employees.id[employee]
@@ -43,10 +44,11 @@ fun basicSkills() {
     employees.department[employee] = department
     employees.supervisor[employee] = supervisor
 
-    // Relations with composed properties: (TODO)
-    //val employeeDepartmentName : Property<Employee, String> = employees.department.name;
-    //val departmentName : String = employeeDepartmentName[employee]
-    //employeeDepartmentName[employee] = departmentName
+    // Composed properties:
+    val employeeDepartmentId = (employees.department + departments.id)[employee]
+    val employeeDepartmentName = (employees.department + departments.name)[employee]
+    assert(employeeDepartmentId == 1) { "Department id must be 1"}
+    assert(employeeDepartmentName == "A") { "Department name must be 'A'"}
 }
 
 /** Sample of usage */
@@ -76,6 +78,7 @@ fun criterions() {
 fun moreInfo() {
     val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
     val employees = ModelProvider.employees
+    val departments = ModelProvider.departments
 
     val id: Int = employees.id[employee]
     val name: String = employees.name[employee] // Get a name of the employee
@@ -107,6 +110,12 @@ fun moreInfo() {
     // Entity type (alias domain type)
     assert(employees.id.data().entityClass == Employee::class)
     assert(employees.contractDay.data().entityClass == Employee::class)
+
+    // Composed properties:
+    val employeeDepartmentNameProp :
+            Property<Employee, String> = employees.department + departments.name
+    assert(employeeDepartmentNameProp.info() == "Employee.department.name")
+    assert(employeeDepartmentNameProp.toString() == "department.name")
 }
 
 /** Create new object by a constructor (for immutable objects) */
