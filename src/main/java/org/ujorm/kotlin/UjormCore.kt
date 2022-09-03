@@ -677,17 +677,17 @@ object Constants {
     }
 }
 
-
 class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     val primaryProperty: PropertyNullable<D, M>,
     val secondaryProperty: PropertyNullable<M, V>
 ) : PropertyMetadata<D, V> {
 
     override val index: UByte get() = primaryProperty.data().index
+    @Volatile
     override var name: String = ""
         internal set(value) { field = value }
         get() {
-            if (field.isEmpty()) { // Lazy initialization (synchronized?):
+            if (field.isEmpty()) { // Lazy initialization:
                 field = "${primaryProperty.data().name}.${secondaryProperty.data().name}"
             }
             return field
