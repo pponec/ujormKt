@@ -700,26 +700,42 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 
 /** Composed nullable property implementation */
 open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNullable<D, V> {
-    protected val metaData: ComposedPropertyMetadata<D, M, V>
+    protected val metadata: ComposedPropertyMetadata<D, M, V>
 
     constructor(
         leftProperty : PropertyNullable<D, M>,
         righProperty : PropertyNullable<M, V>
     ) {
-       this.metaData = ComposedPropertyMetadata(leftProperty, righProperty)
+       this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
     }
 
-    override fun data() = this.metaData
+    override fun data() = this.metadata
 
     override fun get(entity: D): V? {
-        val entity2 = metaData.primaryProperty[entity]
-        return if (entity2 != null) metaData.secondaryProperty[entity2] else null;
+        val entity2 = metadata.primaryProperty[entity]
+        return if (entity2 != null) metadata.secondaryProperty[entity2] else null;
     }
 
     override fun set(entity: D, value: V?) {
-        val entity2 = metaData.primaryProperty[entity]
+        val entity2 = metadata.primaryProperty[entity]
             ?: throw IllegalArgumentException("Value of property ${info()} is null")
-        metaData.secondaryProperty.set(entity2, value)
+        metadata.secondaryProperty.set(entity2, value)
+    }
+
+    override fun toString(): String {
+        return metadata.name()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as PropertyNullable<*, *>
+        if (metadata != other.data()) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return metadata.hashCode()
     }
 }
 
