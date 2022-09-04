@@ -21,21 +21,10 @@ open class _Departments : EntityModel<Department>(Department::class) {
 }
 
 /** Model of the entity can be a generated class in the feature */
-open class Departments<D : Any> : PropertyNullable<D, Department> {
-
-    protected var headKey: PropertyNullable<D, Department>? = null
-    protected var originalEntityModel : _Departments
-
-    /* Primary constructor **/
-    constructor(originalEntityModel: _Departments) :
-            this(null, originalEntityModel)
-
-    /** Extended constructor */
-    constructor(headKey: PropertyNullable<D, Department>?,
-                originalEntityModel: _Departments,) {
-        this.headKey = headKey
-        this.originalEntityModel = originalEntityModel
-    }
+open class Departments<D : Any> (
+    protected var entityModel: _Departments,
+    protected var headKey: PropertyNullable<D, Department>? = null,
+) : PropertyNullable<D, Department> {
 
     /** Provides any Key */
     protected fun <V : Any> buildKey(property : PropertyNullable<*, V>) : PropertyNullable<D, V> {
@@ -60,9 +49,9 @@ open class Departments<D : Any> : PropertyNullable<D, Department> {
 
     // --- Property descriptors ---
 
-    val id : PropertyNullable<D, Int> get() = buildKey(originalEntityModel.id)
-    val name get() = buildKey(originalEntityModel.name)
-    val created get() = buildKey(originalEntityModel.created)
+    val id : PropertyNullable<D, Int> get() = buildKey(entityModel.id)
+    val name get() = buildKey(entityModel.name)
+    val created get() = buildKey(entityModel.created)
 }
 
 /** Initialize, register and close the entity model. */
