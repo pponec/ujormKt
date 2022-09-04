@@ -27,8 +27,10 @@ internal class UjormCoreTest {
     @Test
     fun testReadWrite() {
         val employee = Employee(
-            id = 11, name = "John", contractDay = LocalDate.now(),
-            department = Department(1, "D")
+            id = 11,
+            name = "John",
+            contractDay = LocalDate.now(),
+            department = Department(2, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -48,7 +50,7 @@ internal class UjormCoreTest {
         // Composed properties:
         val employeeDepartmentId = (employees.department + departments.id)[employee]
         val employeeDepartmentName = (employees.department + departments.name)[employee]
-        assertEq(employeeDepartmentId, 1) { "Department id must be 1" }
+        assertEq(employeeDepartmentId, 2) { "Department id must be 2" }
         assertEq(employeeDepartmentName, "D") { "Department name must be 'D'" }
     }
 
@@ -56,8 +58,10 @@ internal class UjormCoreTest {
     @Test
     fun testConditions() {
         val employee = Employee(
-            id = 11, name = "John", contractDay = LocalDate.now(),
-            department = Department(1, "D")
+            id = 11,
+            name = "John",
+            contractDay = LocalDate.now(),
+            department = Department(2, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -86,8 +90,10 @@ internal class UjormCoreTest {
     @Test
     fun testExtendedFunctions() {
         val employee = Employee(
-            id = 11, name = "John", contractDay = LocalDate.now(),
-            department = Department(1, "D")
+            id = 11,
+            name = "John",
+            contractDay = LocalDate.now(),
+            department = Department(2, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -146,8 +152,8 @@ internal class UjormCoreTest {
     }
 
     /** Helper methods */
-    private fun <V> assertEq(currentValue: V, expectedValue: V, message: (() -> String)? = null) {
-        Assertions.assertEquals(expectedValue, currentValue/*, message*/)
+    private fun <V> assertEq(currentValue: V, expectedValue: V, messageSupplier: (() -> String)? = null) {
+        Assertions.assertEquals(expectedValue, currentValue, messageSupplier)
     }
 
     /** Helper methods */

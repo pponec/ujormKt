@@ -22,8 +22,14 @@ Topical areas of use are:
 Presentation of basic skills with entity model:
 
 ```kotlin
-val employee = Employee(id = 11, name = "John", contractDay = LocalDate.now())
-val employees = ModelProvider.employees // Entity meta-model
+val employee = Employee(
+    id = 11, 
+    name = "John", 
+    contractDay = LocalDate.now(),
+    department = Department(2, "D")
+)
+val employees = ModelProvider.employees // Employee Entity meta-model
+val departments = ModelProvider.departments // Department Entity meta-model
 
 // Read and Write values by entity meta-model:
 val id = employees.id[employee]
@@ -37,22 +43,29 @@ employees.contractDay[employee] = contractDay
 employees.department[employee] = department
 employees.supervisor[employee] = supervisor
 
+// Composed properties:
+val employeeDepartmentId = (employees.department + departments.id)[employee]
+val employeeDepartmentName = (employees.department + departments.name)[employee]
+assertEq(employeeDepartmentId, 2) { "Department id must be 2" }
+assertEq(employeeDepartmentName, "D") { "Department name must be 'D'" }
+
 // Criterion conditions:
 val crn1 = employees.name EQ "Lucy"
 val crn2 = employees.id GT 1
-val crn3 = employees.id LT 99
+val crn3 = (employees.department + departments.id) LT 99
 val crn4 = crn1 OR (crn2 AND crn3)
 val crn5 = crn1.not() OR (crn2 AND crn3)
 val noValid: Boolean = crn1(employee)
 val isValid: Boolean = crn4(employee)
 
 // Criterion logs:
-assert(!noValid, { "crn1(employee)" })
-assert(isValid, { "crn4(employee)" })
-assert(crn1.toString() == """Employee: name EQ "Lucy"""")
-assert(crn2.toString() == """Employee: id GT 1""")
-assert(crn4.toString() == """Employee: (name EQ "Lucy") OR (id GT 1) AND (id LT 99)""")
-assert(crn5.toString() == """Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (id LT 99)""")
+assertFalse(noValid, { "crn1(employee)" })
+assertTrue(isValid, { "crn4(employee)" })
+assertEq(crn1.toString(), """Employee: name EQ "Lucy"""")
+assertEq(crn2.toString(), """Employee: id GT 1""")
+assertEq(crn3.toString(), """Employee: department.id LT 99""")
+assertEq(crn4.toString(), """Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
+assertEq(crn5.toString(), """Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
 ```
 
 Building domain entity model:
