@@ -1,8 +1,8 @@
-package org.ujorm.kotlin.model.composed
+package org.ujorm.kotlin.entityComposed.entity
 
-import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.PropertyMetadata
-import org.ujorm.kotlin.PropertyNullable
+import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.PropertyMetadata
+import org.ujorm.kotlin.core.PropertyNullable
 import java.time.LocalDate
 
 

@@ -1,6 +1,6 @@
-package org.ujorm.kotlin.model.direct
+package org.ujorm.kotlin.core.entity
 
-import org.ujorm.kotlin.*
+import org.ujorm.kotlin.core.EntityModel
 import java.time.LocalDate
 
 /** An user entity */
@@ -8,7 +8,7 @@ data class Employee constructor(
     var id: Int,
     var name: String,
     var contractDay: LocalDate,
-    var department: Department = Department(1, "A"),
+    var department: Department = Department(1, "D"),
     var supervisor: Employee? = null
 )
 

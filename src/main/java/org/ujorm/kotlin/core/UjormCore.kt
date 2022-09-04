@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin
+package org.ujorm.kotlin.core
 
 import java.util.Collections
 import java.util.stream.Stream
@@ -282,7 +282,7 @@ open class PropertyImpl<D : Any, V : Any>(
 
     override val getter: (D) -> V = super.getter as (D) -> V
     override fun set(entity: D, value: V?) = setter.invoke(entity, value
-            ?: throw IllegalArgumentException("Notnull value is required")
+        ?: throw IllegalArgumentException("Notnull value is required")
     )
 
     override fun get(entity: D): V = getter.invoke(entity)
@@ -707,7 +707,7 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
         leftProperty : PropertyNullable<D, M>,
         righProperty : PropertyNullable<M, V>
     ) {
-       this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
+        this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
     }
 
     override fun data() = this.metadata

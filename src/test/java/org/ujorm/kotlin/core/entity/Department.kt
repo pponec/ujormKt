@@ -1,6 +1,6 @@
-package org.ujorm.kotlin.model.direct
+package org.ujorm.kotlin.core.entity
 
-import org.ujorm.kotlin.EntityModel
+import org.ujorm.kotlin.core.EntityModel
 import java.time.LocalDate
 
 /** An Department entity */
