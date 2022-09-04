@@ -1,8 +1,8 @@
-package org.ujorm.kotlin.model.composed
+package org.ujorm.kotlin.entityComposed.entity
 
-import org.ujorm.kotlin.EntityModel
-import org.ujorm.kotlin.PropertyMetadata
-import org.ujorm.kotlin.PropertyNullable
+import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.PropertyMetadata
+import org.ujorm.kotlin.core.PropertyNullable
 import java.time.LocalDate
 
 
@@ -14,32 +14,32 @@ data class Department constructor(
 )
 
 /** Model of the entity can be a generated class in the feature */
-open class Departments : EntityModel<Department>(Department::class) {
+open class _Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
     val created = property { it.created }
 }
 
 /** Model of the entity can be a generated class in the feature */
-open class DepartmentS<D : Any> : PropertyNullable<D, Department>  {
+open class Departments<D : Any> : PropertyNullable<D, Department> {
 
-    protected var primaryKey: PropertyNullable<D, Department>? = null
-    protected var originalEntityModel : Departments
+    protected var headKey: PropertyNullable<D, Department>? = null
+    protected var originalEntityModel : _Departments
 
     /* Primary constructor **/
-    constructor(originalEntityModel: Departments) :
+    constructor(originalEntityModel: _Departments) :
             this(null, originalEntityModel)
 
     /** Extended constructor */
-    constructor(primaryKey: PropertyNullable<D, Department>?,
-                originalEntityModel: Departments,) {
-        this.primaryKey = primaryKey
+    constructor(headKey: PropertyNullable<D, Department>?,
+                originalEntityModel: _Departments,) {
+        this.headKey = headKey
         this.originalEntityModel = originalEntityModel
     }
 
     /** Provides any Key */
     protected fun <V : Any> buildKey(property : PropertyNullable<*, V>) : PropertyNullable<D, V> {
-        return if (primaryKey == null) {
+        return if (headKey == null) {
             property as PropertyNullable<D, V>
         } else {
             TODO("Create composed property")
@@ -67,5 +67,5 @@ open class DepartmentS<D : Any> : PropertyNullable<D, Department>  {
 
 /** Initialize, register and close the entity model. */
 val ModelProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Departments().close() as Departments
+    _Departments().close() as _Departments
 }

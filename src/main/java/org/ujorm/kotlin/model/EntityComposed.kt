@@ -15,7 +15,8 @@
  */
 package org.ujorm.kotlin.model
 
-import org.ujorm.kotlin.*
+import org.ujorm.kotlin.core.Property
+import org.ujorm.kotlin.core.PropertyImpl
 import kotlin.reflect.KClass
 
 /** Entity composed model */

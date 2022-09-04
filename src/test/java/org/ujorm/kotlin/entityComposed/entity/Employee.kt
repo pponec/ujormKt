@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.model.composed
+package org.ujorm.kotlin.entityComposed.entity
 //
 //import org.ujorm.kotlin.*
 //import org.ujorm.kotlin.model.direct.ModelProvider

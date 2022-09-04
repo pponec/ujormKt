@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ujorm.kotlin.proxy
+package org.ujorm.kotlin.proxyUtils
 
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
