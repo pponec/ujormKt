@@ -32,11 +32,11 @@ val employees = ModelProvider.employees // Employee Entity meta-model
 val departments = ModelProvider.departments // Department Entity meta-model
 
 // Read and Write values by entity meta-model:
-val id = employees.id[employee]
-val name = employees.name[employee]
-val contractDay = employees.contractDay[employee]
-val department = employees.department[employee]
-val supervisor = employees.supervisor[employee]
+val id : Int = employees.id[employee]
+val name : String = employees.name[employee]
+val contractDay : LocalDate = employees.contractDay[employee]
+val department : Department = employees.department[employee]
+val supervisor : Employee? = employees.supervisor[employee]
 employees.id[employee] = id
 employees.name[employee] = name
 employees.contractDay[employee] = contractDay
