@@ -41,12 +41,13 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     val baseInstance : Boolean
 
     private constructor(
-        composedProperty: PropertyNullable<D, V>,
+        headProperty: PropertyNullable<D, V>,
         originalEntityModel: EntityModel<V>,
+        baseInstance: Boolean = headProperty is SelfProperty<*>,
     ) {
-        this.composedProperty = composedProperty
+        this.composedProperty = headProperty
         this.originalEntityModel = originalEntityModel
-        this.baseInstance = composedProperty is SelfProperty<*>
+        this.baseInstance = baseInstance
     }
 
     companion object {
@@ -55,6 +56,7 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
             headProperty: PropertyNullable<D, V>,
             originalEntityModel : EntityModel<V>,
         ) : EntityComposedModel<D, V> {
+            val baseInstance = headProperty is SelfProperty<*>
             val property : PropertyNullable<D, V> = null!!
 //                if (baseInstance) {
 //                    originalEntityModel
