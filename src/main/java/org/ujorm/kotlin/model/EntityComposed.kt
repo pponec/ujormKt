@@ -41,47 +41,29 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     val baseInstance : Boolean
 
     private constructor(
-        headProperty: SelfProperty<D, V>,
+        composedProperty: PropertyNullable<D, V>,
         originalEntityModel: EntityModel<V>,
-        baseInstance: Boolean = headProperty is SelfProperty<*>,
+        baseInstance: Boolean = composedProperty is SelfProperty<*>,
     ) {
-        this.composedProperty = headProperty
+        this.composedProperty = composedProperty
         this.originalEntityModel = originalEntityModel
         this.baseInstance = baseInstance
     }
 
     companion object {
-        /** Factory method */
-        fun <V: Any> of1(
-            headProperty: SelfProperty<V>,
-            originalEntityModel : EntityModel<V>,
-        ) : EntityComposedModel<V, V> {
-
-            val baseInstance = headProperty is SelfProperty<*>
-            val property : PropertyNullable<V, V> = null!!
-//                if (baseInstance) {
-//                    originalEntityModel
-//                } else {
-//                    headProperty.plus(originalEntityModel)
-//                }
-            return EntityComposedModel(property, originalEntityModel)
-
+        /** Primary factory method */
+        fun <V: Any> of(originalEntityModel : EntityModel<V>) : EntityComposedModel<V, V> {
+            val headProperty : SelfProperty<V> = SelfProperty(originalEntityModel.utils().entityClass)
+            return EntityComposedModel(headProperty, originalEntityModel, true)
         }
 
-        /** Factory method */
-        fun <D: Any, V: Any> of2(
-            headProperty: PropertyNullable<D, V>,
-            originalEntityModel : EntityModel<V>,
+        /** Secondary factory method */
+        fun <D: Any, M: Any, V: Any> of(
+            leaderProperty: PropertyNullable<D, M>,
+            originalEntityModel : EntityComposedModel<M, V>,
         ) : EntityComposedModel<D, V> {
-            val baseInstance = headProperty is SelfProperty<*>
-            val property : PropertyNullable<D, V> = null!!
-//                if (baseInstance) {
-//                    originalEntityModel
-//                } else {
-//                    headProperty.plus(originalEntityModel)
-//                }
-            return EntityComposedModel(property, originalEntityModel)
-
+            val headProperty = leaderProperty + originalEntityModel
+            return EntityComposedModel(headProperty, originalEntityModel, false)
         }
     }
 
