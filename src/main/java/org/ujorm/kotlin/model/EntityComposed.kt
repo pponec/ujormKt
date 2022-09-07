@@ -15,26 +15,66 @@
  */
 package org.ujorm.kotlin.model
 
-import org.ujorm.kotlin.core.Property
-import org.ujorm.kotlin.core.PropertyImpl
+import org.ujorm.kotlin.core.*
 import kotlin.reflect.KClass
 
-/** Entity composed model */
-abstract class EntityComposedModel<D : Any, V : Any> : PropertyImpl<D, V> {
-    /** A name */
-    val propertyPrefix: Property<D, *>?
+/** Dummy property */
+class SelfProperty<D : Any> : PropertyNullable<D, D> {
+    private val metadata : PropertyMetadata<D, D>
 
-    constructor(
-        index: UByte,
-        name: String,
-        getter: (D) -> V,
-        setter: (D, V?) -> Unit,
-        entityClass: KClass<D>,
-        valueClass: KClass<V>,
-        readOnly: Boolean,
-        nullable: Boolean,
-        propertyPrefix: Property<D, *>?
-    ) : super(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
-        this.propertyPrefix = propertyPrefix
+    constructor(domainClass: KClass<D>) {
+        this.metadata = PropertyMetadataImpl(0U, "", domainClass, domainClass)
+    }
+
+    override fun data(): PropertyMetadata<D, D> = metadata
+
+    override fun get(entity: D): D? = throw UnsupportedOperationException("Dummy object")
+
+    override fun set(entity: D, value: D?) = throw UnsupportedOperationException("Dummy object")
+}
+
+/** Entity composed model */
+/*abstract*/ class EntityComposedModel<D : Any, V : Any> : PropertyNullable<D, V> {
+
+    val composedProperty : PropertyNullable<D, V>
+    val originalEntityModel : EntityModel<V>
+    val baseInstance : Boolean
+
+    private constructor(
+        composedProperty: PropertyNullable<D, V>,
+        originalEntityModel: EntityModel<V>,
+    ) {
+        this.composedProperty = composedProperty
+        this.originalEntityModel = originalEntityModel
+        this.baseInstance = composedProperty is SelfProperty<*>
+    }
+
+    companion object {
+        /** Factory method */
+        fun <D: Any, V: Any> of(
+            headProperty: PropertyNullable<D, V>,
+            originalEntityModel : EntityModel<V>,
+        ) : EntityComposedModel<D, V> {
+            val property : PropertyNullable<D, V> = null!!
+//                if (baseInstance) {
+//                    originalEntityModel
+//                } else {
+//                    headProperty.plus(originalEntityModel)
+//                }
+            return EntityComposedModel(property, originalEntityModel)
+
+        }
+    }
+
+    override fun data(): PropertyMetadata<D, V> {
+        return composedProperty?.data() ?: throw IllegalArgumentException("invalid model")
+    }
+
+    override fun get(entity: D): V? {
+        TODO("Not yet implemented")
+    }
+
+    override fun set(entity: D, value: V?) {
+        TODO("Not yet implemented")
     }
 }
