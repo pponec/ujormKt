@@ -142,6 +142,7 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
                 ", valueClass=${valueClass.simpleName}" +
                 ", readOnly=$readOnly" +
                 ", nullable=$nullable" +
+                ", entityAlias=$entityAlias" +
                 ")"
     }
 }
