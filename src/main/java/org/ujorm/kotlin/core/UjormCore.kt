@@ -75,7 +75,7 @@ interface PropertyMetadata<D : Any, V : Any> {
     val index: UByte
     val name: String
     val entityClass: KClass<D>
-    val valueClass: KClass<V> //  KClass<out V>
+    val valueClass: KClass<V> // KClass<out V>
     /** Is the property value read-only? */
     val readOnly: Boolean
     /** Variables of this property can have null value. */
@@ -116,7 +116,7 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
         this.nullable = nullable
     }
 
-    /** Equals */
+    /** Compare entity classes and names only. */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -135,7 +135,7 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
     override fun toString(): String {
         return "PropertyMetadata" +
                 "( index=$index" +
-                ", name='$name()'" +
+                ", name='$name'" +
                 ", entityClass=${entityClass.simpleName}" +
                 ", valueClass=${valueClass.simpleName}" +
                 ", readOnly=$readOnly" +
@@ -143,7 +143,6 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
                 ")"
     }
 }
-
 
 /** API of the property descriptor for a nullable values */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
@@ -221,11 +220,7 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 
 /** An implementation of the property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, CharSequence {
-    private val metadata: PropertyMetadata<D, V>
-    override fun data() = metadata
-    override fun get(entity: D): V? = getter.invoke(entity)
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
-
+    private val metadata: PropertyMetadataImpl<D, V>
     /** Value provider is not the part of API */
     open internal val getter: (D) -> V?
     /** Value writer is not the part of API */
@@ -249,6 +244,10 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
         this.getter = getter
         this.setter = setter
     }
+
+    override fun get(entity: D): V? = getter.invoke(entity)
+    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+    override fun data() = metadata
 
     override fun toString(): String {
         return metadata.name
@@ -276,7 +275,7 @@ open class PropertyImpl<D : Any, V : Any>(
     entityClass: KClass<D>,
     valueClass: KClass<V>,
     readOnly: Boolean,
-    nullable: Boolean
+    nullable: Boolean,
 ) : Property<D, V>,
     PropertyNullableImpl<D, V>(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
 
