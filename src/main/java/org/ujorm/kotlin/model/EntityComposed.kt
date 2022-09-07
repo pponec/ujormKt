@@ -34,7 +34,7 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 }
 
 /** Entity composed model */
-/*abstract*/ class EntityComposedModel<D : Any, V : Any> : PropertyNullable<D, V> {
+/*abstract*/ class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
     val composedProperty : PropertyNullable<D, V>
     val originalEntityModel : EntityModel<V>
@@ -52,18 +52,18 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 
     companion object {
         /** Primary factory method */
-        fun <V: Any> of(originalEntityModel : EntityModel<V>) : EntityComposedModel<V, V> {
-            val headProperty : SelfProperty<V> = SelfProperty(originalEntityModel.utils().entityClass)
-            return EntityComposedModel(headProperty, originalEntityModel, true)
+        fun <V: Any> of(originalEntityModel : EntityModel<V>) : ComposedEntityModel<V, V> {
+            val selfProperty = SelfProperty(originalEntityModel.utils().entityClass)
+            return ComposedEntityModel(selfProperty, originalEntityModel, true)
         }
 
         /** Secondary factory method */
         fun <D: Any, M: Any, V: Any> of(
-            leaderProperty: PropertyNullable<D, M>,
-            originalEntityModel : EntityComposedModel<M, V>,
-        ) : EntityComposedModel<D, V> {
-            val headProperty = leaderProperty + originalEntityModel
-            return EntityComposedModel(headProperty, originalEntityModel.originalEntityModel, false)
+            leadProperty: PropertyNullable<D, M>,
+            composedEntityModel : ComposedEntityModel<M, V>,
+        ) : ComposedEntityModel<D, V> {
+            val headProperty = leadProperty + composedEntityModel
+            return ComposedEntityModel(headProperty, composedEntityModel.originalEntityModel, false)
         }
     }
 
