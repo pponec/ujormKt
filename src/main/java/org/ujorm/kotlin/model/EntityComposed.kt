@@ -63,19 +63,19 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
             originalEntityModel : EntityComposedModel<M, V>,
         ) : EntityComposedModel<D, V> {
             val headProperty = leaderProperty + originalEntityModel
-            return EntityComposedModel(headProperty, originalEntityModel, false)
+            return EntityComposedModel(headProperty, originalEntityModel.originalEntityModel, false)
         }
     }
 
     override fun data(): PropertyMetadata<D, V> {
-        return composedProperty?.data() ?: throw IllegalArgumentException("invalid model")
+        return composedProperty.data()
     }
 
     override fun get(entity: D): V? {
-        TODO("Not yet implemented")
+        return composedProperty[entity]
     }
 
     override fun set(entity: D, value: V?) {
-        TODO("Not yet implemented")
+        composedProperty[entity] = value
     }
 }
