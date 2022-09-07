@@ -82,6 +82,8 @@ interface PropertyMetadata<D : Any, V : Any> {
     val nullable: Boolean
     /** Variables of this property must be non-null. */
     val required get() = !nullable
+    /** An entity alias where the blank text means the default alias name. */
+    val entityAlias: String get() = "" // TODO
 }
 
 /** API of the property descriptor for a nullable values */
@@ -147,9 +149,6 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
 /** API of the property descriptor for a nullable values */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
-
-    /** An entity alias where a blank text means the default alias name . */
-    fun entityAlias() = "" // TODO: A value change implements by the overriding
 
     /** Ascending sort request */
     fun asc() : SortingProperty<D, V> = SortingProperty(this, true)
