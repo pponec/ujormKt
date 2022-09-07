@@ -634,7 +634,7 @@ class SortingProperty<D : Any, V : Any> (
 /** Data Entity builder */
 open class EntityBuilder<D : Any> {
     /** Entity model */
-    private val model: EntityModel<D>
+    val model: EntityModel<D>
     /** Object values */
     private val values : Array<Any?>
 

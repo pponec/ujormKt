@@ -41,7 +41,7 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     val baseInstance : Boolean
 
     private constructor(
-        headProperty: PropertyNullable<D, V>,
+        headProperty: SelfProperty<D, V>,
         originalEntityModel: EntityModel<V>,
         baseInstance: Boolean = headProperty is SelfProperty<*>,
     ) {
@@ -52,7 +52,24 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 
     companion object {
         /** Factory method */
-        fun <D: Any, V: Any> of(
+        fun <V: Any> of1(
+            headProperty: SelfProperty<V>,
+            originalEntityModel : EntityModel<V>,
+        ) : EntityComposedModel<V, V> {
+
+            val baseInstance = headProperty is SelfProperty<*>
+            val property : PropertyNullable<V, V> = null!!
+//                if (baseInstance) {
+//                    originalEntityModel
+//                } else {
+//                    headProperty.plus(originalEntityModel)
+//                }
+            return EntityComposedModel(property, originalEntityModel)
+
+        }
+
+        /** Factory method */
+        fun <D: Any, V: Any> of2(
             headProperty: PropertyNullable<D, V>,
             originalEntityModel : EntityModel<V>,
         ) : EntityComposedModel<D, V> {
