@@ -148,6 +148,9 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
 
+    /** An entity alias where a blank text means the default alias name . */
+    fun entityAlias() = "" // TODO: A value change implements by the overriding
+
     /** Ascending sort request */
     fun asc() : SortingProperty<D, V> = SortingProperty(this, true)
     /** Descending sort request */
