@@ -80,7 +80,7 @@ open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     }
 }
 
-class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
+abstract open class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
 
     constructor(originalEntityModel: EntityModel<D>) : super(
         SelfProperty(originalEntityModel.utils().entityClass),
