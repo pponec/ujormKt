@@ -34,13 +34,13 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 }
 
 /** Entity composed model */
-/*abstract*/ class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
+open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
     val composedProperty : PropertyNullable<D, V>
     val originalEntityModel : EntityModel<V>
     val baseInstance : Boolean
 
-    private constructor(
+    protected constructor(
         composedProperty: PropertyNullable<D, V>,
         originalEntityModel: EntityModel<V>,
         baseInstance: Boolean = composedProperty is SelfProperty<*>,
@@ -78,4 +78,13 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     override fun set(entity: D, value: V?) {
         composedProperty[entity] = value
     }
+}
+
+class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
+
+    constructor(originalEntityModel: EntityModel<D>) : super(
+        SelfProperty(originalEntityModel.utils().entityClass),
+        originalEntityModel,
+        true)
+
 }
