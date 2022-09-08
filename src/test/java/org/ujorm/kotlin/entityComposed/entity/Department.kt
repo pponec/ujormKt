@@ -26,8 +26,7 @@ open class _Departments : EntityModel<Department>(Department::class) {
 open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()) {
 
     /** Build the new Key */
-    protected fun <V : Any> buildKey(
-        property : PropertyNullable<*, V>) : PropertyNullable<D, V> {
+    protected fun <V : Any> buildKey(property : PropertyNullable<*, V>) : PropertyNullable<D, V> {
         return if (super.baseInstance) {
             property as PropertyNullable<D, V>
         } else {
@@ -35,9 +34,9 @@ open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()
         }
     }
 
-    val id : Long get() =0
-    val name : String get() = ""
-    val created : LocalDateTime  get() = null!!
+    val id : PropertyNullable<D, Long> get() = null!!
+    val name : PropertyNullable<D, String> get() = null!!
+    val created : PropertyNullable<D, LocalDateTime> get() = null!!
 }
 
 //
