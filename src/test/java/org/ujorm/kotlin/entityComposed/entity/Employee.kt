@@ -29,7 +29,6 @@ open class _Employeess : EntityModel<Employee>(Employee::class) {
 open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) {
 
     /** Direct property model */
-    /** Direct property model */
     private val core = _Employeess().close() as _Employeess
 
     fun core() = this.core
@@ -48,6 +47,6 @@ open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) 
     val id get() = property(core.id)
     val name get() = property(core.name)
     val contractDay get() = property(core.contractDay)
-    val department get() = property(core.department)
-    val supervisor get() = property(core.supervisor)
+    val department get() = property(core.department) as Departments<D>
+    val supervisor get() = property(core.supervisor) as Employees<D>
 }
