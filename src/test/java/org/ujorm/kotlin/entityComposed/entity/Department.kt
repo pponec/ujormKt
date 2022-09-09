@@ -25,6 +25,9 @@ open class _Departments : EntityModel<Department>(Department::class) {
 /** Model of the entity can be a generated class in the feature */
 open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()) {
 
+    /** Direct property model */
+    val core = _Departments().close() as _Departments
+
     /** Build the new Key */
     protected fun <V : Any> buildKey(property : PropertyNullable<*, V>) : PropertyNullable<D, V> {
         return if (super.baseInstance) {
@@ -34,9 +37,9 @@ open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()
         }
     }
 
-    val id : PropertyNullable<D, Long> get() = null!!
-    val name : PropertyNullable<D, String> get() = null!!
-    val created : PropertyNullable<D, LocalDateTime> get() = null!!
+    val id : PropertyNullable<D, Int> get() = buildKey(core.id)
+    val name : PropertyNullable<D, String> get() = buildKey(core.name)
+    val created : PropertyNullable<D, LocalDate> = buildKey(core.created)
 }
 
 //
