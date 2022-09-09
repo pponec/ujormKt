@@ -78,6 +78,11 @@ open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     override fun set(entity: D, value: V?) {
         composedProperty[entity] = value
     }
+
+    fun close() : ComposedEntityModel<D, V> {
+        // TODO ...
+        return this
+    }
 }
 
 abstract open class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
