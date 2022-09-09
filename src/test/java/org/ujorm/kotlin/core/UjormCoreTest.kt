@@ -15,13 +15,12 @@
  */
 package org.ujorm.kotlin.core
 
-
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.ujorm.kotlin.AbstractTest
 import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 
-internal class UjormCoreTest {
+internal class UjormCoreTest : AbstractTest() {
 
     /** Test writing and reading to the object using the meta object. */
     @Test
@@ -149,21 +148,6 @@ internal class UjormCoreTest {
 
         assertEq(employee.id, 1)
         assertEq(employee.name, "John")
-    }
-
-    /** Helper methods */
-    private fun <V> assertEq(currentValue: V, expectedValue: V, messageSupplier: (() -> String)? = null) {
-        Assertions.assertEquals(expectedValue, currentValue, messageSupplier)
-    }
-
-    /** Helper methods */
-    private fun assertTrue(condition: Boolean, message: (() -> String)? = null) {
-        Assertions.assertTrue(condition, message)
-    }
-
-    /** Helper methods */
-    private fun assertFalse(condition: Boolean, message: (() -> String)? = null) {
-        Assertions.assertFalse(condition, message)
     }
 
 }
