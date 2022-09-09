@@ -107,18 +107,18 @@ internal class UjormCoreTest : AbstractTest() {
 
         employees.name[employee] = "James" // Set a name to the user
         employees.supervisor[employee] = null
-        assertEq(employees.id.data().name, "id") { "property id" }
-        assertEq(employees.id.toString(), "id") { "property id" }
+        assertEq(employees.id.name(), "id") { "property id" }
         assertEq(employees.id.info(), "Employee.id") { "property id" }
-        assertEq(employees.id(), "Employee.id") { "property id" }
+        assertEq(employees.id.toString(), "Employee.id") { "property id" }
+        assertEq(employees.id(), "id") { "property id" } // A shortcut for the name()
 
         val properties = ModelProvider.employees.utils().properties
         assertEq(properties.size, 5) { "Count of properties" }
-        assertEq(properties[0].data().name, "id") { "property id" }
-        assertEq(properties[1].data().name, "name") { "property name" }
-        assertEq(properties[2].data().name, "contract_day") { "property contract_day" } // User defined name
-        assertEq(properties[3].data().name, "department") { "property department" }
-        assertEq(properties[4].data().name, "supervisor") { "property supervisor" }
+        assertEq(properties[0].name(), "id") { "property id" }
+        assertEq(properties[1].name(), "name") { "property name" }
+        assertEq(properties[2].name(), "contract_day") { "property contract_day" } // User defined name
+        assertEq(properties[3].name(), "department") { "property department" }
+        assertEq(properties[4].name(), "supervisor") { "property supervisor" }
 
         // Value type
         assertEq(employees.id.data().valueClass, Int::class)

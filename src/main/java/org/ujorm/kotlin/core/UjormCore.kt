@@ -147,8 +147,10 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
     }
 }
 
-/** API of the property descriptor for a nullable values */
-interface PropertyNullable<D : Any, V : Any> : CharSequence {
+/** API of the property descriptor for a nullable values.
+ * Interface can't extends {@link CharSequence} due to 'length' attribute.
+ */
+interface PropertyNullable<D : Any, V : Any> /*: CharSequence */ {
     fun data() : PropertyMetadata<D, V>
 
     /** Ascending sort request */
@@ -168,8 +170,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     /** Returns a property name introduced by a simple domain name */
     fun info(): String = "${data().entityClass.simpleName}.${data().name}"
 
-    /** Name of property */
-    operator fun invoke(): String = info()
+    /** Returns a simple name of the property */
+    fun name(): String = data().name
+
+    /** Returns a simple name of the property */
+    operator fun invoke(): String = name()
 
     /** Criterion evaluates the true value always */
     fun forAll(value: V): ValueCriterion<D, V> {
@@ -200,16 +205,17 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     operator fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) : PropertyNullable<D, N> =
         ComposedPropertyNullableImpl(this, nextProperty)
 
+
     // --- CharSequence implementation ---
 
-    /** For a CharSequence implementation */
-    override val length: Int get() = data().name.length
-
-    /** For a CharSequence implementation */
-    override fun get(index: Int): Char = data().name[index]
-
-    /** For a CharSequence implementation */
-    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = data().name.subSequence(startIndex, endIndex)
+//    /** For a CharSequence implementation */
+//    override val length: Int get() = name().length
+//
+//    /** For a CharSequence implementation */
+//    override fun get(index: Int): Char = name()[index]
+//
+//    /** For a CharSequence implementation */
+//    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = name().subSequence(startIndex, endIndex)
 }
 
 /** API of the property descriptor */
@@ -222,7 +228,7 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 }
 
 /** An implementation of the property descriptor for nullable values */
-open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, CharSequence {
+open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V> {
     private val metadata: PropertyMetadataImpl<D, V>
     /** Value provider is not the part of API */
     open internal val getter: (D) -> V?
@@ -252,8 +258,9 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, Char
     override fun set(entity: D, value: V?) = setter.invoke(entity, value)
     override fun data() = metadata
 
+    /** For example: {@sample "Employee.name"} */
     override fun toString(): String {
-        return metadata.name
+        return info()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -420,7 +427,7 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
 
     override operator fun invoke(): String {
         val separator = stringValueSeparator()
-        return "$property ${operator.name} $separator$value$separator"
+        return "${property.name()} ${operator.name} $separator$value$separator"
     }
 
     override fun toString(): String {
