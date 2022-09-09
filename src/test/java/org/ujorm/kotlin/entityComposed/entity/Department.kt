@@ -46,6 +46,6 @@ open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()
 }
 
 /** Initialize, register and close the entity model. */
-//val ModelProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-//    Departments<Department>().close() as Departments
-//}
+val ModelProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    Departments<Department>().close() as Departments<Department>
+}

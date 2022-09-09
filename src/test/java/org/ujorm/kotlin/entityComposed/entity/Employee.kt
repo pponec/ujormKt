@@ -11,12 +11,12 @@ data class Employee constructor(
     var id: Int,
     var name: String,
     var contractDay: LocalDate,
-    var department: org.ujorm.kotlin.core.entity.Department = org.ujorm.kotlin.core.entity.Department(2, "D"),
+    var department: Department = Department(2, "D"),
     var supervisor: Employee? = null
 )
 
 /** Model of the entity can be a generated class in the feature */
-open class _Employeess : EntityModel<Employee>(Employee::class) {
+open class _Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
     val contractDay = property("contract_day") { it.contractDay }
@@ -24,12 +24,11 @@ open class _Employeess : EntityModel<Employee>(Employee::class) {
     val supervisor = propertyNullable { it.supervisor }
 }
 
-
 /** Model of the entity can be a generated class in the feature */
 open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) {
 
     /** Direct property model */
-    private val core = _Employeess().close() as _Employeess
+    private val core = _Employees().close() as _Employees
 
     fun core() = this.core
 
@@ -49,4 +48,9 @@ open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) 
     val contractDay get() = property(core.contractDay)
     val department get() = property(core.department) as Departments<D>
     val supervisor get() = property(core.supervisor) as Employees<D>
+}
+
+/** Initialize, register and close the entity model. */
+val ModelProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    Employees<Employee>().close() as Employees<Employee>
 }

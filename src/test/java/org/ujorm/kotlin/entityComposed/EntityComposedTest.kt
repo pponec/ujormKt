@@ -2,7 +2,7 @@ package org.ujorm.kotlin.entityComposed
 
 import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.AbstractTest
-import org.ujorm.kotlin.core.entity.*
+import org.ujorm.kotlin.entityComposed.entity.*
 import java.time.LocalDate
 
 
@@ -32,8 +32,8 @@ internal class EntityComposedTest: AbstractTest() {
         employees.supervisor[employee] = supervisor
 
         // Composed properties:
-        val employeeDepartmentId = (employees.department + departments.id)[employee]
-        val employeeDepartmentName = (employees.department + departments.name)[employee]
+        val employeeDepartmentId = employees.department.id[employee] // !!!
+        val employeeDepartmentName = employees.department.name[employee]
         assertEq(employeeDepartmentId, 2) { "Department id must be 2" }
         assertEq(employeeDepartmentName, "D") { "Department name must be 'D'" }
     }
