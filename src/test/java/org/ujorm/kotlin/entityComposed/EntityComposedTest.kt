@@ -24,13 +24,14 @@ internal class EntityComposedTest: AbstractTest() {
 
         val propId : PropertyNullable<Employee, Int> = employees.id
         val propDep : Departments<Employee> = employees.department
+        val propDep2 : PropertyNullable<Employee, Department> = employees.department // !!!
         val propDepName : PropertyNullable<Employee, String> = employees.department.name
 
         // Read and Write values by entity meta-model:
         val id : Int? = employees.id[employee]
         val name : String? = employees.name[employee]
         val contractDay : LocalDate? = employees.contractDay[employee]
-        val department : Department? = employees.department.get(employee)
+        val department : Department? = employees.department.get(employee) // !!!
         val supervisor : Employee? = employees.supervisor[employee]
         employees.id[employee] = id
         employees.name[employee] = name
