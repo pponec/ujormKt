@@ -36,25 +36,23 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 /** Entity composed model */
 open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
-    val composedProperty : PropertyNullable<D, V>
+    val prefixProperty : PropertyNullable<D, V>?
     val originalEntityModel : EntityModel<V>
-    val baseInstance : Boolean
+    val baseInstance get() = prefixProperty == null
 
     protected constructor(
-        composedProperty: PropertyNullable<D, V>,
+        prefixProperty: PropertyNullable<D, V>?,
         originalEntityModel: EntityModel<V>,
-        baseInstance: Boolean = composedProperty is SelfProperty<*>,
     ) {
-        this.composedProperty = composedProperty
+        this.prefixProperty = prefixProperty
         this.originalEntityModel = originalEntityModel
-        this.baseInstance = baseInstance
     }
 
     companion object {
         /** Primary factory method */
         fun <V: Any> of(originalEntityModel : EntityModel<V>) : ComposedEntityModel<V, V> {
             val selfProperty = SelfProperty(originalEntityModel.utils().entityClass)
-            return ComposedEntityModel(selfProperty, originalEntityModel, true)
+            return ComposedEntityModel(null, originalEntityModel)
         }
 
         /** Secondary factory method */
@@ -63,20 +61,20 @@ open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
             composedEntityModel : ComposedEntityModel<M, V>,
         ) : ComposedEntityModel<D, V> {
             val headProperty = leadProperty + composedEntityModel
-            return ComposedEntityModel(headProperty, composedEntityModel.originalEntityModel, false)
+            return ComposedEntityModel(headProperty, composedEntityModel.originalEntityModel)
         }
     }
 
     override fun data(): PropertyMetadata<D, V> {
-        return composedProperty.data()
+        return prefixProperty.data()
     }
 
     override fun get(entity: D): V? {
-        return composedProperty[entity]
+        return prefixProperty[entity]
     }
 
     override fun set(entity: D, value: V?) {
-        composedProperty[entity] = value
+        prefixProperty[entity] = value
     }
 
     fun close() : ComposedEntityModel<D, V> {

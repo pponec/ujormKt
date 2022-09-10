@@ -38,6 +38,11 @@ open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()
         }
     }
 
+    /** Clone the model for the new domain */
+    fun <P : Any> basedOn(prefixedDomain: PropertyNullable<P, D>): Departments<P> {
+       return null !!
+    }
+
     // --- Properties ---
 
     val id get() = property(core.id)

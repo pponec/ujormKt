@@ -5,7 +5,6 @@ import org.ujorm.kotlin.core.PropertyNullable
 import org.ujorm.kotlin.model.DomainEntityModel
 import java.time.LocalDate
 
-
 /** An user entity */
 data class Employee constructor(
     var id: Int,
@@ -41,13 +40,21 @@ open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) 
         }
     }
 
+    /** Clone the model for the new domain */
+    fun <P : Any> basedOn(prefixedDomain: PropertyNullable<P, D>): Employees<P> {
+        return null !!
+    }
+
     // --- Properties ---
 
     val id get() = property(core.id)
     val name get() = property(core.name)
     val contractDay get() = property(core.contractDay)
-    val department get() = property(core.department) as Departments<D>
-    val supervisor get() = property(core.supervisor) as Employees<D>
+    //val department get() = property(core.department) as Departments<D>
+    val department : Departments<Employee> get() =
+        ModelProvider.departments.basedOn(core.department)
+    val supervisor : Employees<Employee> get() =
+        ModelProvider.employees.basedOn(core.supervisor)
 }
 
 /** Initialize, register and close the entity model. */
