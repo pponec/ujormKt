@@ -24,7 +24,7 @@ open class _Employees : EntityModel<Employee>(Employee::class) {
 }
 
 /** Model of the entity can be a generated class in the feature */
-open class Employees<D : Any>() : DomainEntityModel<Department>(_Departments()) {
+open class Employees<D : Any>() : DomainEntityModel<D, Employee>(_Employees()) {
 
     /** Direct property model */
     private val core = _Employees().close() as _Employees

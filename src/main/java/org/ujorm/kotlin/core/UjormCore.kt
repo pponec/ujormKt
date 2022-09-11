@@ -450,8 +450,8 @@ abstract class AbstractModelProvider {
     }
 }
 
-/** Utlilities for entity properties */
-class PropertyUtils<D : Any>(
+/** Utilities for entity properties */
+class EntityUtils<D : Any>(
     /** Entity meta-model */
     val entityModel: EntityModel<D>,
     /** Get the main domain class */
@@ -526,7 +526,7 @@ class PropertyUtils<D : Any>(
 /** Implementations of the EntityModels cam be generated in the feature. */
 abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** Property builder properties */
-    private val propertyBuilder = PropertyUtils(this, entityClass)
+    private val propertyBuilder = EntityUtils(this, entityClass)
 
     /** The provider must be a method because the entiry attributes are reserved for the Entity model. */
     fun utils() = propertyBuilder

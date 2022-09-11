@@ -22,7 +22,7 @@ open class _Departments : EntityModel<Department>(Department::class) {
 
 
 /** Model of the entity can be a generated class in the feature */
-open class Departments<D : Any>() : DomainEntityModel<Department>(_Departments()) {
+open class Departments<D : Any>() : DomainEntityModel<D, Department>(_Departments()) {
 
     /** Direct property model */
     private val core = _Departments().close() as _Departments

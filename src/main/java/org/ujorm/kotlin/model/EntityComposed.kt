@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 
 /** Dummy property */
 class SelfProperty<D : Any> : PropertyNullable<D, D> {
-    private val metadata : PropertyMetadata<D, D>
+    private val metadata: PropertyMetadata<D, D>
 
     constructor(domainClass: KClass<D>) {
         this.metadata = PropertyMetadataImpl(0U, "", domainClass, domainClass)
@@ -33,35 +33,38 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     override fun set(entity: D, value: D?) = throw UnsupportedOperationException("Dummy object")
 }
 
-/** Entity composed model */
-open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
+/** Composed Entity  model */
+open class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
-    val prefixProperty : PropertyNullable<D, V>?
-    val originalEntityModel : EntityModel<V>
-    val baseInstance get() = prefixProperty == null
+    val prefixProperty: PropertyNullable<D, V>
+    val originalEntityModel: EntityModel<V>
+    val baseInstance get() = prefixProperty is SelfProperty<*>
 
     protected constructor(
-        prefixProperty: PropertyNullable<D, V>?,
+        prefixProperty: PropertyNullable<D, V>,
         originalEntityModel: EntityModel<V>,
     ) {
         this.prefixProperty = prefixProperty
         this.originalEntityModel = originalEntityModel
     }
 
+    protected constructor(originalEntityModel: EntityModel<V>) :
+            this(SelfProperty(originalEntityModel.utils().entityClass) as PropertyNullable<D, V>, originalEntityModel)
+
     companion object {
         /** Primary factory method */
-        fun <V: Any> of(originalEntityModel : EntityModel<V>) : ComposedEntityModel<V, V> {
+        fun <V : Any> of(originalEntityModel: EntityModel<V>): DomainEntityModel<V, V> {
             val selfProperty = SelfProperty(originalEntityModel.utils().entityClass)
-            return ComposedEntityModel(null, originalEntityModel)
+            return DomainEntityModel(selfProperty, originalEntityModel)
         }
 
         /** Secondary factory method */
-        fun <D: Any, M: Any, V: Any> of(
+        fun <D : Any, M : Any, V : Any> of(
             leadProperty: PropertyNullable<D, M>,
-            composedEntityModel : ComposedEntityModel<M, V>,
-        ) : ComposedEntityModel<D, V> {
-            val headProperty = leadProperty + composedEntityModel
-            return ComposedEntityModel(headProperty, composedEntityModel.originalEntityModel)
+            domainEntityModel: DomainEntityModel<M, V>,
+        ): DomainEntityModel<D, V> {
+            val headProperty = leadProperty + domainEntityModel
+            return DomainEntityModel(headProperty, domainEntityModel.originalEntityModel)
         }
     }
 
@@ -77,17 +80,17 @@ open class ComposedEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
         prefixProperty[entity] = value
     }
 
-    fun close() : ComposedEntityModel<D, V> {
+    fun close(): DomainEntityModel<D, V> {
         // TODO ...
         return this
     }
 }
 
-abstract open class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
-
-    constructor(originalEntityModel: EntityModel<D>) : super(
-        SelfProperty(originalEntityModel.utils().entityClass),
-        originalEntityModel,
-        true)
-
-}
+//abstract open class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
+//
+//    constructor(originalEntityModel: EntityModel<D>) : super(
+//        SelfProperty(originalEntityModel.utils().entityClass),
+//        originalEntityModel,
+//        )
+//
+//}
