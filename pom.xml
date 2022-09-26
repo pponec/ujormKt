@@ -46,6 +46,14 @@
             <version>5.9.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.tutteli.atrium</groupId>
+            <artifactId>atrium-fluent-en_GB</artifactId>
+            <version>0.17.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
 
         <!-- https://mvnrepository.com/artifact/org.ktorm/ktorm-core -->
         <dependency>

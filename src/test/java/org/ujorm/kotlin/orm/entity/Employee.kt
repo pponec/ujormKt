@@ -1,18 +1,17 @@
-package org.ujorm.kotlin.entityComposed.entity
+package org.ujorm.kotlin.orm.entity
 
-import org.ujorm.kotlin.core.EntityModel
-import org.ujorm.kotlin.core.PropertyNullable
+import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.entityComposed.DomainEntityModel
 import java.time.LocalDate
 
 /** An user entity */
-data class Employee constructor(
-    var id: Int,
-    var name: String,
-    var contractDay: LocalDate,
-    var department: Department = Department(2, "D"),
-    var supervisor: Employee? = null
-)
+interface Employee : Entity<Employee> {
+    var id: Int
+    var name: String
+    var contractDay: LocalDate
+    var department: Department
+    var supervisor: Employee?
+}
 
 /** Model of the entity can be a generated class in the feature */
 open class _Employees : EntityModel<Employee>(Employee::class) {
@@ -25,7 +24,6 @@ open class _Employees : EntityModel<Employee>(Employee::class) {
 
 /** Model of the entity can be a generated class in the feature */
 open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
-    /** Direct property model */
     override val core: _Employees = _Employees().close()
 
     val id get() = property(core.id)
@@ -36,6 +34,6 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val Database.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Employees<Employee>().close() as Employees<Employee>
 }

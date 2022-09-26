@@ -1,10 +1,10 @@
-package org.ujorm.kotlin.core.entity
+package org.ujorm.kotlin.ormBreaf.entity
 
-import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.EntityModel
 import java.time.LocalDate
 
 /** An Department entity */
-interface Department : Entity<Department> {
+interface Department {
     var id: Int
     var name: String
     var created: LocalDate
@@ -18,6 +18,6 @@ open class Departments : EntityModel<Department>(Department::class) {
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val Database.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Departments().close<Departments>()
 }

@@ -28,10 +28,10 @@ val employee = Employee(
     contractDay = LocalDate.now(),
     department = Department(2, "D")
 )
-val employees = ModelProvider.employees // Employee Entity meta-model
-val departments = ModelProvider.departments // Department Entity meta-model
+val employees = ModelProvider.employees // Employee Entity metamodel
+val departments = ModelProvider.departments // Department Entity metamodel
 
-// Read and Write values by entity meta-model:
+// Read and Write values by entity metamodel:
 val id : Int = employees.id[employee]
 val name : String = employees.name[employee]
 val contractDay : LocalDate = employees.contractDay[employee]
