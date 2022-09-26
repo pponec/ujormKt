@@ -75,15 +75,13 @@ interface PropertyMetadata<D : Any, V : Any> {
     val index: UByte
     val name: String
     val entityClass: KClass<D>
-    val valueClass: KClass<V> // KClass<out V>
+    val valueClass: KClass<V> //  KClass<out V>
     /** Is the property value read-only? */
     val readOnly: Boolean
     /** Variables of this property can have null value. */
     val nullable: Boolean
     /** Variables of this property must be non-null. */
     val required get() = !nullable
-    /** An entity alias where the blank text means the default alias name. */
-    val entityAlias: String get() = "" // TODO
 }
 
 /** API of the property descriptor for a nullable values */
@@ -118,7 +116,7 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
         this.nullable = nullable
     }
 
-    /** Compare entity classes and names only. */
+    /** Equals */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -137,20 +135,17 @@ class PropertyMetadataImpl<D : Any, V : Any> : PropertyMetadata<D, V>  {
     override fun toString(): String {
         return "PropertyMetadata" +
                 "( index=$index" +
-                ", name='$name'" +
+                ", name='$name()'" +
                 ", entityClass=${entityClass.simpleName}" +
                 ", valueClass=${valueClass.simpleName}" +
                 ", readOnly=$readOnly" +
                 ", nullable=$nullable" +
-                ", entityAlias=$entityAlias" +
                 ")"
     }
 }
 
-/** API of the property descriptor for a nullable values.
- * Interface can't extends {@link CharSequence} due to 'length' attribute.
- */
-interface PropertyNullable<D : Any, V : Any> /*: CharSequence */ {
+/** API of the property descriptor for a nullable values */
+interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
 
     /** Ascending sort request */
@@ -170,11 +165,8 @@ interface PropertyNullable<D : Any, V : Any> /*: CharSequence */ {
     /** Returns a property name introduced by a simple domain name */
     fun info(): String = "${data().entityClass.simpleName}.${data().name}"
 
-    /** Returns a simple name of the property */
-    fun name(): String = data().name
-
-    /** Returns a simple name of the property */
-    operator fun invoke(): String = name()
+    /** Name of property */
+    operator fun invoke(): String = info()
 
     /** Criterion evaluates the true value always */
     fun forAll(value: V): ValueCriterion<D, V> {
@@ -205,17 +197,16 @@ interface PropertyNullable<D : Any, V : Any> /*: CharSequence */ {
     operator fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) : PropertyNullable<D, N> =
         ComposedPropertyNullableImpl(this, nextProperty)
 
-
     // --- CharSequence implementation ---
 
-//    /** For a CharSequence implementation */
-//    override val length: Int get() = name().length
-//
-//    /** For a CharSequence implementation */
-//    override fun get(index: Int): Char = name()[index]
-//
-//    /** For a CharSequence implementation */
-//    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = name().subSequence(startIndex, endIndex)
+    /** For a CharSequence implementation */
+    override val length: Int get() = data().name.length
+
+    /** For a CharSequence implementation */
+    override fun get(index: Int): Char = data().name[index]
+
+    /** For a CharSequence implementation */
+    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = data().name.subSequence(startIndex, endIndex)
 }
 
 /** API of the property descriptor */
@@ -228,8 +219,12 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 }
 
 /** An implementation of the property descriptor for nullable values */
-open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V> {
-    private val metadata: PropertyMetadataImpl<D, V>
+open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V>, CharSequence {
+    private val metadata: PropertyMetadata<D, V>
+    override fun data() = metadata
+    override fun get(entity: D): V? = getter.invoke(entity)
+    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+
     /** Value provider is not the part of API */
     open internal val getter: (D) -> V?
     /** Value writer is not the part of API */
@@ -254,13 +249,8 @@ open class PropertyNullableImpl<D : Any, V : Any> : PropertyNullable<D, V> {
         this.setter = setter
     }
 
-    override fun get(entity: D): V? = getter.invoke(entity)
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
-    override fun data() = metadata
-
-    /** For example: {@sample "Employee.name"} */
     override fun toString(): String {
-        return info()
+        return metadata.name
     }
 
     override fun equals(other: Any?): Boolean {
@@ -427,7 +417,7 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
 
     override operator fun invoke(): String {
         val separator = stringValueSeparator()
-        return "${property.name()} ${operator.name} $separator$value$separator"
+        return "$property ${operator.name} $separator$value$separator"
     }
 
     override fun toString(): String {
@@ -450,8 +440,8 @@ abstract class AbstractModelProvider {
     }
 }
 
-/** Utilities for entity properties */
-class EntityUtils<D : Any>(
+/** Utlilities for entity properties */
+class PropertyUtils<D : Any>(
     /** Entity meta-model */
     val entityModel: EntityModel<D>,
     /** Get the main domain class */
@@ -526,7 +516,7 @@ class EntityUtils<D : Any>(
 /** Implementations of the EntityModels cam be generated in the feature. */
 abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** Property builder properties */
-    private val propertyBuilder = EntityUtils(this, entityClass)
+    private val propertyBuilder = PropertyUtils(this, entityClass)
 
     /** The provider must be a method because the entiry attributes are reserved for the Entity model. */
     fun utils() = propertyBuilder
@@ -641,7 +631,7 @@ class SortingProperty<D : Any, V : Any> (
 /** Data Entity builder */
 open class EntityBuilder<D : Any> {
     /** Entity model */
-    val model: EntityModel<D>
+    private val model: EntityModel<D>
     /** Object values */
     private val values : Array<Any?>
 

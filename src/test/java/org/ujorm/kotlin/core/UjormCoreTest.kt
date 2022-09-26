@@ -15,12 +15,12 @@
  */
 package org.ujorm.kotlin.core
 
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.AbstractTest
 import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 
-internal class UjormCoreTest : AbstractTest() {
+internal class UjormCoreTest {
 
     /** Test writing and reading to the object using the meta object. */
     @Test
@@ -29,7 +29,7 @@ internal class UjormCoreTest : AbstractTest() {
             id = 11,
             name = "John",
             contractDay = LocalDate.now(),
-            department = Department(2, "D")
+            department = Department(1, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -49,7 +49,7 @@ internal class UjormCoreTest : AbstractTest() {
         // Composed properties:
         val employeeDepartmentId = (employees.department + departments.id)[employee]
         val employeeDepartmentName = (employees.department + departments.name)[employee]
-        assertEq(employeeDepartmentId, 2) { "Department id must be 2" }
+        assertEq(employeeDepartmentId, 1) { "Department id must be 1" }
         assertEq(employeeDepartmentName, "D") { "Department name must be 'D'" }
     }
 
@@ -60,7 +60,7 @@ internal class UjormCoreTest : AbstractTest() {
             id = 11,
             name = "John",
             contractDay = LocalDate.now(),
-            department = Department(2, "D")
+            department = Department(1, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -92,7 +92,7 @@ internal class UjormCoreTest : AbstractTest() {
             id = 11,
             name = "John",
             contractDay = LocalDate.now(),
-            department = Department(2, "D")
+            department = Department(1, "D")
         )
         val employees = ModelProvider.employees // Employee Entity meta-model
         val departments = ModelProvider.departments // Department Entity meta-model
@@ -107,18 +107,18 @@ internal class UjormCoreTest : AbstractTest() {
 
         employees.name[employee] = "James" // Set a name to the user
         employees.supervisor[employee] = null
-        assertEq(employees.id.name(), "id") { "property id" }
+        assertEq(employees.id.data().name, "id") { "property id" }
+        assertEq(employees.id.toString(), "id") { "property id" }
         assertEq(employees.id.info(), "Employee.id") { "property id" }
-        assertEq(employees.id.toString(), "Employee.id") { "property id" }
-        assertEq(employees.id(), "id") { "property id" } // A shortcut for the name()
+        assertEq(employees.id(), "Employee.id") { "property id" }
 
         val properties = ModelProvider.employees.utils().properties
         assertEq(properties.size, 5) { "Count of properties" }
-        assertEq(properties[0].name(), "id") { "property id" }
-        assertEq(properties[1].name(), "name") { "property name" }
-        assertEq(properties[2].name(), "contract_day") { "property contract_day" } // User defined name
-        assertEq(properties[3].name(), "department") { "property department" }
-        assertEq(properties[4].name(), "supervisor") { "property supervisor" }
+        assertEq(properties[0].data().name, "id") { "property id" }
+        assertEq(properties[1].data().name, "name") { "property name" }
+        assertEq(properties[2].data().name, "contract_day") { "property contract_day" } // User defined name
+        assertEq(properties[3].data().name, "department") { "property department" }
+        assertEq(properties[4].data().name, "supervisor") { "property supervisor" }
 
         // Value type
         assertEq(employees.id.data().valueClass, Int::class)
@@ -148,6 +148,21 @@ internal class UjormCoreTest : AbstractTest() {
 
         assertEq(employee.id, 1)
         assertEq(employee.name, "John")
+    }
+
+    /** Helper methods */
+    private fun <V> assertEq(currentValue: V, expectedValue: V, message: (() -> String)? = null) {
+        Assertions.assertEquals(expectedValue, currentValue/*, message*/)
+    }
+
+    /** Helper methods */
+    private fun assertTrue(condition: Boolean, message: (() -> String)? = null) {
+        Assertions.assertTrue(condition, message)
+    }
+
+    /** Helper methods */
+    private fun assertFalse(condition: Boolean, message: (() -> String)? = null) {
+        Assertions.assertFalse(condition, message)
     }
 
 }

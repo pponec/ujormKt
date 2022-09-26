@@ -8,7 +8,7 @@ data class Employee constructor(
     var id: Int,
     var name: String,
     var contractDay: LocalDate,
-    var department: Department = Department(2, "D"),
+    var department: Department = Department(1, "D"),
     var supervisor: Employee? = null
 )
 

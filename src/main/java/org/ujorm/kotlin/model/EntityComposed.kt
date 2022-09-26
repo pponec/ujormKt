@@ -15,82 +15,26 @@
  */
 package org.ujorm.kotlin.model
 
-import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.Property
+import org.ujorm.kotlin.core.PropertyImpl
 import kotlin.reflect.KClass
 
-/** Dummy property */
-class SelfProperty<D : Any> : PropertyNullable<D, D> {
-    private val metadata: PropertyMetadata<D, D>
+/** Entity composed model */
+abstract class EntityComposedModel<D : Any, V : Any> : PropertyImpl<D, V> {
+    /** A name */
+    val propertyPrefix: Property<D, *>?
 
-    constructor(domainClass: KClass<D>) {
-        this.metadata = PropertyMetadataImpl(0U, "", domainClass, domainClass)
-    }
-
-    override fun data(): PropertyMetadata<D, D> = metadata
-
-    override fun get(entity: D): D? = throw UnsupportedOperationException("Dummy object")
-
-    override fun set(entity: D, value: D?) = throw UnsupportedOperationException("Dummy object")
-}
-
-/** Composed Entity  model */
-open class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
-
-    val prefixProperty: PropertyNullable<D, V>
-    val originalEntityModel: EntityModel<V>
-    val baseInstance get() = prefixProperty is SelfProperty<*>
-
-    protected constructor(
-        prefixProperty: PropertyNullable<D, V>,
-        originalEntityModel: EntityModel<V>,
-    ) {
-        this.prefixProperty = prefixProperty
-        this.originalEntityModel = originalEntityModel
-    }
-
-    protected constructor(originalEntityModel: EntityModel<V>) :
-            this(SelfProperty(originalEntityModel.utils().entityClass) as PropertyNullable<D, V>, originalEntityModel)
-
-    companion object {
-        /** Primary factory method */
-        fun <V : Any> of(originalEntityModel: EntityModel<V>): DomainEntityModel<V, V> {
-            val selfProperty = SelfProperty(originalEntityModel.utils().entityClass)
-            return DomainEntityModel(selfProperty, originalEntityModel)
-        }
-
-        /** Secondary factory method */
-        fun <D : Any, M : Any, V : Any> of(
-            leadProperty: PropertyNullable<D, M>,
-            domainEntityModel: DomainEntityModel<M, V>,
-        ): DomainEntityModel<D, V> {
-            val headProperty = leadProperty + domainEntityModel
-            return DomainEntityModel(headProperty, domainEntityModel.originalEntityModel)
-        }
-    }
-
-    override fun data(): PropertyMetadata<D, V> {
-        return prefixProperty.data()
-    }
-
-    override fun get(entity: D): V? {
-        return prefixProperty[entity]
-    }
-
-    override fun set(entity: D, value: V?) {
-        prefixProperty[entity] = value
-    }
-
-    fun close(): DomainEntityModel<D, V> {
-        // TODO ...
-        return this
+    constructor(
+        index: UByte,
+        name: String,
+        getter: (D) -> V,
+        setter: (D, V?) -> Unit,
+        entityClass: KClass<D>,
+        valueClass: KClass<V>,
+        readOnly: Boolean,
+        nullable: Boolean,
+        propertyPrefix: Property<D, *>?
+    ) : super(index, name, getter, setter, entityClass, valueClass, readOnly, nullable) {
+        this.propertyPrefix = propertyPrefix
     }
 }
-
-//abstract open class DomainEntityModel<D : Any> : ComposedEntityModel<D, D> {
-//
-//    constructor(originalEntityModel: EntityModel<D>) : super(
-//        SelfProperty(originalEntityModel.utils().entityClass),
-//        originalEntityModel,
-//        )
-//
-//}
