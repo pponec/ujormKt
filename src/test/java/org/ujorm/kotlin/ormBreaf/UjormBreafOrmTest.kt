@@ -24,7 +24,7 @@ internal class UjormBreafOrmTest {
         expect(employeeResult.id).toEqual(1)
         expect(employeeResult.name).toEqual("Joe")
 
-        // Slightly shorter notation:
+        // Shorter notation:
         val theSameEmployee = Database
             .where(employees.id EQ 1)
             .toSingleObject()

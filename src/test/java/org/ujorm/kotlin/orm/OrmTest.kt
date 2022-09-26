@@ -22,7 +22,7 @@ internal class OrmTest {
         expect(employeeResult.id).toEqual(1)
         expect(employeeResult.name).toEqual("Joe")
 
-        // Slightly shorter notation:
+        // Shorter notation:
         val theSameEmployee = Database
             .where(employees.id EQ 1)
             .toSingleObject()
@@ -36,6 +36,7 @@ internal class OrmTest {
             .limit(3)
             .offset(4)
             .toList()
+
         expect(employeeList).toHaveSize(3)
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
@@ -47,10 +48,10 @@ internal class OrmTest {
                 employees.department.created,
                 employees.supervisor.name,
             )
-            .where((employees.department.id LE 1) AND
-                            (employees.department.id LE 3))
+            .where((employees.department.id LE 1) AND (employees.department.id LE 3))
             .orderBy((employees.department.created).desc())
             .toList()
+
         expect(employeesWithSelectedItems).toHaveSize(3)
         expect(employeesWithSelectedItems.first().department.created)
             .toEqual(LocalDate.of(2022, 12, 24))
@@ -63,8 +64,9 @@ internal class OrmTest {
                 employees.supervisor.name, // Optional supervisor's name by outer join
             )
             .where(employees.department.name EQ "accounting")
-            .orderBy((employees.supervisor.name).asc(), employees.name.asc())
+            .orderBy(employees.supervisor.name.asc(), employees.name.desc())
             .toList()
+
         expect(employeesByOuterJoin).toHaveSize(3)
         expect(employeesByOuterJoin.first().supervisor?.name).toEqual("Black")
     }
@@ -72,19 +74,17 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun insert() {
-        val development : Department = Database.departments.new().apply {
+        val development = Database.departments.new().apply {
             name = "development"
             created = LocalDate.now()
         }
-
-        val lucy : Employee = Database.employees.new().apply {
+        val lucy = Database.employees.new().apply {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1 , 1)
             supervisor = null
             department = development
         }
-
-        val joe : Employee = Database.employees.new().apply {
+        val joe = Database.employees.new().apply {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2 , 1)
             supervisor = lucy
