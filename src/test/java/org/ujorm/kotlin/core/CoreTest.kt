@@ -24,28 +24,28 @@ import ch.tutteli.atrium.api.verbs.*
 internal class CoreTest {
 
     @Test
-    fun createRawEntity() {
-        val employees = ModelProvider.employees
-        val departments = ModelProvider.departments
+    fun createEntities() {
+        // Get the metamodel:
+        val employees: Employees = ModelProvider.employees
+        val departments: Departments = ModelProvider.departments
 
-        val development : Department = departments.new().apply {
+        // Create some entities:
+        val development: Department = departments.new().apply {
             id = 1
             name = "development"
-            created = LocalDate.of(2021, 10 , 15)
+            created = LocalDate.of(2021, 10, 15)
         }
-
-        val lucy : Employee = employees.new().apply {
+        val lucy: Employee = employees.new().apply {
             id = 2
             name = "Lucy"
-            contractDay = LocalDate.of(2022, 1 , 1)
+            contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
         }
-
-        val joe : Employee = employees.new().apply {
+        val joe: Employee = employees.new().apply {
             id = 3
             name = "Joe"
-            contractDay = LocalDate.of(2022, 2 , 1)
+            contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development
         }
@@ -72,9 +72,9 @@ internal class CoreTest {
 
     /** Test writing and reading to the object using the metamodel. */
     @Test
-    fun testReadWrite() {
-        val employees: Employees = ModelProvider.employees // Employee metamodel
-        val departments: Departments = ModelProvider.departments // Department metamodel
+    fun readAndWrite() {
+        val employees = ModelProvider.employees // Employee metamodel
+        val departments = ModelProvider.departments // Department metamodel
 
         val employee = employees.new().apply {// New employee object
             id = 11
@@ -110,7 +110,7 @@ internal class CoreTest {
 
     /** Test conditions */
     @Test
-    fun testConditions() {
+    fun conditions() {
         val employees = ModelProvider.employees // Employee Entity metamodel
         val departments = ModelProvider.departments // Department Entity metamodel
         val employee = employees.new().apply {// New employee object
@@ -119,7 +119,6 @@ internal class CoreTest {
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
-
 
         // Criterion conditions:
         val crn1 = employees.name EQ "Lucy"
@@ -142,7 +141,7 @@ internal class CoreTest {
 
     /** Sample of usage */
     @Test
-    fun testExtendedFunctions() {
+    fun extendedFunctions() {
         val employees = ModelProvider.employees // Employee Entity metamodel
         val departments = ModelProvider.departments // Department Entity metamodel
         val employee = employees.new().apply {// New employee object
@@ -243,7 +242,7 @@ internal class CoreTest {
 
     /** Create new object by a constructor (for immutable objects) */
     @Test
-    fun createArrayEntity() {
+    fun createArrayOfEntity() {
         val employees = ModelProvider.employees
         val emplyee: Array<Any?> = employees.createArray()
 
@@ -259,6 +258,7 @@ internal class CoreTest {
     }
 }
 
+/** Helper method to create new department */
 private fun getDepartment(id: Int, name: String) =
     ModelProvider.departments.new().apply {
         this.id = id
