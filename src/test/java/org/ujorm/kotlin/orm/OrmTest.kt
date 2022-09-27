@@ -37,12 +37,11 @@ internal class OrmTest {
         expect(employeeList).toHaveSize(3)
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
-        // Ordered list with relation - by inner join:
         val employeesWithSelectedItems = Database.select(
                 employees.id,
                 employees.name,
-                employees.department.created,
-                employees.supervisor.name,
+                employees.department.created, // Required relation by the inner join
+                employees.supervisor.name, // Optional relation by the left outer join
             )
             .where((employees.department.id LE 1) AND (employees.department.id LE 3))
             .orderBy((employees.department.created).desc())
@@ -52,11 +51,12 @@ internal class OrmTest {
         expect(employeesWithSelectedItems.first().department.created)
             .toEqual(LocalDate.of(2022, 12, 24))
 
-        // Ordered list with relation - by outer join:
+        // Ordered list with relations:
         val employeesByOuterJoin = Database.select(
                 employees.id,
                 employees.name,
-                employees.supervisor.name, // Optional supervisor's name by outer join
+                employees.department.name, // Required relation by the inner join
+                employees.supervisor.name, // Optional relation by the left outer join
             )
             .where(employees.department.name EQ "accounting")
             .orderBy(employees.supervisor.name.asc(), employees.name.desc())
