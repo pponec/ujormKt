@@ -106,7 +106,7 @@ internal class OrmTest {
             val created = property(LocalDate::class)
         }
 
-
+        // Result object list:
         val result = Database.selectFor(dbRecordModel)
             .column(employees.id ).bindTo(dbRecordModel.id)
             .column(departments.name).bindTo(dbRecordModel.created)
