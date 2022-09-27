@@ -33,7 +33,7 @@ interface Session {
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  * */
-class RawEntity<D : Any> : InvocationHandler, Entity<D>{
+open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
@@ -124,3 +124,6 @@ class RawEntity<D : Any> : InvocationHandler, Entity<D>{
     /** Hash code of the values */
     override fun hashCode() = values.contentHashCode()
 }
+
+/** Common database recored entity */
+interface DbRecord : Entity<Any>

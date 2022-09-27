@@ -652,6 +652,10 @@ class EntityUtils<D : Any>(
         return result
     }
 
+    protected fun <V : Any> createPropertyRaw(valueClass: KClass<V>, any: Any): Property<RawEntity<D>, V> {
+        TODO()
+    }
+
     /** Add property to the list */
     fun addToList(item: PropertyNullable<D, *>) {
         if (briefModel.closed) throw IllegalStateException(CLOSED_MESSAGE)
@@ -699,6 +703,12 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     protected inline fun <reified V : Any> property(
         noinline getter: (D) -> V
     ) = propertyBuilder.createProperty(V::class, getter)
+
+    /** Create a non-null property by a class.
+     * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
+     */
+    protected inline fun <reified V : Any> property(valueClass: KClass<V>) : Property<RawEntity<D>, V> = TODO()
+        //propertyBuilder.createPropertyRaw(valueClass, TODO())
 
     /** Create a non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.

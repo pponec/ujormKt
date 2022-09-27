@@ -13,7 +13,7 @@ interface Employee : Entity<Employee> {
 }
 
 /** Model of the entity can be a generated class in the feature */
-open class Employees : EntityModel<Employee>(Employee::class) {
+class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
     val contractDay = property(/*"contract_day"*/) { it.contractDay } // TODO()

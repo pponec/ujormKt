@@ -11,7 +11,7 @@ interface Department : Entity<Department> {
 }
 
 /** Model of the entity can be a generated class in the feature */
-open class Departments : EntityModel<Department>(Department::class) {
+class Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
     val created = property { it.created }

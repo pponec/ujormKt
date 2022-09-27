@@ -16,10 +16,8 @@
 package org.ujorm.kotlin.orm
 
 import org.ujorm.kotlin.core.*
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.util.*
 import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 abstract class AbstractDatabase : AbstractModelProvider() {
 
@@ -38,6 +36,17 @@ abstract class AbstractDatabase : AbstractModelProvider() {
     fun save(vararg entities : Entity<*>) {
         TODO()
     }
+
+    // --- Native query
+
+    fun <D : Any> selectFor(entity: EntityModel<D>) : NativeQuery<D> {
+        TODO()
+    }
+
+    fun <D : EntityModel<D>>  selectFor(kClass: KClass<D>): NativeQuery<D> {
+        TODO()
+    }
+
 }
 
 open class Query<D : Any> {
@@ -79,6 +88,37 @@ open class Query<D : Any> {
 
     fun toCount(): Long {
         TODO("Not yet implemented")
+    }
+}
+
+open class NativeQuery<D : Any> {
+    fun column(vararg expr: CharSequence) : Column<D> {
+        TODO("Not yet implemented")
+        return Column(this);
+    }
+
+    fun join(vararg expr: CharSequence) : Column<D> {
+        TODO("Not yet implemented")
+        return Column(this);
+    }
+
+    fun where(vararg expr: CharSequence) : NativeQuery<D> {
+        TODO("Not yet implemented")
+    }
+
+    fun orderBy(vararg expr: CharSequence) : NativeQuery<D> {
+        TODO("Not yet implemented")
+    }
+
+    fun toList() : List<RawEntity<DbRecord>> = TODO()
+}
+
+open class Column<D: Any>(
+    val nativeQuery : NativeQuery<D>
+) {
+    fun <V : Any> bindTo(property : PropertyNullable<RawEntity<DbRecord>, V>) : NativeQuery<D> {
+        TODO("Not yet implemented")
+        return nativeQuery;
     }
 }
 

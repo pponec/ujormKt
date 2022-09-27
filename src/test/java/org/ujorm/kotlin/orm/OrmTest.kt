@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.orm.entity.*
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import org.ujorm.kotlin.core.DbRecord
+import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.RawEntity
 import java.time.LocalDate
 
 internal class OrmTest {
@@ -88,7 +91,40 @@ internal class OrmTest {
 
         Database.save(development, lucy, joe)
     }
+
+    @Test
+    @Disabled("Only a first draft of API is implemented")
+    internal fun nativeQuery() {
+        val employees = Database.employees
+        val departments = Database.departments
+
+
+        // Metamodel of the result:
+        val dbRecordModel = object : EntityModel<DbRecord>(DbRecord::class) {
+            val id = property(Int::class)
+            val name = property(String::class)
+            val created = property(LocalDate::class)
+        }
+
+
+        val result = Database.selectFor(dbRecordModel)
+            .column(employees.id ).bindTo(dbRecordModel.id)
+            .column(departments.name).bindTo(dbRecordModel.created)
+            .where(employees.department.id, "=", departments.id)
+            .toList()
+
+//        result.forEach{row ->
+//            println("id = ${row[dbRecordModel.id]}")
+//        }
+
+
+//        val dbRecord : RawEntity<DbRecord> = TODO()
+//        val id : Int = dbRecordModel.id.get(dbRecord)
+
+    }
 }
+
+
 
 
 
