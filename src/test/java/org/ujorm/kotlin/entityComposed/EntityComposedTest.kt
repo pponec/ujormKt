@@ -28,14 +28,16 @@ internal class EntityComposedTest {
     @Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        val employee = ModelProvider.employees.new().apply {
+        val employees = ModelProvider.employees // Employee Entity metamodel
+        val employee = employees.new {
             id = 11
             name = "John"
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
-        val employees = ModelProvider.employees // Employee Entity metamodel
-        val departments = ModelProvider.departments // Department Entity metamodel
+        expect(employee.id).toEqual(11)
+        expect(employee.name).toEqual("John")
+
         val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (!)
 
         // Read and Write values by entity metamodel:
@@ -58,7 +60,7 @@ internal class EntityComposedTest {
     }
 
     private fun getDepartment(id: Int, name: String) =
-        ModelProvider.departments.new().apply {
+        ModelProvider.departments.new {
             this.id = id
             this.name = name
         }

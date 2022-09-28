@@ -70,17 +70,17 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun insert() {
-        val development = Database.departments.new().apply {
+        val development = Database.departments.new {
             name = "development"
             created = LocalDate.now()
         }
-        val lucy = Database.employees.new().apply {
+        val lucy = Database.employees.new {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1 , 1)
             supervisor = null
             department = development
         }
-        val joe = Database.employees.new().apply {
+        val joe = Database.employees.new {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2 , 1)
             supervisor = lucy

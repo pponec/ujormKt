@@ -25,24 +25,24 @@ internal class CoreTest {
 
     @Test
     fun createEntities() {
-        // Get the metamodel:
+        // Get the metamodel(s):
         val employees: Employees = ModelProvider.employees
         val departments: Departments = ModelProvider.departments
 
-        // Create some entities:
-        val development: Department = departments.new().apply {
+        // Create some new entities:
+        val development: Department = departments.new {
             id = 1
             name = "development"
             created = LocalDate.of(2021, 10, 15)
         }
-        val lucy: Employee = employees.new().apply {
+        val lucy: Employee = employees.new {
             id = 2
             name = "Lucy"
             contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
         }
-        val joe: Employee = employees.new().apply {
+        val joe: Employee = employees.new {
             id = 3
             name = "Joe"
             contractDay = LocalDate.of(2022, 2, 1)
@@ -50,6 +50,7 @@ internal class CoreTest {
             department = development
         }
 
+        expect(development.id).toEqual(1)
         expect(joe.name).toEqual("Joe")
         expect(joe.department.name).toEqual("development")
         expect(joe.supervisor?.name).toEqual("Lucy")
@@ -76,7 +77,7 @@ internal class CoreTest {
         val employees = ModelProvider.employees // Employee metamodel
         val departments = ModelProvider.departments // Department metamodel
 
-        val employee = employees.new().apply {// New employee object
+        val employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()
@@ -113,7 +114,7 @@ internal class CoreTest {
     fun conditions() {
         val employees = ModelProvider.employees // Employee Entity metamodel
         val departments = ModelProvider.departments // Department Entity metamodel
-        val employee = employees.new().apply {// New employee object
+        val employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()
@@ -144,7 +145,7 @@ internal class CoreTest {
     fun extendedFunctions() {
         val employees = ModelProvider.employees // Employee Entity metamodel
         val departments = ModelProvider.departments // Department Entity metamodel
-        val employee = employees.new().apply {// New employee object
+        val employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()
@@ -260,7 +261,7 @@ internal class CoreTest {
 
 /** Helper method to create new department */
 private fun getDepartment(id: Int, name: String) =
-    ModelProvider.departments.new().apply {
+    ModelProvider.departments.new {
         this.id = id
         this.name = name
     }

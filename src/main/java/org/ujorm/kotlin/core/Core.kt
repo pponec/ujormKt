@@ -749,6 +749,9 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
         )
         return result as D
     }
+
+    /** Create new instance of the domain object and assign properties */
+    inline fun new(init: D.() -> Unit) : D = new().also { it.init() }
 }
 
 /** Common utilities */
