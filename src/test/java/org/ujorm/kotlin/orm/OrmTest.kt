@@ -93,11 +93,11 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun nativeQuery() {
-        val employees = Database.employees
-        val departments = Database.departments
+        val employees = Database.employees //.entityAlias("e")
+        val departments = Database.departments // .entityAlias("d")
 
         // Metamodel of the result:
-        val dbRecordApi = object : TempModel() {
+        val db = object : TempModel() {
             val id = property(Int::class)
             val name = property(String::class)
             val created = property(LocalDate::class)
@@ -105,41 +105,41 @@ internal class OrmTest {
 
         // Result object list:
         val result1 = Database.selectFor()
-            .item(dbRecordApi.id to "(",  employees.id, "+ 10) * 2" )
-            .item(dbRecordApi.created to departments.name)
+            .item(db.id to "(",  employees.id, "+ 10) * 2" )
+            .item(db.created to departments.name)
             .where(employees.department.id, "=", departments.id)
             .toList()
         result1.forEach{
-            val id : Int = dbRecordApi.id[it]
-            val name : String = dbRecordApi.name[it]
-            val created : LocalDate = dbRecordApi.created[it]
+            val id : Int = db.id[it]
+            val name : String = db.name[it]
+            val created : LocalDate = db.created[it]
             println("Db record: id = $id, name = $name, created = $created")
         }
 
 
         // Result object list:
         val result23 = Database.selectFor()
-            .item(dbRecordApi.id to "max(", dbRecordApi.created, ")")
+            .item(db.id to "max(", db.created, ")")
             .whereAny(employees.department.id, ">", 10)
             .toList()
         result23.forEach{
-            val id : Int = dbRecordApi.id[it]
-            val name : String = dbRecordApi.name[it]
-            val created : LocalDate = dbRecordApi.created[it]
+            val id : Int = db.id[it]
+            val name : String = db.name[it]
+            val created : LocalDate = db.created[it]
             println("Db record: id = $id, name = $name, created = $created")
         }
 
 
         // Result object list:
         val result24 = Database.selectFor()
-            .item(employees.id, "+", 1 ).to(dbRecordApi.id)
-            .item(departments.name).to(dbRecordApi.created)
+            .item(employees.id, "+", 10).to(db.id)
+            .item(departments.name).to(db.created)
             .where(employees.department.id, "=", departments.id)
             .toList()
         result24.forEach{
-            val id : Int = dbRecordApi.id[it]
-            val name : String = dbRecordApi.name[it]
-            val created : LocalDate = dbRecordApi.created[it]
+            val id : Int = db.id[it]
+            val name : String = db.name[it]
+            val created : LocalDate = db.created[it]
             println("Db record: id = $id, name = $name, created = $created")
         }
 
