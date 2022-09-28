@@ -106,10 +106,17 @@ internal class OrmTest {
 
         // Result object list:
         val result1 = Database.selectFor(dbRecordApi)
-            .column(dbRecordApi.id to employees.id, "", "", "" )
+            .column(dbRecordApi.id to "(",  employees.id, "+ 10) * 2" )
             .column(dbRecordApi.created to departments.name)
             .where(employees.department.id, "=", departments.id)
             .toList()
+
+        result1.forEach{
+            val id : Int = dbRecordApi.id[it]
+            val name : String = dbRecordApi.name[it]
+            val created : LocalDate = dbRecordApi.created[it]
+            println("Db record: id = $id, name = $name, created = $created")
+        }
 
 
         // Result object list:

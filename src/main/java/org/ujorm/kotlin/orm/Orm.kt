@@ -123,7 +123,7 @@ open class NativeQuery<D : Any> {
         TODO("Not yet implemented")
     }
 
-    fun toList(): List<RawEntity<DbRecord>> = TODO()
+    fun toList(): List<Array<Any?>> = TODO()
 }
 
 open class Column<D : Any>(
