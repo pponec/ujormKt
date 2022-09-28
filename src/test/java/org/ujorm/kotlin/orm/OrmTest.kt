@@ -8,6 +8,7 @@ import ch.tutteli.atrium.api.verbs.*
 import org.ujorm.kotlin.core.DbRecord
 import org.ujorm.kotlin.core.EntityModel
 import org.ujorm.kotlin.core.RawEntity
+import org.ujorm.kotlin.core.TempModel
 import java.time.LocalDate
 
 internal class OrmTest {
@@ -100,7 +101,7 @@ internal class OrmTest {
 
 
         // Metamodel of the result:
-        val dbRecordModel = object : EntityModel<DbRecord>(DbRecord::class) {
+        val dbRecordModel = object : TempModel() {
             val id = property(Int::class)
             val name = property(String::class)
             val created = property(LocalDate::class)

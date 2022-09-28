@@ -127,3 +127,5 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
 
 /** Common database recored entity */
 interface DbRecord : Entity<Any>
+
+open class TempModel : EntityModel<DbRecord>(DbRecord::class)
