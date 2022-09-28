@@ -1,7 +1,6 @@
 package org.ujorm.kotlin.entityComposed.entity
 
 import org.ujorm.kotlin.core.EntityModel
-import org.ujorm.kotlin.core.PropertyNullable
 import org.ujorm.kotlin.entityComposed.DomainEntityModel
 import java.time.LocalDate
 
@@ -36,6 +35,6 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Employees<Employee>().close() as Employees<Employee>
 }

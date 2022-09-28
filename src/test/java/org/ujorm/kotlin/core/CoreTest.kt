@@ -26,8 +26,8 @@ internal class CoreTest {
     @Test
     fun createEntities() {
         // Get the metamodel(s):
-        val employees: Employees = ModelProvider.employees
-        val departments: Departments = ModelProvider.departments
+        val employees: Employees = EntityProvider.employees
+        val departments: Departments = EntityProvider.departments
 
         // Create some new entities:
         val development: Department = departments.new {
@@ -74,8 +74,8 @@ internal class CoreTest {
     /** Test writing and reading to the object using the metamodel. */
     @Test
     fun readAndWrite() {
-        val employees = ModelProvider.employees // Employee metamodel
-        val departments = ModelProvider.departments // Department metamodel
+        val employees = EntityProvider.employees // Employee metamodel
+        val departments = EntityProvider.departments // Department metamodel
 
         val employee = employees.new { // Create new employee object
             id = 11
@@ -112,8 +112,8 @@ internal class CoreTest {
     /** Test conditions */
     @Test
     fun conditions() {
-        val employees = ModelProvider.employees // Employee Entity metamodel
-        val departments = ModelProvider.departments // Department Entity metamodel
+        val employees = EntityProvider.employees // Employee Entity metamodel
+        val departments = EntityProvider.departments // Department Entity metamodel
         val employee = employees.new { // Create new employee object
             id = 11
             name = "John"
@@ -143,8 +143,8 @@ internal class CoreTest {
     /** Sample of usage */
     @Test
     fun extendedFunctions() {
-        val employees = ModelProvider.employees // Employee Entity metamodel
-        val departments = ModelProvider.departments // Department Entity metamodel
+        val employees = EntityProvider.employees // Employee Entity metamodel
+        val departments = EntityProvider.departments // Department Entity metamodel
         val employee = employees.new { // Create new employee object
             id = 11
             name = "John"
@@ -167,7 +167,7 @@ internal class CoreTest {
         expect(employees.id.info()).toEqual("Employee.id") // property id
         expect(employees.id()).toEqual("id") // A shortcut for the name()
 
-        val properties = ModelProvider.employees.utils().properties
+        val properties = employees.utils().properties
         expect(properties.size).toEqual(5) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
         expect(properties[1].name()).toEqual("name") // property name
@@ -193,8 +193,8 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndAlias() {
-        val employees: Employees = ModelProvider.employees.alias("e")
-        val department: Departments = ModelProvider.departments.alias("d")
+        val employees: Employees = EntityProvider.employees.alias("e")
+        val department: Departments = EntityProvider.departments.alias("d")
 
         println(employees.id.status())
 
@@ -207,17 +207,17 @@ internal class CoreTest {
         expect(employees.department.info()).toEqual("Employee(e).department")
 
         var idAliasHash = employees.id.hashCode()
-        var idHash = ModelProvider.employees.id.hashCode()
+        var idHash = employees.id.hashCode()
         var nameAliasHash = employees.name.hashCode()
         var idAliasName = employees.id.name()
-        var idName = ModelProvider.employees.id.name()
-        var idAlias2 = ModelProvider.employees.id.entityAlias("e") // Alias for a single property
-        var idAlias3 = ModelProvider.employees.id("e") // Shortcut for new alias
+        var idName = employees.id.name()
+        var idAlias2 = employees.id.entityAlias("e") // Alias for a single property
+        var idAlias3 = employees.id("e") // Shortcut for new alias
 
         expect(idAliasName).toEqual(idName)
         expect(idAliasHash).notToEqual(idHash) // Different hash codes
         expect(idAliasHash).notToEqual(nameAliasHash) // Different hash codes
-        expect(employees.id).notToEqual(ModelProvider.employees.id) // Different properties
+        expect(employees.id).notToEqual(employees.id) // Different properties
         expect(idAliasHash).toEqual(idAlias2.hashCode())
         expect(employees.id).toEqual(idAlias2)
         expect(idAlias2).toEqual(idAlias3)
@@ -244,7 +244,7 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun createArrayOfEntity() {
-        val employees = ModelProvider.employees
+        val employees = EntityProvider.employees
         val emplyee: Array<Any?> = employees.createArray()
 
         val id = 17 // Reference value
@@ -261,7 +261,7 @@ internal class CoreTest {
 
 /** Helper method to create new department */
 private fun getDepartment(id: Int, name: String) =
-    ModelProvider.departments.new {
+    EntityProvider.departments.new {
         this.id = id
         this.name = name
     }

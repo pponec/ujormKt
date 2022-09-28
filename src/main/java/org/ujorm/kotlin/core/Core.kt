@@ -517,7 +517,7 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
 }
 
 /** Interface of the domain metamodel */
-abstract class AbstractModelProvider {
+abstract class AbstractEntityProvider {
 
     /** Get all entity models */
     val entityModels: List<EntityModel<*>> by lazy {

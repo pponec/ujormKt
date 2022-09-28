@@ -18,7 +18,7 @@ package org.ujorm.kotlin.orm
 import org.ujorm.kotlin.core.*
 import java.util.stream.Stream
 
-abstract class AbstractDatabase : AbstractModelProvider() {
+abstract class AbstractDatabase : AbstractEntityProvider() {
 
     fun <D : Any> select(table: EntityModel<D>): Query<D> {
         TODO()

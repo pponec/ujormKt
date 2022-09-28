@@ -28,7 +28,7 @@ internal class EntityComposedTest {
     @Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        val employees = ModelProvider.employees // Employee Entity metamodel
+        val employees = EntityProvider.employees // Employee Entity metamodel
         val employee = employees.new {
             id = 11
             name = "John"
@@ -60,7 +60,7 @@ internal class EntityComposedTest {
     }
 
     private fun getDepartment(id: Int, name: String) =
-        ModelProvider.departments.new {
+        EntityProvider.departments.new {
             this.id = id
             this.name = name
         }
