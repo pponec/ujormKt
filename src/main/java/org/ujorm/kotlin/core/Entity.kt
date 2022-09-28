@@ -94,7 +94,7 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
 
     override fun toString() = toString(40)
 
-    protected fun toString(itemValueLength : Int): String {
+    protected fun toString(itemValueMaxLength : Int, maxDepth: Int = 3): String {
         val result = StringBuilder().append(model.utils().entityClass.simpleName)
         model.utils().properties.forEachIndexed { i, property ->
             result.append(if (i == 0) "{" else ", ")
@@ -102,11 +102,15 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
             result.append('=')
             val value = values[i]
             if (value is RawEntity<*>) {
-                result.append(value.toString(itemValueLength))
+                if (maxDepth > 0) {
+                    result.append(value.toString(itemValueMaxLength, maxDepth - 1))
+                } else {
+                    result.append("...")
+                }
             } else {
                 val text = "$value"
-                result.append(if (text.length <= itemValueLength) text
-                else "${text.substring(0, itemValueLength - 4)}...}")
+                result.append(if (text.length <= itemValueMaxLength) text
+                else "${text.substring(0, itemValueMaxLength - 4)}...}")
             }
         }
         return result.append('}').toString()
