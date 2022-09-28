@@ -28,6 +28,7 @@ internal class CoreTest {
         // Get the metamodel(s):
         val employees: Employees = EntityProvider.employees
         val departments: Departments = EntityProvider.departments
+        EntityProvider.close()
 
         // Create some new entities:
         val development: Department = departments.new {

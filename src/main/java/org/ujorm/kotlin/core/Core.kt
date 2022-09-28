@@ -25,6 +25,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.memberExtensionProperties
 import kotlin.reflect.full.memberProperties
 
 /** Common condition operator */
@@ -523,6 +524,20 @@ abstract class AbstractEntityProvider {
     val entityModels: List<EntityModel<*>> by lazy {
         val result: List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
         result.sortedBy { it.utils().entityClass.simpleName }
+    }
+
+    /** Create a map of assigned entities */
+    fun close() {
+        println("Close AbstractEntityProvider") // TODO:
+        val currentClass = this::class
+
+        var xxx = false
+        currentClass.memberExtensionProperties.forEach{
+            println("1>>>" + it.name)
+            xxx = true
+        }
+
+        println("TOTAL >>> " + xxx)
     }
 }
 
