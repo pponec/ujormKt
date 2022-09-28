@@ -29,5 +29,5 @@ class Employees : EntityModel<Employee>(Employee::class) {
 
 /** Initialize, register and close the entity model. */
 val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Employees().close<Employees>()
+    EntityProvider.add(Employees())
 }

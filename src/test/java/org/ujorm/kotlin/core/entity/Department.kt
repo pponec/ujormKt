@@ -19,5 +19,5 @@ class Departments : EntityModel<Department>(Department::class) {
 
 /** Initialize, register and close the entity model. */
 val EntityProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Departments().close<Departments>()
+    EntityProvider.add(Departments())
 }

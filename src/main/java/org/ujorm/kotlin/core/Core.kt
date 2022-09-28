@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
 import java.util.*
 import java.util.stream.Stream
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
@@ -517,28 +518,48 @@ class ValueCriterion<D : Any, out V : Any> : Criterion<D, ValueOperator, V> {
     }
 }
 
+class EntityProviderUtils {
+    private var locked: Boolean = false
+
+    /** Get all entity models */
+    private var entityModels: MutableList<EntityModel<*>> = mutableListOf()
+
+    private var entityMap : Map<KClass<*>, EntityModel<*>> = emptyMap()
+
+    /** Add an entity and close */
+    fun <D : Any, E : EntityModel<D>> add(entity : E) : E {
+        check(locked) { "The object is locked" }
+        entityModels.add(entity.close())
+        return entity
+    }
+
+    fun entityModels() : List<EntityModel<*>> = entityModels
+
+    /** Lock the model if it hasn't already. */
+    fun close() {
+        if (locked) return
+
+        var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
+        entityModels.forEach {
+            it.closeNoResult()
+            map[it.utils().entityClass] = it
+        }
+        entityMap = map
+        entityModels = Collections.unmodifiableList(entityModels) as MutableList<EntityModel<*>>
+        locked = true
+    }
+}
+
 /** Interface of the domain metamodel */
 abstract class AbstractEntityProvider {
 
-    /** Get all entity models */
-    val entityModels: List<EntityModel<*>> by lazy {
-        val result: List<EntityModel<*>> = Utils.getProperties(this, EntityModel::class)
-        result.sortedBy { it.utils().entityClass.simpleName }
-    }
+    protected val utils = EntityProviderUtils()
 
-    /** Create a map of assigned entities */
-    fun close() {
-        println("Close AbstractEntityProvider") // TODO:
-        val currentClass = this::class
+    fun utils() = utils
 
-        var xxx = false
-        currentClass.memberExtensionProperties.forEach{
-            println("1>>>" + it.name)
-            xxx = true
-        }
+    /** Register a new entity */
+    fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
 
-        println("TOTAL >>> " + xxx)
-    }
 }
 
 /** Brief entity model */
@@ -689,9 +710,14 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** The provider must be a method because the entity attributes are reserved for the Entity model. */
     fun utils() = propertyBuilder
 
-    /** Initialize and close the entity model. */
+    /** Initialize and close the entity model and return yourself back. */
     @Suppress("UNCHECKED_CAST")
     fun <R : EntityModel<D>> close(): R = propertyBuilder.close() as R
+
+    /** Initialize and close the entity model. */
+    fun closeNoResult() : Unit {
+         propertyBuilder.close()
+    }
 
     /** Clone the metamodel for required alias.
      * Use the method judiciously because it needs certain system resources. */
