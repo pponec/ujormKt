@@ -33,17 +33,17 @@ abstract class AbstractDatabase : AbstractModelProvider() {
         TODO("Not yet implemented")
     }
 
-    fun save(vararg entities : Entity<*>) {
+    fun save(vararg entities: Entity<*>) {
         TODO()
     }
 
     // --- Native query
 
-    fun <D : Any> selectFor(entity: EntityModel<D>) : NativeQuery<D> {
+    fun <D : Any> selectFor(entity: EntityModel<D>): NativeQuery<D> {
         TODO()
     }
 
-    fun <D : EntityModel<D>>  selectFor(kClass: KClass<D>): NativeQuery<D> {
+    fun <D : EntityModel<D>> selectFor(kClass: KClass<D>): NativeQuery<D> {
         TODO()
     }
 
@@ -92,31 +92,44 @@ open class Query<D : Any> {
 }
 
 open class NativeQuery<D : Any> {
-    fun column(vararg expr: CharSequence) : Column<D> {
+    fun column(vararg expr: CharSequence): Column<D> {
         TODO("Not yet implemented")
         return Column(this);
     }
 
-    fun join(vararg expr: CharSequence) : Column<D> {
+    fun <V : Any> column(map: Pair<Property<RawEntity<DbRecord>, V>, Any>, vararg sql: Any): NativeQuery<D> {
+        TODO("Not yet implemented")
+        return this;
+    }
+
+    fun join(vararg expr: CharSequence): Column<D> {
         TODO("Not yet implemented")
         return Column(this);
     }
 
-    fun where(vararg expr: CharSequence) : NativeQuery<D> {
+    fun <V : Any> where(
+        c1: PropertyNullable<*, V>,
+        operator: CharSequence,
+        c2: PropertyNullable<*, V>
+    ): NativeQuery<D> {
         TODO("Not yet implemented")
     }
 
-    fun orderBy(vararg expr: CharSequence) : NativeQuery<D> {
+    fun whereAny(vararg expr: Any): NativeQuery<D> {
         TODO("Not yet implemented")
     }
 
-    fun toList() : List<RawEntity<DbRecord>> = TODO()
+    fun orderBy(vararg expr: CharSequence): NativeQuery<D> {
+        TODO("Not yet implemented")
+    }
+
+    fun toList(): List<RawEntity<DbRecord>> = TODO()
 }
 
-open class Column<D: Any>(
-    val nativeQuery : NativeQuery<D>
+open class Column<D : Any>(
+    val nativeQuery: NativeQuery<D>
 ) {
-    fun <V : Any> bindTo(property : PropertyNullable<RawEntity<DbRecord>, V>) : NativeQuery<D> {
+    fun <V : Any> bindTo(property: PropertyNullable<RawEntity<DbRecord>, V>): NativeQuery<D> {
         TODO("Not yet implemented")
         return nativeQuery;
     }

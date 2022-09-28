@@ -5,9 +5,6 @@ import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.orm.entity.*
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
-import org.ujorm.kotlin.core.DbRecord
-import org.ujorm.kotlin.core.EntityModel
-import org.ujorm.kotlin.core.RawEntity
 import org.ujorm.kotlin.core.TempModel
 import java.time.LocalDate
 
@@ -101,16 +98,30 @@ internal class OrmTest {
 
 
         // Metamodel of the result:
-        val dbRecordModel = object : TempModel() {
+        val dbRecordApi = object : TempModel() {
             val id = property(Int::class)
             val name = property(String::class)
             val created = property(LocalDate::class)
         }
 
         // Result object list:
-        val result = Database.selectFor(dbRecordModel)
-            .column(employees.id ).bindTo(dbRecordModel.id)
-            .column(departments.name).bindTo(dbRecordModel.created)
+        val result1 = Database.selectFor(dbRecordApi)
+            .column(dbRecordApi.id to employees.id, "", "", "" )
+            .column(dbRecordApi.created to departments.name)
+            .where(employees.department.id, "=", departments.id)
+            .toList()
+
+
+        // Result object list:
+        val result23 = Database.selectFor(dbRecordApi)
+            .column(dbRecordApi.id to "max(", dbRecordApi.created, ")")
+            .whereAny(employees.department.id, ">", 10)
+            .toList()
+
+        // Result object list:
+        val result2 = Database.selectFor(dbRecordApi)
+            .column(employees.id ).bindTo(dbRecordApi.id)
+            .column(departments.name).bindTo(dbRecordApi.created)
             .where(employees.department.id, "=", departments.id)
             .toList()
 
