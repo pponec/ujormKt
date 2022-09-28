@@ -96,7 +96,6 @@ internal class OrmTest {
         val employees = Database.employees
         val departments = Database.departments
 
-
         // Metamodel of the result:
         val dbRecordApi = object : TempModel() {
             val id = property(Int::class)
@@ -105,12 +104,11 @@ internal class OrmTest {
         }
 
         // Result object list:
-        val result1 = Database.selectFor(dbRecordApi)
-            .column(dbRecordApi.id to "(",  employees.id, "+ 10) * 2" )
-            .column(dbRecordApi.created to departments.name)
+        val result1 = Database.selectFor()
+            .item(dbRecordApi.id to "(",  employees.id, "+ 10) * 2" )
+            .item(dbRecordApi.created to departments.name)
             .where(employees.department.id, "=", departments.id)
             .toList()
-
         result1.forEach{
             val id : Int = dbRecordApi.id[it]
             val name : String = dbRecordApi.name[it]
@@ -120,25 +118,30 @@ internal class OrmTest {
 
 
         // Result object list:
-        val result23 = Database.selectFor(dbRecordApi)
-            .column(dbRecordApi.id to "max(", dbRecordApi.created, ")")
+        val result23 = Database.selectFor()
+            .item(dbRecordApi.id to "max(", dbRecordApi.created, ")")
             .whereAny(employees.department.id, ">", 10)
             .toList()
+        result23.forEach{
+            val id : Int = dbRecordApi.id[it]
+            val name : String = dbRecordApi.name[it]
+            val created : LocalDate = dbRecordApi.created[it]
+            println("Db record: id = $id, name = $name, created = $created")
+        }
+
 
         // Result object list:
-        val result2 = Database.selectFor(dbRecordApi)
-            .column(employees.id ).bindTo(dbRecordApi.id)
-            .column(departments.name).bindTo(dbRecordApi.created)
+        val result24 = Database.selectFor()
+            .item(employees.id, "+", 1 ).to(dbRecordApi.id)
+            .item(departments.name).to(dbRecordApi.created)
             .where(employees.department.id, "=", departments.id)
             .toList()
-
-//        result.forEach{row ->
-//            println("id = ${row[dbRecordModel.id]}")
-//        }
-
-
-//        val dbRecord : RawEntity<DbRecord> = TODO()
-//        val id : Int = dbRecordModel.id.get(dbRecord)
+        result24.forEach{
+            val id : Int = dbRecordApi.id[it]
+            val name : String = dbRecordApi.name[it]
+            val created : LocalDate = dbRecordApi.created[it]
+            println("Db record: id = $id, name = $name, created = $created")
+        }
 
     }
 }
