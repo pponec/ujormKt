@@ -26,7 +26,6 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.full.memberExtensionProperties
 import kotlin.reflect.full.memberProperties
 
 /** Common condition operator */
@@ -541,7 +540,7 @@ class EntityProviderUtils {
 
         var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
         entityModels.forEach {
-            it.closeNoResult()
+            it.closeModel()
             map[it.utils().entityClass] = it
         }
         entityMap = map
@@ -553,12 +552,16 @@ class EntityProviderUtils {
 /** Interface of the domain metamodel */
 abstract class AbstractEntityProvider {
 
-    protected val utils = EntityProviderUtils()
+    private val utils = EntityProviderUtils()
 
     fun utils() = utils
 
     /** Register a new entity */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
+
+    open protected fun close() {
+        utils.close()
+    }
 
 }
 
@@ -715,7 +718,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun <R : EntityModel<D>> close(): R = propertyBuilder.close() as R
 
     /** Initialize and close the entity model. */
-    fun closeNoResult() : Unit {
+    fun closeModel() : Unit {
          propertyBuilder.close()
     }
 
