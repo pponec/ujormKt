@@ -559,7 +559,7 @@ abstract class AbstractEntityProvider {
     /** Register a new entity */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
 
-    open protected fun close() {
+    open fun close() {
         utils.close()
     }
 
