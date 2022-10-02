@@ -92,6 +92,7 @@ open class NativeQuery {
         return Column(this);
     }
 
+    @Deprecated("Remove it")
     fun <V : Any> item(map: Pair<Property<RawEntity<DbRecord>, V>, Any>, vararg sql: Any): NativeQuery {
         TODO("Not yet implemented")
         return this;

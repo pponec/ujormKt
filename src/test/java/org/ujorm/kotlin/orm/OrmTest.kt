@@ -104,33 +104,6 @@ internal class OrmTest {
         }
 
         // Result object list:
-        val result1 = Database.selectFor()
-            .item(db.id to "(",  employees.id, "+ 10) * 2" )
-            .item(db.created to departments.name)
-            .where(employees.department.id, "=", departments.id)
-            .toList()
-        result1.forEach{
-            val id : Int = db.id[it]
-            val name : String = db.name[it]
-            val created : LocalDate = db.created[it]
-            println("Db record: id = $id, name = $name, created = $created")
-        }
-
-
-        // Result object list:
-        val result23 = Database.selectFor()
-            .item(db.id to "max(", db.created, ")")
-            .whereAny(employees.department.id, ">", 10)
-            .toList()
-        result23.forEach{
-            val id : Int = db.id[it]
-            val name : String = db.name[it]
-            val created : LocalDate = db.created[it]
-            println("Db record: id = $id, name = $name, created = $created")
-        }
-
-
-        // Result object list:
         val result24 = Database.selectFor()
             .item(employees.id, "+", 10).to(db.id)
             .item(departments.name).to(db.created)
