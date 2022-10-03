@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import kotlin.reflect.KProperty2
 import kotlin.reflect.full.*
 
 class ExtensionPropertiesTest {
@@ -19,8 +20,20 @@ class ExtensionPropertiesTest {
 
         val propertyNames = ExtensionPropertiesTest::class.memberExtensionProperties
             .map { it.name }
+            .sortedBy { it }
             .toList()
 
-        expect(propertyNames).toHaveSize(2) // Real size is zero (?)
+        expect(propertyNames).toHaveSize(2)
+        expect(propertyNames.first()).toEqual("date")
+        expect(propertyNames.last()).toEqual("name")
+
+        val property = ExtensionPropertiesTest::class
+            .memberExtensionProperties
+            .filter { it.name == "name" }
+            .first() as KProperty2<ExtensionPropertiesTest, DummyClass, String>
+
+        val dummy = DummyClass()
+        val john = property.get(this, dummy) as String
+        expect(john).toEqual("John")
     }
 }
