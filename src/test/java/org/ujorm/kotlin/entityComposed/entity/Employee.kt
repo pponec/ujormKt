@@ -32,9 +32,8 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
     val contractDay get() = property(core.contractDay)
     val department: Departments<D> get() = property(core.department)
     val supervisor: Employees<D> get() = property(core.supervisor)
-}
 
-/** Initialize, register and close the entity model. */
-val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Employees<Employee>().close() as Employees<Employee>
+    val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        Employees<Employee>().close() as Employees<Employee>
+    }
 }
