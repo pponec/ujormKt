@@ -32,7 +32,7 @@ open class Departments<D : Any> : DomainEntityModel<D, Department>() {
     val created get() = property(core.created)
 
     /** Initialize, register and close the entity model. */
-    val EntityProvider.departments by lazy {
+    val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Departments<Department>().close() as Departments<Department>
     }
 }
