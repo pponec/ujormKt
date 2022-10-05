@@ -8,6 +8,22 @@ import kotlin.reflect.KClass
 /** Source : https://www.baeldung.com/java-find-all-classes-in-package#1-system-class-loader */
 class Reflections {
 
+    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>): Stream<EntityModel<*>> {
+        return findAllClassesOfPackage(packageClass)
+            .filter{ it.simpleName.endsWith("Kt")}
+            .map { getObjects(it) }
+            .flatMap { it }
+    }
+
+    fun getObjects(clazz : Class<*>) : Stream<EntityModel<*>> {
+        val domain = clazz.getDeclaredConstructor().newInstance()
+        return clazz.methods
+            .filter { it.parameterCount == 0 }
+            .filter { it.returnType.isAssignableFrom(EntityModel::class.java) }
+            .map { it.invoke(domain) }
+            .stream() as Stream<EntityModel<*>>
+    }
+
     fun findAllClassesOfPackage(packageClass: KClass<*>): Stream<Class<*>> {
         return findAllClassesOfPackage(packageClass.java.packageName)
     }
