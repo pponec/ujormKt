@@ -33,7 +33,7 @@ internal class ReflectionsTest {
      */
     @Test
     fun findMemberExtensionObjectOfPackage() {
-        val provider = EntityProvider
+        val provider: AbstractEntityProvider = EntityProvider
         val instance = Reflections()
 
 
