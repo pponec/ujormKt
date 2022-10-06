@@ -27,9 +27,7 @@ internal class ReflectionsTest {
     at java.base/java.lang.Class.getDeclaredConstructor(Class.java:2754)
     at org.ujorm.kotlin.core.Reflections.getObjects(Reflections.kt:19)
 
-    https://stackoverflow.com/questions/48635210/how-to-obtain-properties-or-function-declared-in-kotlin-extensions-by-java-refle
     https://stackoverflow.com/questions/28294509/accessing-kotlin-extension-functions-from-java
-
      */
     @Test
     fun findMemberExtensionObjectOfPackage() {
