@@ -28,7 +28,7 @@ class Reflections {
                 EntityModel::class.java.isAssignableFrom(it.returnType)
             }
             .map {
-                it.invoke(provider) as EntityModel<*>
+                it.invoke(null, provider) as EntityModel<*>
             }
     }
 
