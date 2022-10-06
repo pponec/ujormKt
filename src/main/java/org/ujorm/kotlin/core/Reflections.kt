@@ -13,10 +13,10 @@ class Reflections {
         return findAllClassesOfPackage(packageClass)
             .filter{ it.simpleName.endsWith("Kt")}
             .map { getObjects(it, provider) }
-            .flatMap { it }
+            .flatMap { it.stream() }
     }
 
-    fun getObjects(clazz : Class<*>, provider : Any) : Stream<EntityModel<*>> {
+    fun getObjects(clazz : Class<*>, provider : Any) : List<EntityModel<*>> {
         return clazz.methods
             .filter {
                 Modifier.isStatic(it.getModifiers())
@@ -25,12 +25,11 @@ class Reflections {
                 it.parameterCount == 1
             }
             .filter {
-                it.returnType.isAssignableFrom(EntityModel::class.java)
+                EntityModel::class.java.isAssignableFrom(it.returnType)
             }
             .map {
-                it.invoke(provider)
+                it.invoke(provider) as EntityModel<*>
             }
-            .stream() as Stream<EntityModel<*>>
     }
 
     fun findAllClassesOfPackage(packageClass: KClass<*>): Stream<Class<*>> {
