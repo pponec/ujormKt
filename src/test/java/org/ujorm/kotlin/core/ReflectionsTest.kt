@@ -24,12 +24,15 @@ internal class ReflectionsTest {
      */
     @Test
     fun findMemberExtensionObjectOfPackage() {
-        val provider: AbstractEntityProvider = RefEntityProvider
+        val provider = RefEntityProvider
         val instance = Reflections()
 
         val objects = instance.findMemberExtensionObjectOfPackage(provider::class, provider)
             .toList()
+            .sortedBy { it::class.java.simpleName }
 
         expect(objects).toHaveSize(2)
+        expect(objects.first()).toBeTheInstance( provider.departments)
+        expect(objects.last()).toBeTheInstance( provider.employees )
     }
 }
