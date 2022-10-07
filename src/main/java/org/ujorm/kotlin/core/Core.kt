@@ -527,7 +527,7 @@ class EntityProviderUtils {
 
     /** Add an entity and close */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E {
-        check(locked) { "The object is locked" }
+        check(!locked) { "The object is locked" }
         entityModels.add(entity.close())
         return entity
     }

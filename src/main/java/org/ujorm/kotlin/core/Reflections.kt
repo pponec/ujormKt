@@ -18,18 +18,10 @@ class Reflections {
 
     fun getObjects(clazz : Class<*>, provider : AbstractEntityProvider) : List<EntityModel<*>> {
         return clazz.methods
-            .filter {
-                Modifier.isStatic(it.getModifiers())
-            }
-            .filter {
-                it.parameterCount == 1
-            }
-            .filter {
-                EntityModel::class.java.isAssignableFrom(it.returnType)
-            }
-            .map {
-                it.invoke(null, provider) as EntityModel<*>
-            }
+            .filter { it.parameterCount == 1 }
+            .filter { Modifier.isStatic(it.getModifiers()) }
+            .filter { EntityModel::class.java.isAssignableFrom(it.returnType) }
+            .map { it.invoke(null, provider) as EntityModel<*> }
     }
 
     fun findAllClassesOfPackage(packageClass: KClass<*>): Stream<Class<*>> {
