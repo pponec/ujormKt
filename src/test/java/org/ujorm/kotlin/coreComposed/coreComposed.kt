@@ -15,7 +15,7 @@
  */
 @file:kotlin.jvm.JvmMultifileClass
 @file:kotlin.jvm.JvmName("StandardKt")
-package org.ujorm.kotlin.entityComposed
+package org.ujorm.kotlin.coreComposed
 
 import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.core.RawEntity

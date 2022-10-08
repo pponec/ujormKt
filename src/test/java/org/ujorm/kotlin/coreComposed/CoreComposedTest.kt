@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin.entityComposed
+package org.ujorm.kotlin.coreComposed
 
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.entityComposed.entity.*
+import org.ujorm.kotlin.coreComposed.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
 import org.ujorm.kotlin.core.PropertyNullable
 
-internal class EntityComposedTest {
+internal class CoreComposedTest {
 
     @Disabled("Implementation is not finished")
     @Test

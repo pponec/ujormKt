@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.orm.entity
 
 import org.ujorm.kotlin.core.*
-import org.ujorm.kotlin.entityComposed.DomainEntityModel
+import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
 /** An Department entity */

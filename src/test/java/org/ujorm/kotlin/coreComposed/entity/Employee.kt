@@ -1,7 +1,7 @@
-package org.ujorm.kotlin.entityComposed.entity
+package org.ujorm.kotlin.coreComposed.entity
 
 import org.ujorm.kotlin.core.EntityModel
-import org.ujorm.kotlin.entityComposed.DomainEntityModel
+import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
 /** An user entity */

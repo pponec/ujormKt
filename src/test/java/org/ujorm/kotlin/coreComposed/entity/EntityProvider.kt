@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.entityComposed.entity
+package org.ujorm.kotlin.coreComposed.entity
 
 import org.ujorm.kotlin.core.AbstractEntityProvider
 
