@@ -10,24 +10,24 @@ import kotlin.reflect.KClass
 class Reflections {
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<EntityModel<*>> {
-        return findMemberExtensionObjectOfPackage(packageClass::class.java.packageName, provider)
+    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<Any> {
+        return findMemberExtensionObjectOfPackage(packageClass.java.packageName, provider)
     }
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<EntityModel<*>> {
+    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<Any> {
         return findAllClassesOfPackage(packageName)
             .filter{ it.simpleName.endsWith("Kt")}
-            .map { findEntityModels(it, provider) }
+            .map { findEntityModels(it, provider, Any::class) }
             .flatMap { it.stream() }
     }
 
-    fun findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider) : List<EntityModel<*>> {
+    fun <T : Any> findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider, targetClass : KClass<T>) : List<T> {
         return clazz.methods
             .filter { it.parameterCount == 1 }
             .filter { Modifier.isStatic(it.getModifiers()) }
-            .filter { EntityModel::class.java.isAssignableFrom(it.returnType) }
-            .map { it.invoke(null, provider) as EntityModel<*> }
+            .filter { targetClass.java.isAssignableFrom(it.returnType) }
+            .map { it.invoke(null, provider) as T }
     }
 
     fun findAllClassesOfPackage(packageClass: KClass<*>): Stream<Class<*>> {
