@@ -15,7 +15,6 @@
  */
 package org.ujorm.kotlin.coreComposed
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.coreComposed.entity.*
 import java.time.LocalDate
@@ -25,16 +24,18 @@ import org.ujorm.kotlin.core.PropertyNullable
 
 internal class CoreComposedTest {
 
-    @Disabled("Implementation is not finished")
+    //@Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        val employees = EntityProvider.employees // Employee Entity metamodel
+        val employees = Entities.employees // Employee Entity metamodel
         val employee = employees.new {
             id = 11
             name = "John"
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = getDepartment(2, "Development")
         }
+
+        expect(employee.toString()).toEqual("")
         expect(employee.id).toEqual(11)
         expect(employee.name).toEqual("John")
 
@@ -60,7 +61,7 @@ internal class CoreComposedTest {
     }
 
     private fun getDepartment(id: Int, name: String) =
-        EntityProvider.departments.new {
+        Entities.departments.new {
             this.id = id
             this.name = name
         }

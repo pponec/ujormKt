@@ -34,6 +34,6 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
 }
 
 /** Initialize, register and close the entity model. */
-val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Employees<Employee>().close() as Employees<Employee>
 }

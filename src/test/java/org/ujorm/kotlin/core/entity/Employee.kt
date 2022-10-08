@@ -22,12 +22,12 @@ class Employees : EntityModel<Employee>(Employee::class) {
 
     // Optional composed properties:
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        department + EntityProvider.departments.name }
+        department + Entities.departments.name }
     val departmentId by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        department + EntityProvider.departments.id }
+        department + Entities.departments.id }
 }
 
 /** Initialize, register and close the entity model. */
-val EntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    EntityProvider.add(Employees().close<Employees>())
+val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    Entities.add(Employees().close<Employees>())
 }
