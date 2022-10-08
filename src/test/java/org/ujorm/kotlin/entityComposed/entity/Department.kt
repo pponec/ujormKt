@@ -21,8 +21,6 @@ open class _Departments : EntityModel<Department>(Department::class) {
 
 /** Model of the entity can be a generated class in the feature */
 open class Departments<D : Any> : DomainEntityModel<D, Department>() {
-
-    /** Direct property model */
     override val core: _Departments = _Departments().close()
 
     // --- Properties ---

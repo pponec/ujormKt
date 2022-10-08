@@ -24,7 +24,6 @@ open class _Employees : EntityModel<Employee>(Employee::class) {
 
 /** Model of the entity can be a generated class in the feature */
 open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
-    /** Direct property model */
     override val core: _Employees = _Employees().close()
 
     val id get() = property(core.id)
