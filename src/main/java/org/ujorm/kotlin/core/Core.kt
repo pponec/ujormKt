@@ -535,8 +535,17 @@ class EntityProviderUtils {
     fun entityModels() : List<EntityModel<*>> = entityModels
 
     /** Lock the model if it hasn't already. */
-    fun close() {
+    fun close(entities : AbstractEntityProvider) {
         if (locked) return
+
+        if (entityModels.isEmpty()) {
+            Reflections().findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
+                .forEach {
+                    it.closeModel()
+                    entityModels.add(it)
+                }
+        }
+        println(">>>" + entityModels.size)
 
         var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
         entityModels.forEach {
@@ -559,10 +568,11 @@ abstract class AbstractEntityProvider {
     /** Register a new entity */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
 
-    open fun close() {
-        utils.close()
+    @Suppress("UNCHECKED_CAST")
+    open fun <R : AbstractEntityProvider> close() : R {
+        utils.close(this)
+        return this as R
     }
-
 }
 
 /** Brief entity model */

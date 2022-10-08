@@ -9,14 +9,20 @@ import kotlin.reflect.KClass
 /** Source : https://www.baeldung.com/java-find-all-classes-in-package#1-system-class-loader */
 class Reflections {
 
+    /** Returns instances of Entity models */
     fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<EntityModel<*>> {
-        return findAllClassesOfPackage(packageClass)
+        return findMemberExtensionObjectOfPackage(packageClass::class.java.packageName, provider)
+    }
+
+    /** Returns instances of Entity models */
+    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<EntityModel<*>> {
+        return findAllClassesOfPackage(packageName)
             .filter{ it.simpleName.endsWith("Kt")}
-            .map { getObjects(it, provider) }
+            .map { findEntityModels(it, provider) }
             .flatMap { it.stream() }
     }
 
-    fun getObjects(clazz : Class<*>, provider : AbstractEntityProvider) : List<EntityModel<*>> {
+    fun findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider) : List<EntityModel<*>> {
         return clazz.methods
             .filter { it.parameterCount == 1 }
             .filter { Modifier.isStatic(it.getModifiers()) }

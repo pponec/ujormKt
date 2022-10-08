@@ -32,5 +32,5 @@ open class Departments<D : Any> : DomainEntityModel<D, Department>() {
 
 /** Initialize, register and close the entity model. */
 val Entities.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Departments<Department>().close() as Departments<Department>
+    Departments<Department>() //.close() as Departments<Department>
 }

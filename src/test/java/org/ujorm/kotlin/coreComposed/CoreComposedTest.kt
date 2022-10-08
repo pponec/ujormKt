@@ -27,7 +27,9 @@ internal class CoreComposedTest {
     //@Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        val employees = Entities.employees // Employee Entity metamodel
+        // Close all meta-models first:
+        val entities = Entities.close<Entities>()
+        val employees = entities.employees // Employee Entity metamodel
         val employee = employees.new {
             id = 11
             name = "John"
