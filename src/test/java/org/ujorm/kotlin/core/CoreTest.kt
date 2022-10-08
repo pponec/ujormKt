@@ -194,33 +194,33 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndAlias() {
-        val employees: Employees = EntityProvider.employees.alias("e")
-        val department: Departments = EntityProvider.departments.alias("d")
+        val aliasEmployees: Employees = EntityProvider.employees.alias("e")
+        val aliasDepartment: Departments = EntityProvider.departments.alias("d")
 
-        println(employees.id.status())
+        println(aliasEmployees.id.status())
 
-        expect(employees.id.entityAlias()).toEqual("e")
-        expect(employees.name.entityAlias()).toEqual("e")
-        expect(employees.department.entityAlias()).toEqual("e")
-        expect(department.id.entityAlias()).toEqual("d")
-        expect(department.name.entityAlias()).toEqual("d")
-        expect(employees.id.info()).toEqual("Employee(e).id")
-        expect(employees.department.info()).toEqual("Employee(e).department")
+        expect(aliasEmployees.id.entityAlias()).toEqual("e")
+        expect(aliasEmployees.name.entityAlias()).toEqual("e")
+        expect(aliasEmployees.department.entityAlias()).toEqual("e")
+        expect(aliasDepartment.id.entityAlias()).toEqual("d")
+        expect(aliasDepartment.name.entityAlias()).toEqual("d")
+        expect(aliasEmployees.id.info()).toEqual("Employee(e).id")
+        expect(aliasEmployees.department.info()).toEqual("Employee(e).department")
 
-        var idAliasHash = employees.id.hashCode()
-        var idHash = employees.id.hashCode()
-        var nameAliasHash = employees.name.hashCode()
-        var idAliasName = employees.id.name()
-        var idName = employees.id.name()
-        var idAlias2 = employees.id.entityAlias("e") // Alias for a single property
-        var idAlias3 = employees.id("e") // Shortcut for new alias
+        var idAliasHash = aliasEmployees.id.hashCode()
+        var idHash = EntityProvider.employees.id.hashCode()
+        var nameAliasHash = aliasEmployees.name.hashCode()
+        var idAliasName = aliasEmployees.id.name()
+        var idName = aliasEmployees.id.name()
+        var idAlias2 = aliasEmployees.id.entityAlias("e") // Alias for a single property
+        var idAlias3 = aliasEmployees.id("e") // Shortcut for new alias
 
         expect(idAliasName).toEqual(idName)
         expect(idAliasHash).notToEqual(idHash) // Different hash codes
         expect(idAliasHash).notToEqual(nameAliasHash) // Different hash codes
-        expect(employees.id).notToEqual(employees.id) // Different properties
+        expect(aliasEmployees.id).notToEqual(EntityProvider.employees.id) // Different properties
         expect(idAliasHash).toEqual(idAlias2.hashCode())
-        expect(employees.id).toEqual(idAlias2)
+        expect(aliasEmployees.id).toEqual(idAlias2)
         expect(idAlias2).toEqual(idAlias3)
     }
 
