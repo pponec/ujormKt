@@ -539,7 +539,7 @@ class EntityProviderUtils {
         if (locked) return
 
         if (entityModels.isEmpty()) {
-            Reflections().findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
+            Reflections(EntityModel::class).findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
                 .forEach {
                     it.closeModel()
                     entityModels.add(it)
