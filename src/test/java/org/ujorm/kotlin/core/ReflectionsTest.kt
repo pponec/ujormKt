@@ -10,7 +10,7 @@ internal class ReflectionsTest {
 
     @Test
     fun findAllClassesOfPackage() {
-        val instance = Reflections()
+        val instance = Reflections(EntityModel::class)
 
         val classes = instance.findAllClassesOfPackage(Departments::class)
             .filter { it.simpleName.endsWith("Kt")}
@@ -25,7 +25,7 @@ internal class ReflectionsTest {
     @Test
     fun findMemberExtensionObjectOfPackage() {
         val provider = RefEntityProvider
-        val instance = Reflections()
+        val instance = Reflections(EntityModel::class)
 
         val objects = instance.findMemberExtensionObjectOfPackage(provider::class, provider)
             .toList()

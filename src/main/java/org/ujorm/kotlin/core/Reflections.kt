@@ -1,3 +1,18 @@
+/*
+ * Copyright 2022-2022 Pavel Ponec, https://github.com/pponec
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.ujorm.kotlin.core
 
 import java.io.BufferedReader
@@ -7,22 +22,24 @@ import java.util.stream.Stream
 import kotlin.reflect.KClass
 
 /** Source : https://www.baeldung.com/java-find-all-classes-in-package#1-system-class-loader */
-class Reflections {
+class Reflections<T : Any>(
+    val targetClass : KClass<T>
+) {
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<Any> {
+    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<T> {
         return findMemberExtensionObjectOfPackage(packageClass.java.packageName, provider)
     }
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<Any> {
+    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<T> {
         return findAllClassesOfPackage(packageName)
             .filter{ it.simpleName.endsWith("Kt")}
-            .map { findEntityModels(it, provider, Any::class) }
+            .map { findEntityModels(it, provider) }
             .flatMap { it.stream() }
     }
 
-    fun <T : Any> findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider, targetClass : KClass<T>) : List<T> {
+    fun findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider) : List<T> {
         return clazz.methods
             .filter { it.parameterCount == 1 }
             .filter { Modifier.isStatic(it.getModifiers()) }
