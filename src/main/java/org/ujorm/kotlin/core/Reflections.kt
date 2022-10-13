@@ -27,24 +27,24 @@ class Reflections<T : Any>(
 ) {
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, provider : AbstractEntityProvider): Stream<T> {
-        return findMemberExtensionObjectOfPackage(packageClass.java.packageName, provider)
+    fun findMemberExtensionObjectOfPackage(packageClass: KClass<*>, entityProvider : Any): Stream<T> {
+        return findMemberExtensionObjectOfPackage(packageClass.java.packageName, entityProvider)
     }
 
     /** Returns instances of Entity models */
-    fun findMemberExtensionObjectOfPackage(packageName: String, provider : AbstractEntityProvider): Stream<T> {
+    fun findMemberExtensionObjectOfPackage(packageName: String, entityProvider : Any): Stream<T> {
         return findAllClassesOfPackage(packageName)
             .filter{ it.simpleName.endsWith("Kt")}
-            .map { findEntityModels(it, provider) }
+            .map { findEntityModels(it, entityProvider) }
             .flatMap { it.stream() }
     }
 
-    fun findEntityModels(clazz : Class<*>, provider : AbstractEntityProvider) : List<T> {
+    fun findEntityModels(clazz : Class<*>, entityProvider : Any) : List<T> {
         return clazz.methods
             .filter { it.parameterCount == 1 }
             .filter { Modifier.isStatic(it.getModifiers()) }
             .filter { targetClass.java.isAssignableFrom(it.returnType) }
-            .map { it.invoke(null, provider) as T }
+            .map { it.invoke(null, entityProvider) as T }
     }
 
     fun findAllClassesOfPackage(packageClass: KClass<*>): Stream<Class<*>> {

@@ -67,7 +67,7 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
                     }
                 } else {
                     val msg = "Method: ${model.utils().entityClass.simpleName}.$methodName()"
-                    throw UnsupportedOperationException(msg)
+                    TODO(msg)
                 }
             }
         }

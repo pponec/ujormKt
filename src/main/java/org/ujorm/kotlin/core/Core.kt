@@ -452,7 +452,7 @@ class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Opera
             BinaryOperator.AND_NOT -> left(entity) && !right(entity)
             BinaryOperator.OR_NOT -> left(entity) || !right(entity)
             else -> {
-                throw UnsupportedOperationException("Unsupported operator: ${operator.name}")
+                TODO("Unsupported operator: ${operator.name}")
             }
         }
     }
@@ -885,7 +885,7 @@ class SortingProperty<D : Any, V : Any> (
 object Constants {
     /** Undefined property setter */
     val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v ->
-        throw UnsupportedOperationException("read-only")
+        TODO("read-only")
     }
     const val CLOSED_MESSAGE = "Object is closed"
 }
@@ -949,7 +949,7 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     @Deprecated("Method is not supported for composed properties")
     override fun entityAlias(entityAlias: String): PropertyNullable<D, V> {
-        throw UnsupportedOperationException("Method is not supported for composed properties")
+        TODO("Method is not supported for composed properties")
     }
 
     override fun get(entity: D): V? {
@@ -991,6 +991,6 @@ class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, Composed
 
     @Deprecated("Method is not supported for composed properties")
     override fun entityAlias(entityAlias: String): Property<D, V> {
-        throw UnsupportedOperationException("Method is not supported for composed properties")
+        TODO("Method is not supported for composed properties")
     }
 }

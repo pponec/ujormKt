@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:kotlin.jvm.JvmMultifileClass
-@file:kotlin.jvm.JvmName("StandardKt")
 package org.ujorm.kotlin.coreComposed
 
 import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.core.RawEntity
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 /** Dummy property */
@@ -35,7 +35,7 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 
     override fun entityAlias(): String = ""
 
-    override fun get(entity: D): D? = throw UnsupportedOperationException("Dummy object")
+    override fun get(entity: D): D? = TODO("Dummy object")
 
     override fun set(entity: D, value: D?) = throw UnsupportedOperationException("Dummy object")
 
@@ -44,11 +44,11 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
     }
 }
 
-/** Composed Entity  model */
+/** Composed Entity model */
 abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
     /** Original Entity model with direct properties */
-    abstract protected val core : EntityModel<V>
+    abstract protected val core: EntityModel<V>
 
     /** Composed property to the entity model. */
     val domainProperty: PropertyNullable<D, V>
@@ -111,9 +111,73 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
             entityClass.classLoader, arrayOf<Class<*>>(entityClass),
             myHandler
         )
+        @Suppress("UNCHECKED_CAST")
         return result as D
     }
 
     /** Create new instance of the domain object and assign properties */
     inline fun new(init: D.() -> Unit) : D = new().also { it.init() }
+
+    fun closeModel() {
+        // TODO
+    }
+}
+
+/** Interface of the domain metamodel */
+abstract class AbstractDomainEntityProvider {
+
+    private val utils = DomainEntityProviderUtils()
+
+    fun utils() = utils
+
+    /** Register a new entity */
+    fun <D : Any, E : DomainEntityModel<D, Any>> add(entity : E) : E = utils.add(entity)
+
+    @Suppress("UNCHECKED_CAST")
+    open fun <R : AbstractEntityProvider> close() : R {
+        utils.close(this)
+        return this as R
+    }
+}
+
+class DomainEntityProviderUtils {
+    private var locked: Boolean = false
+
+    /** Get all entity models */
+    private var entityModels: MutableList<DomainEntityModel<*, *>> = mutableListOf()
+
+    private var entityMap : Map<KClass<*>, DomainEntityModel<*, *>> = emptyMap()
+
+    /** Add an entity and close */
+    fun <D : Any, E : DomainEntityModel<D, Any>> add(entity : E) : E {
+        check(!locked) { "The object is locked" }
+        entityModels.add(entity.close())
+        return entity
+    }
+
+    fun entityModels() : List<DomainEntityModel<*, *>> = entityModels
+
+    /** Lock the model if it hasn't already. */
+    fun close(entities : AbstractDomainEntityProvider) {
+        if (locked) return
+
+        if (entityModels.isEmpty()) {
+            Reflections(DomainEntityModel::class)
+                .findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
+                .forEach {
+                    it.close()
+                    entityModels.add(it)
+                }
+        }
+        println(">>>" + entityModels.size)
+
+        var map = HashMap<KClass<*>, DomainEntityModel<*, *>>(this.entityModels.size)
+        entityModels.forEach {
+            it.closeModel()
+            map[it.domainProperty.data().entityClass] = it
+        }
+        entityMap = map
+        entityModels = Collections.unmodifiableList(entityModels)
+        locked = true
+    }
 }
