@@ -50,8 +50,13 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     /** Original Entity model with direct properties */
     abstract protected val core: EntityModel<V>
 
+    /** Core property */
+    private val coreProperty by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        SelfProperty(core.utils().entityClass)
+    }
+
     /** Composed property to the entity model. */
-    val domainProperty: PropertyNullable<D, V>
+    private val domainProperty: PropertyNullable<D, V>?
 
     /** Entity model with direct properties. */
     val originalEntityModel: EntityModel<V>
@@ -68,22 +73,27 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     }
 
     protected constructor() {
-        this.domainProperty = SelfProperty(core.utils().entityClass) as PropertyNullable<D, V>
+        this.domainProperty = null
         this.originalEntityModel = core
     }
 
+    /** Composed property to the entity model. */
+    fun domainProperty(): PropertyNullable<D, V> {
+        return domainProperty ?: coreProperty as PropertyNullable<D, V>
+    }
+
     override fun data(): PropertyMetadata<D, V> {
-        return domainProperty.data()
+        return domainProperty().data()
     }
 
     override fun entityAlias(): String = ""
 
     override fun get(entity: D): V? {
-        return domainProperty[entity]
+        return domainProperty()[entity]
     }
 
     override fun set(entity: D, value: V?) {
-        domainProperty[entity] = value
+        domainProperty()[entity] = value
     }
 
     /** Build the new Property */
@@ -174,7 +184,7 @@ class DomainEntityProviderUtils {
         var map = HashMap<KClass<*>, DomainEntityModel<*, *>>(this.entityModels.size)
         entityModels.forEach {
             it.closeModel()
-            map[it.domainProperty.data().entityClass] = it
+            map[it.domainProperty().data().entityClass] = it
         }
         entityMap = map
         entityModels = Collections.unmodifiableList(entityModels)
