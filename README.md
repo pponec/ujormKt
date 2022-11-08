@@ -9,6 +9,63 @@ Topical areas of use are:
 - alerting
 - modelling conditions for ORM
 
+The ultimate goal of this project is to provide a programming interface (in Kotlin programming language) 
+to build a database query model according to the following pattern. 
+In doing so, the description of sessions is modeled by chaining metamodel attributes together, 
+as if chaining common object attributes when reading object values. 
+An entity here is an interface whose attributes are annotated with standard JPA specification annotations. 
+However, in the first production release, I plan to support only a selected subset of JPA annotations. 
+The SQL query modeling module will not have its own ORM implementation. 
+The execution of database queries will then be delegated to an existing JPA implementation. 
+Also in play is to create some clone of the Ujorm framework, adapted for Kotlin.
+
+See the target `SELECT` example:
+
+```kotlin
+internal fun comprehensiveDatabaseSelect() {
+    val employees = Database.employees
+    val employeRows = Database.select(
+        employees.id,
+        employees.name,
+        employees.department.name, // Required relation by the inner join!
+        employees.supervisor.name, // Optional relation by the left outer join!
+        employees.department.created,
+    ).where((employees.department.id LE 1)
+                AND (employees.department.name STARTS "D"))
+        .orderBy((employees.department.created).desc())
+        .toList()
+
+    expect(employeRows).toHaveSize(1)
+    expect(employeRows.first().department.name)
+        .toEqual("Development")
+    }
+```
+
+and an `INSERT` example:
+
+```kotlin
+internal fun insertRows() {
+    val development = Database.departments.new {
+        name = "Development"
+        created = LocalDate.of(2020, 10 , 1)
+    }
+    val lucy = Database.employees.new {
+        name = "lucy"
+        contractDay = LocalDate.of(2022, 1 , 1)
+        supervisor = null
+        department = development
+    }
+    val joe = Database.employees.new {
+        name = "Joe"
+        contractDay = LocalDate.of(2022, 2 , 1)
+        supervisor = lucy
+        department = development
+    }
+
+    Database.save(development, lucy, joe)
+}
+```
+
 # What remains to be done
 
 - building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)

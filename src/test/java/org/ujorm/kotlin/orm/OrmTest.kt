@@ -17,8 +17,8 @@ internal class OrmTest {
             employees.id,
             employees.name,
             employees.department.name, // Required relation by the inner join
-            employees.department.created,
             employees.supervisor.name, // Optional relation by the left outer join
+            employees.department.created,
         ).where((employees.department.id LE 1)
                     AND (employees.department.name STARTS "D"))
             .orderBy((employees.department.created).desc())
@@ -60,11 +60,10 @@ internal class OrmTest {
         val employeRows = Database.select(
             employees.id,
             employees.name,
-            employees.department.name,    // Required relation by the inner join
-            employees.department.created, // Required relation by the inner join
-            employees.supervisor.name,    // Optional relation by the left outer join
-        )
-            .where((employees.department.id LE 1)
+            employees.department.name, // Required relation by the inner join
+            employees.supervisor.name, // Optional relation by the left outer join
+            employees.department.created,
+        ).where((employees.department.id LE 1)
                     AND (employees.department.name STARTS "A"))
             .orderBy((employees.department.created).desc())
             .toList()
