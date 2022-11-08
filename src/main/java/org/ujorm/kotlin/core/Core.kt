@@ -237,6 +237,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
         return ValueCriterion(this, ValueOperatorEnum.LE, value)
     }
 
+    /** Value operator */
+    infix fun STARTS(value: V): ValueCriterion<D, V> {
+        return ValueCriterion(this, ValueOperatorEnum.STARTS, value)
+    }
+
     /** Create new composite property  */
     operator fun <N: Any> plus(nextProperty : PropertyNullable<V, N>) : PropertyNullable<D, N> =
         ComposedPropertyNullableImpl(this, nextProperty)
