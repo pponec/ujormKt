@@ -383,22 +383,35 @@ enum class ValueOperatorEnum : ValueOperator {
     /** Less than */
     LT {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
-            compare(entity, property, value) < 0
+            isEqual(entity, property, value) < 0
     },
     /** Less than or equals to */
     LE {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
-            compare(entity, property, value) < 0
+            isEqual(entity, property, value) < 0
     },
     /** Great than */
     GT {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
-            compare(entity, property, value) > 0
+            isEqual(entity, property, value) > 0
     },
     /** Great than or equals to */
     GE {
         override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) =
-            compare(entity, property, value) >= 0
+            isEqual(entity, property, value) >= 0
+    },
+    /** Text starts by the value */
+    STARTS {
+        override fun <D : Any, V : Any> evaluate(entity: D, property: PropertyNullable<D, out V>, value: V?) : Boolean {
+            val propertyValue = property[entity]
+            if (propertyValue == value) return true
+            if (propertyValue == null || value == null) return false
+            if (propertyValue is String && value is String) {
+                return propertyValue.startsWith(value)
+            } else {
+                return false
+            }
+        }
     },
     /** For all items */
     ALL {
@@ -410,7 +423,7 @@ enum class ValueOperatorEnum : ValueOperator {
     };
 
     /** Comparator */
-    protected fun <D : Any, V : Any> compare(entity: D, property: PropertyNullable<D, out V>, value: V?) =
+    protected fun <D : Any, V : Any> isEqual(entity: D, property: PropertyNullable<D, out V>, value: V?) =
         compareValues(property[entity], value, property)
 
     /** Comparator */

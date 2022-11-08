@@ -41,10 +41,12 @@ internal class OrmTest {
         val employeesWithSelectedItems = Database.select(
                 employees.id,
                 employees.name,
+                employees.department.name,    // Required relation by the inner join
                 employees.department.created, // Required relation by the inner join
-                employees.supervisor.name, // Optional relation by the left outer join
+                employees.supervisor.name,    // Optional relation by the left outer join
             )
-            .where((employees.department.id LE 1) AND (employees.department.id LE 3))
+            .where((employees.department.id LE 1)
+                       AND (employees.department.id LE 3)) // <<< STARTS
             .orderBy((employees.department.created).desc())
             .toList()
 
