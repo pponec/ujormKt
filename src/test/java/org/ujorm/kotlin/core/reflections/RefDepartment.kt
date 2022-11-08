@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.core.entity
+package org.ujorm.kotlin.core.reflections
 
 import org.ujorm.kotlin.core.*
 import java.time.LocalDate
@@ -18,6 +18,6 @@ class Departments : EntityModel<Department>(Department::class) {
 }
 
 /** Initialize, register and close the entity model. */
-val Entities.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Departments().close<Departments>())
+val RefEntityProvider.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    RefEntityProvider.add(Departments())
 }

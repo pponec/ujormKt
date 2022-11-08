@@ -1,4 +1,4 @@
-package org.ujorm.kotlin.core.entity
+package org.ujorm.kotlin.core.reflections
 
 import org.ujorm.kotlin.core.*
 import java.time.LocalDate
@@ -22,12 +22,12 @@ class Employees : EntityModel<Employee>(Employee::class) {
 
     // Optional composed properties:
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        department + Entities.departments.name }
+        department + RefEntityProvider.departments.name }
     val departmentId by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        department + Entities.departments.id }
+        department + RefEntityProvider.departments.id }
 }
 
 /** Initialize, register and close the entity model. */
-val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Employees().close<Employees>())
+val RefEntityProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    RefEntityProvider.add(Employees())
 }
