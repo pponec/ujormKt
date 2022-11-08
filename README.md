@@ -30,8 +30,8 @@ internal fun comprehensiveDatabaseSelect() {
         employees.department.name, // Required relation by the inner join!
         employees.supervisor.name, // Optional relation by the left outer join!
         employees.department.created,
-    ).where((employees.department.id LE 1)
-                AND (employees.department.name STARTS "D"))
+    ).where((employees.department.id LE 1) 
+        AND (employees.department.name STARTS "D"))
         .orderBy((employees.department.created).desc())
         .toList()
 
