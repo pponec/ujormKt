@@ -10,6 +10,25 @@ import java.time.LocalDate
 
 internal class OrmTest {
 
+    @Disabled("A comprehensive data selection")
+    internal fun comprehensiveDatabaseSelect() {
+        val employees = Database.employees
+        val employeRows = Database.select(
+            employees.id,
+            employees.name,
+            employees.department.name, // Required relation by the inner join
+            employees.department.created,
+            employees.supervisor.name, // Optional relation by the left outer join
+        ).where((employees.department.id LE 1)
+                    AND (employees.department.name STARTS "D"))
+            .orderBy((employees.department.created).desc())
+            .toList()
+
+        expect(employeRows).toHaveSize(1)
+        expect(employeRows.first().department.name)
+            .toEqual("Development")
+    }
+
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun simpleSelect_byInnerJoins() {
@@ -38,29 +57,29 @@ internal class OrmTest {
         expect(employeeList).toHaveSize(3)
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
-        val employeesWithSelectedItems = Database.select(
-                employees.id,
-                employees.name,
-                employees.department.name,    // Required relation by the inner join
-                employees.department.created, // Required relation by the inner join
-                employees.supervisor.name,    // Optional relation by the left outer join
-            )
+        val employeRows = Database.select(
+            employees.id,
+            employees.name,
+            employees.department.name,    // Required relation by the inner join
+            employees.department.created, // Required relation by the inner join
+            employees.supervisor.name,    // Optional relation by the left outer join
+        )
             .where((employees.department.id LE 1)
-                       AND (employees.department.name STARTS "A"))
+                    AND (employees.department.name STARTS "A"))
             .orderBy((employees.department.created).desc())
             .toList()
 
-        expect(employeesWithSelectedItems).toHaveSize(3)
-        expect(employeesWithSelectedItems.first().department.created)
+        expect(employeRows).toHaveSize(3)
+        expect(employeRows.first().department.created)
             .toEqual(LocalDate.of(2022, 12, 24))
 
         // Ordered list with relations:
         val employeesByOuterJoin = Database.select(
-                employees.id,
-                employees.name,
-                employees.department.name, // Required relation by the inner join
-                employees.supervisor.name, // Optional relation by the left outer join
-            )
+            employees.id,
+            employees.name,
+            employees.department.name, // Required relation by the inner join
+            employees.supervisor.name, // Optional relation by the left outer join
+        )
             .where(employees.department.name EQ "accounting")
             .orderBy(employees.supervisor.name.asc(), employees.name.desc())
             .toList()
@@ -71,10 +90,10 @@ internal class OrmTest {
 
     @Test
     @Disabled("Only a first draft of API is implemented")
-    internal fun insert() {
+    internal fun insertRows() {
         val development = Database.departments.new {
-            name = "development"
-            created = LocalDate.now()
+            name = "Development"
+            created = LocalDate.of(2020, 10 , 1)
         }
         val lucy = Database.employees.new {
             name = "lucy"
