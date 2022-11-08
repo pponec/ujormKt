@@ -9,14 +9,13 @@ Topical areas of use are:
 - alerting
 - modelling conditions for ORM
 
-The ultimate goal of this project is to provide a programming interface (in Kotlin programming language) 
-to build a database query model according to the following pattern. 
-In doing so, the description of sessions is modeled by chaining metamodel attributes together, 
-as if chaining common object attributes when reading object values. 
-An entity here is an interface whose attributes are annotated with standard JPA specification annotations. 
-However, in the first production release, I plan to support only a selected subset of JPA annotations. 
-The SQL query modeling module will not have its own ORM implementation. 
-The execution of database queries will then be delegated to an existing JPA implementation. 
+The ultimate goal of this project is to provide a programming interface (in Kotlin)
+for building a database query model in a natural way.
+That is, the sessions will be modeled in a similar way to how attribute chaining is done when reading the value of an object.
+An entity here is an interface whose attributes are annotated with annotations according to the JPA specification.
+In the first production release, I plan to support only a selected subset of JPA annotations.
+The SQL query modeling module will not have its own ORM implementation.
+The execution of database queries will then be delegated to an existing JPA implementation.
 Also in play is to create some clone of the Ujorm framework, adapted for Kotlin.
 
 See the target `SELECT` example:
