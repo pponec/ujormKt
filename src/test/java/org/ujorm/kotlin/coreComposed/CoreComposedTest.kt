@@ -27,8 +27,7 @@ internal class CoreComposedTest {
     //@Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        // Lock all metamodels first:
-        val entities = Entities.close<Entities>()
+        val entities = Entities.close<Entities>() // Lock the metamodel first
         val employees = entities.employees // Employee Entity metamodel
         val employee = employees.new {
             id = 11
