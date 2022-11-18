@@ -6,7 +6,7 @@ import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
 /** An user entity */
-interface Employee : Entity<Employee> {
+interface Employee /*:Entity<Employee>*/ {
     var id: Int
     var name: String
     var contractDay: LocalDate

@@ -20,6 +20,7 @@ import org.ujorm.kotlin.coreComposed.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import org.ujorm.kotlin.core.Entity
 import org.ujorm.kotlin.core.PropertyNullable
 
 internal class CoreComposedTest {
@@ -27,8 +28,7 @@ internal class CoreComposedTest {
     //@Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        // Lock all metamodels first:
-        val entities = Entities.close<Entities>()
+        val entities = Entities.close<Entities>() // Lock the metamodel first
         val employees = entities.employees // Employee Entity metamodel
         val employee = employees.new {
             id = 11
@@ -37,6 +37,7 @@ internal class CoreComposedTest {
             department = getDepartment(2, "Development")
         }
 
+        expect(employee is Entity<*>).toEqual(true)
         expect(employee.id).toEqual(11)
         expect(employee.name).toEqual("John")
         expect(employee.toString()).toEqual("Employee{id=11" +

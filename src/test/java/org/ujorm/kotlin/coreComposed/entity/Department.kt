@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 
 /** An Department entity */
-interface Department : Entity<Department> {
+interface Department /*:Entity<Department>*/ {
     var id: Int
     var name: String
     var created: LocalDate
