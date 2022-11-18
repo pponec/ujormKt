@@ -1,16 +1,17 @@
 package org.ujorm.kotlin.coreComposed.entity
 
+import org.ujorm.kotlin.core.Entity
 import org.ujorm.kotlin.core.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
 
 /** An Department entity */
-data class Department constructor(
-    var id: Int,
-    var name: String,
-    var created: LocalDate = LocalDate.now().minusDays(1),
-)
+interface Department : Entity<Department> {
+    var id: Int
+    var name: String
+    var created: LocalDate
+}
 
 /** Model of the entity can be a generated class in the feature */
 open class _Departments : EntityModel<Department>(Department::class) {

@@ -1,17 +1,18 @@
 package org.ujorm.kotlin.coreComposed.entity
 
+import org.ujorm.kotlin.core.Entity
 import org.ujorm.kotlin.core.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
 /** An user entity */
-data class Employee constructor(
-    var id: Int,
-    var name: String,
-    var contractDay: LocalDate,
-    var department: Department = Department(2, "D"),
-    var supervisor: Employee? = null
-)
+interface Employee : Entity<Employee> {
+    var id: Int
+    var name: String
+    var contractDay: LocalDate
+    var department: Department
+    var supervisor: Department?
+}
 
 /** Model of the entity can be a generated class in the feature */
 open class _Employees : EntityModel<Employee>(Employee::class) {
