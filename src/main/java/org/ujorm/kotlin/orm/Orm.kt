@@ -36,6 +36,16 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
         TODO()
     }
 
+    fun saveEntity(vararg entities: Any) {
+        entities.forEachIndexed{ index, element ->
+            if (element is Entity<*>) {
+                save(element)
+            } else {
+                throw IllegalArgumentException("Illegal argument #$index type of ${element::class} ")
+            }
+        }
+    }
+
     // --- Native query
 
     fun selectFor(): NativeQuery {
