@@ -27,7 +27,7 @@ internal class CoreComposedTest {
     //@Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
-        // Close all metamodels first:
+        // Lock all metamodels first:
         val entities = Entities.close<Entities>()
         val employees = entities.employees // Employee Entity metamodel
         val employee = employees.new {
@@ -45,7 +45,7 @@ internal class CoreComposedTest {
                 ", department=Department{id=2, name=Development, c...}" +
                 ", supervisor=null}")
 
-        val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (!)
+        val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (Fix it!)
 
         // Read and Write values by entity metamodel:
         val id: Int? = employees.id[employee]
