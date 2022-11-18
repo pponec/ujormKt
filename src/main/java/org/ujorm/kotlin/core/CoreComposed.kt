@@ -118,7 +118,8 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
         val entityClass = core.utils().entityClass.java
         val myHandler = RawEntity(core.utils().entityModel)
         val result = Proxy.newProxyInstance(
-            entityClass.classLoader, arrayOf<Class<*>>(entityClass),
+            entityClass.classLoader,
+            arrayOf<Class<*>>(entityClass, Entity::class.java),
             myHandler
         )
         @Suppress("UNCHECKED_CAST")
