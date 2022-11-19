@@ -66,10 +66,11 @@ internal class CoreComposedTest {
         expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
     }
 
-    private fun getDepartment(id: Int, name: String) =
+    /** Create new department */
+    private fun getDepartment(id: Int, name: String): Department =
         Entities.departments.new {
-            this.id = id
-            this.name = name
-        }
+        this.id = id
+        this.name = name
+    }
 
 }
