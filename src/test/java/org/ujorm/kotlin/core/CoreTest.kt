@@ -57,18 +57,19 @@ internal class CoreTest {
         expect(joe.supervisor?.department?.name).toEqual("development")
 
         expect(development.toString()).toEqual("Department{id=1" +
-                ", name=development" +
+                ", name=\"development\"" +
                 ", created=2021-10-15}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
-                ", name=Lucy" +
+                ", name=\"Lucy\"" +
                 ", contractDay=2022-01-01" +
-                ", department=Department{id=1, name=development, c...}" +
+                ", department=Department{id=1, name=\"development\",...}" +
                 ", supervisor=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
-                ", name=Joe" +
+                ", name=\"Joe\"" +
                 ", contractDay=2022-02-01" +
-                ", department=Department{id=1, name=development, c...}" +
-                ", supervisor=Employee{id=2, name=Lucy, contractDa...}}")
+                ", department=Department{id=1, name=\"development\",...}" +
+                ", supervisor=Employee{id=2, name=\"Lucy\"" +
+                ", contract...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */
@@ -234,7 +235,7 @@ internal class CoreTest {
         expect(department1.hashCode()).notToEqual(department3.hashCode())
         expect(department2.hashCode()).notToEqual(department3.hashCode())
 
-        expect(department1 is Entity<*>).toEqual(true)
+        expect(department1 is AbstractEntity<*>).toEqual(true)
         expect(department1).toEqual(department1)
         expect(department1).toEqual(department2)
         expect(department1).notToEqual(department3)
@@ -260,7 +261,7 @@ internal class CoreTest {
 }
 
 /** Helper method to create new department */
-private fun getDepartment(id: Int, name: String) =
+private fun getDepartment(id: Int, name: String) : Department =
     Entities.departments.new {
         this.id = id
         this.name = name

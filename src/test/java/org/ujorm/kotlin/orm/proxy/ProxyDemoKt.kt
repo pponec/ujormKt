@@ -7,6 +7,7 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import java.io.Serializable
 
 /**
  * Original author: https://xperti.io/blogs/java-dynamic-proxies-introduction/
@@ -17,12 +18,14 @@ class ProxyDemoKt {
         val myImplementation = Implementation()
         val myHandler = MyHandler(myImplementation)
         val a = Proxy.newProxyInstance(
-            Ifce::class.java.classLoader, arrayOf<Class<*>>(Ifce::class.java),
+            Ifce::class.java.classLoader,
+            arrayOf<Class<*>>(Ifce::class.java, Serializable::class.java),
             myHandler
         ) as Ifce
         val result = a.sendName("Joe")
 
         expect(result).toEqual("Hello Joe!")
+        expect(result is Serializable).toEqual(true)
     }
 
     internal interface Ifce {

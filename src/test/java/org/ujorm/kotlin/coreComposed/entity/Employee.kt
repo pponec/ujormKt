@@ -1,12 +1,13 @@
 package org.ujorm.kotlin.coreComposed.entity
 
-import org.ujorm.kotlin.core.Entity
 import org.ujorm.kotlin.core.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
+import org.ujorm.kotlin.anotation.Entity
 
 /** An user entity */
-interface Employee /*:Entity<Employee>*/ {
+@Entity
+interface Employee {
     var id: Int
     var name: String
     var contractDay: LocalDate

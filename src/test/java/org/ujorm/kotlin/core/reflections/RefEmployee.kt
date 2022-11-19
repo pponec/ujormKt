@@ -2,9 +2,11 @@ package org.ujorm.kotlin.core.reflections
 
 import org.ujorm.kotlin.core.*
 import java.time.LocalDate
+import org.ujorm.kotlin.anotation.Entity
 
 /** An user entity */
-interface Employee : Entity<Employee> {
+@Entity
+interface Employee {
     var id: Int
     var name: String
     var contractDay: LocalDate
