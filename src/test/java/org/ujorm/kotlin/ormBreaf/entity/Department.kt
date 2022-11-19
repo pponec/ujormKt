@@ -1,9 +1,11 @@
 package org.ujorm.kotlin.ormBreaf.entity
 
+import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.core.EntityModel
 import java.time.LocalDate
 
-/** An Department entity */
+/** A Department entity */
+@Entity
 interface Department {
     var id: Int
     var name: String

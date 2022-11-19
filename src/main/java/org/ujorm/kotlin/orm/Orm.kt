@@ -32,13 +32,13 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
         TODO("Not yet implemented")
     }
 
-    fun save(vararg entities: Entity<*>) {
+    fun save(vararg entities: AbstractEntity<*>) {
         TODO()
     }
 
     fun saveEntity(vararg entities: Any) {
         entities.forEachIndexed{ index, element ->
-            if (element is Entity<*>) {
+            if (element is AbstractEntity<*>) {
                 save(element)
             } else {
                 throw IllegalArgumentException("Illegal argument #$index type of ${element::class} ")

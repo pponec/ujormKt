@@ -2,8 +2,10 @@ package org.ujorm.kotlin.ormBreaf.entity
 
 import org.ujorm.kotlin.core.EntityModel
 import java.time.LocalDate
+import org.ujorm.kotlin.anotation.Entity
 
 /** An user entity */
+@Entity
 interface Employee {
     var id: Int
     var name: String

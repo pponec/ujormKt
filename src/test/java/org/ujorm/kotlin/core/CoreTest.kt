@@ -234,7 +234,7 @@ internal class CoreTest {
         expect(department1.hashCode()).notToEqual(department3.hashCode())
         expect(department2.hashCode()).notToEqual(department3.hashCode())
 
-        expect(department1 is Entity<*>).toEqual(true)
+        expect(department1 is AbstractEntity<*>).toEqual(true)
         expect(department1).toEqual(department1)
         expect(department1).toEqual(department2)
         expect(department1).notToEqual(department3)
@@ -260,7 +260,7 @@ internal class CoreTest {
 }
 
 /** Helper method to create new department */
-private fun getDepartment(id: Int, name: String) =
+private fun getDepartment(id: Int, name: String) : Department =
     Entities.departments.new {
         this.id = id
         this.name = name

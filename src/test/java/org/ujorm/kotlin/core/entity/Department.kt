@@ -2,9 +2,11 @@ package org.ujorm.kotlin.core.entity
 
 import org.ujorm.kotlin.core.*
 import java.time.LocalDate
+import org.ujorm.kotlin.anotation.Entity
 
-/** An Department entity */
-interface Department : Entity<Department> {
+/** A Department entity */
+@Entity
+interface Department {
     var id: Int
     var name: String
     var created: LocalDate

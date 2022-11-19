@@ -20,7 +20,7 @@ import org.ujorm.kotlin.coreComposed.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
-import org.ujorm.kotlin.core.Entity
+import org.ujorm.kotlin.core.AbstractEntity
 import org.ujorm.kotlin.core.PropertyNullable
 
 internal class CoreComposedTest {
@@ -37,7 +37,7 @@ internal class CoreComposedTest {
             department = getDepartment(2, "Development")
         }
 
-        expect(employee is Entity<*>).toEqual(true)
+        expect(employee is AbstractEntity<*>).toEqual(true)
         expect(employee.id).toEqual(11)
         expect(employee.name).toEqual("John")
         expect(employee.toString()).toEqual("Employee{id=11" +

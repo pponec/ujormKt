@@ -19,7 +19,7 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.util.*
 
-interface Entity<D : Any> {
+interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object */
     fun `___`(): RawEntity<D>
@@ -33,7 +33,7 @@ interface Session {
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  * */
-open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
+open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
@@ -108,9 +108,14 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
                     result.append("...")
                 }
             } else {
+                val separator = if (value is CharSequence) "\"" else ""
                 val text = "$value"
-                result.append(if (text.length <= itemValueMaxLength) text
-                else "${text.substring(0, itemValueMaxLength - 4)}...}")
+                result.append(separator)
+                result.append(
+                    if (text.length <= itemValueMaxLength) text
+                    else "${text.substring(0, itemValueMaxLength - 4)}...}"
+                )
+                result.append(separator)
             }
         }
         return result.append('}').toString()
@@ -118,7 +123,7 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (!(other is Entity<*>)) return false
+        if (!(other is AbstractEntity<*>)) return false
         val raw2 = other.`___`()
         if (model.javaClass != raw2.model.javaClass) return false
         if (!values.contentEquals(raw2.values)) return false
@@ -130,6 +135,6 @@ open class RawEntity<D : Any> : InvocationHandler, Entity<D>{
 }
 
 /** Common database recored entity */
-interface DbRecord : Entity<Any>
+interface DbRecord : AbstractEntity<Any>
 
 open class TempModel : EntityModel<DbRecord>(DbRecord::class)
