@@ -8,7 +8,7 @@ package org.ujorm.kotlin.anotation
  * https://thorben-janssen.com/key-jpa-hibernate-annotations/
  * https://docs.oracle.com/javaee/7/api/javax/persistence/Entity.html
  * https://docs.oracle.com/javaee/7/api/javax/persistence/package-frame.html
- * */
+ **/
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Entity(
