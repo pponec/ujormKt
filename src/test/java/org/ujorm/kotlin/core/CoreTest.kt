@@ -260,7 +260,7 @@ internal class CoreTest {
 }
 
 /** Helper method to create new department */
-private fun getDepartment(id: Int, name: String) : Department =
+private fun getDepartment(id: Int, name: String): Department =
     Entities.departments.new {
         this.id = id
         this.name = name

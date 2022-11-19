@@ -1,7 +1,6 @@
 # UjormKt
 
 A very early prototype of the Kotlin library for modelling filters of domain objects.
-Assembled filters work on common POJO objects.
 The solution was inspired by the [Ujorm](https://pponec.github.io/ujorm/www/index.html) key-value framework, but this code is completely new.
 Topical areas of use are:
 
@@ -12,11 +11,8 @@ Topical areas of use are:
 The ultimate goal of this project is to provide a programming interface (in Kotlin) 
 for building a database query model in a natural way. 
 That is, the sessions will be modeled in a similar way to how attribute chaining is done when reading the value of an object. 
-An entity here is an interface whose attributes are annotated with annotations according to the JPA specification. 
-In the first production release, I plan to support only a selected subset of JPA annotations. 
-The SQL query modeling module will not have its own ORM implementation. 
-The execution of database queries will then be delegated to an existing JPA implementation. 
-Also in play is to create some clone of the Ujorm framework, adapted for Kotlin.
+An entity here is an interface whose attributes are annotated with annotations similar to the JPA specification.
+The execution of database queries will then be delegated to an existing implementation, probably a clone of the Ujorm framework.
 
 See the target `SELECT` example:
 
