@@ -57,18 +57,19 @@ internal class CoreTest {
         expect(joe.supervisor?.department?.name).toEqual("development")
 
         expect(development.toString()).toEqual("Department{id=1" +
-                ", name=development" +
+                ", name=\"development\"" +
                 ", created=2021-10-15}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
-                ", name=Lucy" +
+                ", name=\"Lucy\"" +
                 ", contractDay=2022-01-01" +
-                ", department=Department{id=1, name=development, c...}" +
+                ", department=Department{id=1, name=\"development\",...}" +
                 ", supervisor=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
-                ", name=Joe" +
+                ", name=\"Joe\"" +
                 ", contractDay=2022-02-01" +
-                ", department=Department{id=1, name=development, c...}" +
-                ", supervisor=Employee{id=2, name=Lucy, contractDa...}}")
+                ", department=Department{id=1, name=\"development\",...}" +
+                ", supervisor=Employee{id=2, name=\"Lucy\"" +
+                ", contract...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */

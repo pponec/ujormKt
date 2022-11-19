@@ -40,10 +40,9 @@ internal class CoreComposedTest {
         expect(employee is AbstractEntity<*>).toEqual(true)
         expect(employee.id).toEqual(11)
         expect(employee.name).toEqual("John")
-        expect(employee.toString()).toEqual("Employee{id=11" +
-                ", name=John" +
-                ", contractDay=2022-11-18" +
-                ", department=Department{id=2, name=Development, c...}" +
+        expect(employee.toString()).toEqual("Employee{id=11, name=\"John\"" +
+                ", contractDay=2022-11-19" +
+                ", department=Department{id=2, name=\"Development\",...}" +
                 ", supervisor=null}")
 
         val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (Fix it!)

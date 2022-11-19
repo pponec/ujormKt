@@ -816,7 +816,8 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
         val entityClass = propertyBuilder.entityClass.java
         val myHandler = RawEntity(propertyBuilder.entityModel)
         val result = Proxy.newProxyInstance(
-            entityClass.classLoader, arrayOf<Class<*>>(entityClass),
+            entityClass.classLoader,
+            arrayOf<Class<*>>(entityClass, AbstractEntity::class.java),
             myHandler
         )
         return result as D
