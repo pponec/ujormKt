@@ -78,21 +78,21 @@ internal fun insertRows() {
 Presentation of basic skills with entity model:
 
 ```kotlin
-val employee = Employee(
-    id = 11, 
-    name = "John", 
-    contractDay = LocalDate.now(),
-    department = Department(2, "D")
-)
-val employees = ModelProvider.employees // Employee Entity metamodel
-val departments = ModelProvider.departments // Department Entity metamodel
+val employees = Entities.employees // Employee metamodel
+val departments = Entities.departments // Department metamodel
+val employee = employees.new { // Create new employee object
+    id = 11
+    name = "John"
+    contractDay = LocalDate.now()
+    department = getDepartment(2, "D")
+}
 
 // Read and Write values by entity metamodel:
-val id : Int = employees.id[employee]
-val name : String = employees.name[employee]
-val contractDay : LocalDate = employees.contractDay[employee]
-val department : Department = employees.department[employee]
-val supervisor : Employee? = employees.supervisor[employee]
+val id: Int = employees.id[employee]
+val name: String = employees.name[employee]
+val contractDay: LocalDate = employees.contractDay[employee]
+val department: Department = employees.department[employee]
+val supervisor: Employee? = employees.supervisor[employee]
 employees.id[employee] = id
 employees.name[employee] = name
 employees.contractDay[employee] = contractDay
@@ -102,8 +102,8 @@ employees.supervisor[employee] = supervisor
 // Composed properties:
 val employeeDepartmentId = (employees.department + departments.id)[employee]
 val employeeDepartmentName = (employees.department + departments.name)[employee]
-assertEq(employeeDepartmentId, 2) { "Department id must be 2" }
-assertEq(employeeDepartmentName, "D") { "Department name must be 'D'" }
+expect(employeeDepartmentId).toEqual(2) // "Department id must be 2
+expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
 
 // Criterion conditions:
 val crn1 = employees.name EQ "Lucy"
@@ -115,13 +115,13 @@ val noValid: Boolean = crn1(employee)
 val isValid: Boolean = crn4(employee)
 
 // Criterion logs:
-assertFalse(noValid, { "crn1(employee)" })
-assertTrue(isValid, { "crn4(employee)" })
-assertEq(crn1.toString(), """Employee: name EQ "Lucy"""")
-assertEq(crn2.toString(), """Employee: id GT 1""")
-assertEq(crn3.toString(), """Employee: department.id LT 99""")
-assertEq(crn4.toString(), """Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
-assertEq(crn5.toString(), """Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
+expect(noValid).toEqual(false) // crn1(employee)
+expect(isValid).toEqual(true)  // crn4(employee)
+expect(crn1.toString()).toEqual("""Employee: name EQ "Lucy"""")
+expect(crn2.toString()).toEqual("""Employee: id GT 1""")
+expect(crn3.toString()).toEqual("""Employee: department.id LT 99""")
+expect(crn4.toString()).toEqual("""Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
+expect(crn5.toString()).toEqual("""Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
 ```
 
 Building domain entity model:
