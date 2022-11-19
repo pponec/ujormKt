@@ -30,7 +30,7 @@ internal class CoreComposedTest {
     fun testReadWrite() {
         val entities = Entities.close<Entities>() // Lock the metamodel first
         val employees = entities.employees // Employee Entity metamodel
-        val employee = employees.new {
+        val employee: Employee = employees.new {
             id = 11
             name = "John"
             contractDay = LocalDate.now()

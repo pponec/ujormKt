@@ -77,8 +77,7 @@ internal class CoreTest {
     fun readAndWrite() {
         val employees = Entities.employees // Employee metamodel
         val departments = Entities.departments // Department metamodel
-
-        val employee = employees.new { // Create new employee object
+        val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()
@@ -115,7 +114,7 @@ internal class CoreTest {
     fun conditions() {
         val employees = Entities.employees // Employee Entity metamodel
         val departments = Entities.departments // Department Entity metamodel
-        val employee = employees.new { // Create new employee object
+        val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()
@@ -146,7 +145,7 @@ internal class CoreTest {
     fun extendedFunctions() {
         val employees = Entities.employees // Employee Entity metamodel
         val departments = Entities.departments // Department Entity metamodel
-        val employee = employees.new { // Create new employee object
+        val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
             contractDay = LocalDate.now()

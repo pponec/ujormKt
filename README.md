@@ -80,7 +80,7 @@ Presentation of basic skills with entity model:
 ```kotlin
 val employees = Entities.employees // Employee metamodel
 val departments = Entities.departments // Department metamodel
-val employee = employees.new { // Create new employee object
+val employee: Employee = employees.new { // Create new employee object
     id = 11
     name = "John"
     contractDay = LocalDate.now()
