@@ -23,7 +23,10 @@ interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object.
      * The method name must not match the name of any method of the real entity. */
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("___$")
     fun `~~`(): RawEntity<D>
+
 }
 
 /** A session context */

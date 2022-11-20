@@ -33,7 +33,7 @@ internal class CoreComposedTest {
         val employee: Employee = employees.new {
             id = 11
             name = "John"
-            contractDay = LocalDate.now()
+            contractDay = LocalDate.parse("2022-11-19")
             department = getDepartment(2, "Development")
         }
 
