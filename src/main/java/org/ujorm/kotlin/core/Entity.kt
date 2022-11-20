@@ -22,7 +22,7 @@ import java.util.*
 interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object */
-    fun `___`(): RawEntity<D>
+    fun `~~`(): RawEntity<D>
 }
 
 /** A session context */
@@ -50,7 +50,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
             "toString" -> toString()
             "hashCode" -> hashCode()
             "equals" -> equals(args?.first())
-            "___" -> `___`()
+            "~~" -> `~~`()
             else -> {
                 if (methodName.length > 3 && (
                     methodName.startsWith("get") ||
@@ -90,7 +90,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
         changes?.get(property.data().indexToInt()) ?: false
 
-    override fun `___`(): RawEntity<D> = this
+    override fun `~~`(): RawEntity<D> = this
 
     override fun toString() = toString(40)
 
@@ -124,7 +124,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (!(other is AbstractEntity<*>)) return false
-        val raw2 = other.`___`()
+        val raw2 = other.`~~`()
         if (model.javaClass != raw2.model.javaClass) return false
         if (!values.contentEquals(raw2.values)) return false
         return true
