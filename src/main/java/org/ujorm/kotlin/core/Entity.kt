@@ -54,7 +54,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
             "toString" -> toString()
             "hashCode" -> hashCode()
             "equals" -> equals(args?.first())
-            "~~" -> `~~`()
+            "~~", "___\$" -> `~~`()
             else -> {
                 if (methodName.length > 3 && (
                     methodName.startsWith("get") ||
@@ -70,7 +70,8 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
                         return Unit
                     }
                 } else {
-                    val msg = "Method: ${model.utils().entityClass.simpleName}.$methodName()"
+                    val msg = "Method is not imlemented:" +
+                            " '${model.utils().entityClass.simpleName}.$methodName()'"
                     TODO(msg)
                 }
             }
