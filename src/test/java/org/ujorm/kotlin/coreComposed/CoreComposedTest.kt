@@ -25,7 +25,7 @@ import org.ujorm.kotlin.core.PropertyNullable
 
 internal class CoreComposedTest {
 
-    //@Disabled("Implementation is not finished")
+    @org.junit.jupiter.api.Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
         val entities = Entities.close<Entities>() // Lock the metamodel first
