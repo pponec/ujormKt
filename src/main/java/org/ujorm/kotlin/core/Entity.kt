@@ -22,11 +22,14 @@ import java.util.*
 interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object.
-     * The method name must not match the name of any method of the real entity. */
+     * The method name must not match the name of any method of the real entity.
+     * TODO: change this method to the property (?) */
     // @Suppress("INAPPLICABLE_JVM_NAME")
     // @JvmName("___$") // For Java compatibility (?)
     fun `~~`(): RawEntity<D>
 
+    // operator fun <V : Any> get(property : PropertyNullable<D, V>) : V? = `~~`().getValue(property)
+    // operator fun <V : Any> get(property : Property<D, V>) : V = `~~`().getValue(property)
 }
 
 /** A session context */
@@ -81,10 +84,10 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     protected fun get(name: String): Any? = get(model.utils().findProperty(name))
 
     /** Get value */
-    fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
+    operator fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
 
     /** Set value */
-    fun <V : Any> set(property: PropertyNullable<D, V>, value: V) {
+    operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V) {
         if (session != null) {
             if (changes == null) changes = BitSet(model.utils().size)
             changes!!.set(1)

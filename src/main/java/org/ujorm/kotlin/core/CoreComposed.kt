@@ -47,7 +47,7 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 /** Composed Entity model */
 abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
-    /** Original Entity model with direct properties */
+    /** Direct Entity Model (with direct properties) */
     abstract protected val core: EntityModel<V>
 
     /** Core property */
@@ -56,30 +56,30 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     }
 
     /** Composed property to the entity model. */
-    private val domainProperty: PropertyNullable<D, V>?
+    private val composedProperty: PropertyNullable<D, V>?
 
-    /** Entity model with direct properties. */
-    val originalEntityModel: EntityModel<V>
+    /** Entity model with direct properties (TODO remove it ?). */
+    val directEntityModel: EntityModel<V>
 
     /** Is it the primary instance? */
-    val baseInstance get() = domainProperty is SelfProperty<*>
+    val baseInstance get() = composedProperty is SelfProperty<*>
 
     protected constructor(
         prefixProperty: PropertyNullable<D, V>,
         originalEntityModel: EntityModel<V>,
     ) {
-        this.domainProperty = prefixProperty
-        this.originalEntityModel = originalEntityModel
+        this.composedProperty = prefixProperty
+        this.directEntityModel = originalEntityModel
     }
 
     protected constructor() {
-        this.domainProperty = null
-        this.originalEntityModel = core
+        this.composedProperty = null
+        this.directEntityModel = core
     }
 
     /** Composed property to the entity model. */
     fun domainProperty(): PropertyNullable<D, V> {
-        return domainProperty ?: coreProperty as PropertyNullable<D, V>
+        return composedProperty ?: coreProperty as PropertyNullable<D, V>
     }
 
     override fun data(): PropertyMetadata<D, V> {
@@ -98,7 +98,11 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
     /** Build the new Property */
     protected fun <M : Any, V : Any, R : PropertyNullable<D, V>> property(property : PropertyNullable<M, V>) : R {
-        return TODO()
+        if (composedProperty != null) {
+            TODO()
+        } else {
+            return property as R
+        }
     }
 
     fun close(): DomainEntityModel<D, V> {
