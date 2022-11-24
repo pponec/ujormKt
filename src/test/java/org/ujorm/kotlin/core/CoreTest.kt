@@ -167,6 +167,11 @@ internal class CoreTest {
         expect(employees.id.info()).toEqual("Employee.id") // property id
         expect(employees.id()).toEqual("id") // A shortcut for the name()
 
+        // Another expression:
+        (employee as AbstractEntity<Employee>).`~~`()[employees.name] = "John"
+        val name2 = (employee as AbstractEntity<Employee>).`~~`()[employees.name]
+        expect(name2).toEqual("John") // property id
+
         val properties = employees.utils().properties
         expect(properties.size).toEqual(5) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
