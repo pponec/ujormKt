@@ -35,7 +35,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
     fun save(vararg entities: Any) {
         entities.forEachIndexed { index, element ->
             if (element is AbstractEntity<*>) {
-                saveRawEntity(element.`~~`())
+                saveRawEntity(element.`~~`)
             } else {
                 val expectedClassName = AbstractEntity::class.simpleName
                 throw IllegalArgumentException("The expected type of argument #$index is $expectedClassName.")
@@ -44,7 +44,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
     }
 
     fun saveEntity(vararg entities: AbstractEntity<*>) {
-        entities.forEach { saveRawEntity(it.`~~`()) }
+        entities.forEach { saveRawEntity(it.`~~`) }
     }
 
     protected fun saveRawEntity(entity: RawEntity<*>) {

@@ -26,10 +26,10 @@ interface AbstractEntity<D : Any> {
      * TODO: change this method to the property (?) */
     // @Suppress("INAPPLICABLE_JVM_NAME")
     // @JvmName("___$") // For Java compatibility (?)
-    fun `~~`(): RawEntity<D>
+    val `~~`: RawEntity<D>
 
-    // operator fun <V : Any> get(property : PropertyNullable<D, V>) : V? = `~~`().getValue(property)
-    // operator fun <V : Any> get(property : Property<D, V>) : V = `~~`().getValue(property)
+    // operator fun <V : Any> get(property : PropertyNullable<D, V>) : V? = `~~`.getValue(property)
+    // operator fun <V : Any> get(property : Property<D, V>) : V = `~~`.getValue(property)
 }
 
 /** A session context */
@@ -45,6 +45,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     private val values: Array<Any?>
     private var changes: BitSet? = null
     var session: Session? = null
+    final override val `~~`: RawEntity<D> get() = this
 
     constructor(model: EntityModel<D>) {
         this.model = model
@@ -57,7 +58,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
             "toString" -> toString()
             "hashCode" -> hashCode()
             "equals" -> equals(args?.first())
-            "~~", "___\$" -> `~~`()
+            "~~", "get~~", "get___\$" -> `~~`
             else -> {
                 if (methodName.length > 3 && (
                     methodName.startsWith("get") ||
@@ -98,8 +99,6 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
         changes?.get(property.data().indexToInt()) ?: false
 
-    override fun `~~`(): RawEntity<D> = this
-
     override fun toString() = toString(40)
 
     protected fun toString(itemValueMaxLength : Int, maxDepth: Int = 3): String {
@@ -132,7 +131,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (!(other is AbstractEntity<*>)) return false
-        val raw2 = other.`~~`()
+        val raw2 = other.`~~`
         if (model.javaClass != raw2.model.javaClass) return false
         if (!values.contentEquals(raw2.values)) return false
         return true
