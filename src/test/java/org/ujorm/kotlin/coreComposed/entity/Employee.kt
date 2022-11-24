@@ -1,31 +1,19 @@
 package org.ujorm.kotlin.coreComposed.entity
 
+import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.PropertyAccessor
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
-import org.ujorm.kotlin.anotation.Entity
-import org.ujorm.kotlin.core.AbstractEntity
-import org.ujorm.kotlin.core.Property
-import org.ujorm.kotlin.core.PropertyNullable
 
-/** An user entity */
+/** An user entity with reading value by properties */
 @Entity
-interface Employee {
+interface Employee: PropertyAccessor<Employee> {
     var id: Int
     var name: String
     var contractDay: LocalDate
     var department: Department
     var supervisor: Department?
-
-    /** Optional method for reading value by property */
-    operator fun <V : Any> get(property : PropertyNullable<Employee, V>)
-       = (this as AbstractEntity<Employee>).`~~`[property]
-
-    /** Optional method for reading value by property */
-    operator fun <V : Any> get(property : Property<Employee, V>)
-            = (this as AbstractEntity<Employee>).`~~`[property] as V
-
-
 }
 
 /** Model of the entity can be a generated class in the feature */

@@ -27,10 +27,24 @@ interface AbstractEntity<D : Any> {
     // @Suppress("INAPPLICABLE_JVM_NAME")
     // @JvmName("___$") // For Java compatibility (?)
     val `~~`: RawEntity<D>
-
-    // operator fun <V : Any> get(property : PropertyNullable<D, V>) : V? = `~~`.getValue(property)
-    // operator fun <V : Any> get(property : Property<D, V>) : V = `~~`.getValue(property)
 }
+
+/** Access to data by a properties */
+interface PropertyAccessor<D : Any> : AbstractEntity<D> {
+
+    /** Method for reading value by property */
+    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`[property]
+
+    /** Method for reading value by property */
+    operator fun <V : Any> get(property : Property<D, V>) = `~~`[property] as V
+
+    /** Method for reading value by property */
+    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`.set(property, value)
+
+    /** Method for reading value by property */
+    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`.set(property, value)
+}
+
 
 /** A session context */
 interface Session {
@@ -88,7 +102,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     operator fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
 
     /** Set a nullable value */
-    operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V) {
+    operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) {
         if (session != null) {
             if (changes == null) changes = BitSet(model.utils().size)
             changes!!.set(1)
