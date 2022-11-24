@@ -87,7 +87,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
     /** Get value */
     operator fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
 
-    /** Set value */
+    /** Set a nullable value */
     operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V) {
         if (session != null) {
             if (changes == null) changes = BitSet(model.utils().size)
