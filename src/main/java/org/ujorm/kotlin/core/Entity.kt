@@ -29,7 +29,7 @@ interface AbstractEntity<D : Any> {
     val `~~`: RawEntity<D>
 }
 
-/** Access to data by a properties */
+/** Use this interface if you want to access the entity object via the entity model. */
 interface PropertyAccessor<D : Any> : AbstractEntity<D> {
 
     /** Method for reading value by property */
