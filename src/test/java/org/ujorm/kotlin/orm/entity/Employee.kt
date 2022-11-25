@@ -1,9 +1,9 @@
 package org.ujorm.kotlin.orm.entity
 
-import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.impl.EntityModel
 
 /** An user entity */
 @Entity

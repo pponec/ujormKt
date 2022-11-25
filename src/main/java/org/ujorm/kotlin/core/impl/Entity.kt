@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin.core
+package org.ujorm.kotlin.core.impl
 
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
@@ -54,7 +54,7 @@ interface Session {
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  * */
-open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
+open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null

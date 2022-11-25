@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.kotlin.core
+package org.ujorm.kotlin.core.impl
 
-import org.ujorm.kotlin.core.Constants.CLOSED_MESSAGE
+import org.ujorm.kotlin.core.impl.Constants.CLOSED_MESSAGE
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
 import java.util.*
@@ -107,7 +107,7 @@ class PropertyMetadataImpl<D : Any, V : Any> (
     override val nullable: Boolean = false,
 ) : PropertyMetadata<D, V> {
     override val entityClass: KClass<D> get() = entityModel.entityClass
-    override val entityType : ClassType  get() = entityModel.entityType
+    override val entityType : ClassType get() = entityModel.entityType
 
     override var name: String = name
         internal set(value) {

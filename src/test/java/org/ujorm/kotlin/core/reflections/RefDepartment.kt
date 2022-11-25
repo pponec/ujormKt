@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.core.reflections
 
 import org.ujorm.kotlin.anotation.Entity
-import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.impl.EntityModel
 import java.time.LocalDate
 
 /** A Department entity */

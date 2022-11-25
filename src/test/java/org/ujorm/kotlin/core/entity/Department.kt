@@ -1,8 +1,8 @@
 package org.ujorm.kotlin.core.entity
 
-import org.ujorm.kotlin.core.*
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.impl.EntityModel
 
 /** A Department entity */
 @Entity

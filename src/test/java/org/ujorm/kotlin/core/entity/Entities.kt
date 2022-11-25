@@ -1,6 +1,6 @@
 package org.ujorm.kotlin.core.entity
 
-import org.ujorm.kotlin.core.AbstractEntityProvider
+import org.ujorm.kotlin.core.impl.AbstractEntityProvider
 
 /** Entity provider */
 object Entities : AbstractEntityProvider() {

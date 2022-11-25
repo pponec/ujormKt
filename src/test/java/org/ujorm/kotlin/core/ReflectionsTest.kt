@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import org.ujorm.kotlin.core.impl.EntityModel
+import org.ujorm.kotlin.core.impl.Reflections
 import org.ujorm.kotlin.core.reflections.*
 
 internal class ReflectionsTest {

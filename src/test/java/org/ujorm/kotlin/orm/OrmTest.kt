@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.ujorm.kotlin.orm.entity.*
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
-import org.ujorm.kotlin.core.TempModel
+import org.ujorm.kotlin.core.impl.TempModel
 import java.time.LocalDate
 
 internal class OrmTest {

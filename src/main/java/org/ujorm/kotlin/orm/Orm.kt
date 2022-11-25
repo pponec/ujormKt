@@ -16,6 +16,7 @@
 package org.ujorm.kotlin.orm
 
 import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.impl.*
 import java.util.stream.Stream
 
 abstract class AbstractDatabase : AbstractEntityProvider() {
