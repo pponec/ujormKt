@@ -15,10 +15,7 @@
  */
 package org.ujorm.kotlin.core.impl
 
-import org.ujorm.kotlin.core.AbstractEntity
-import org.ujorm.kotlin.core.DbRecord
-import org.ujorm.kotlin.core.PropertyNullable
-import org.ujorm.kotlin.core.Session
+import org.ujorm.kotlin.core.*
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.util.*
@@ -47,12 +44,13 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
             "equals" -> equals(args?.first())
             "~~", "get~~", "get___\$" -> `~~`
             else -> {
-                if (methodName.length > 3 && (
+                val prefixLength = 3
+                if (methodName.length > prefixLength && (
                     methodName.startsWith("get") ||
                     methodName.startsWith("set"))
                 ) {
-                    val position = 3
-                    val propertyName = "${methodName[position].lowercaseChar()}${methodName.substring(position + 1)}"
+                    val propertyName = "${methodName[prefixLength]
+                        .lowercaseChar()}${methodName.substring(prefixLength + 1)}"
                     val property = model.utils().findProperty(propertyName) as PropertyNullable<D, Any>
                     if (args.isNullOrEmpty()) {
                         return property.get(values)
@@ -61,6 +59,16 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
                         return Unit
                     }
                 } else {
+                    if (methodName.length == prefixLength && proxy is PropertyAccessor<*>) {
+                        if (args?.size == 1 && methodName == "get") {
+                            val p = args[0] as PropertyNullable<D, Any>
+                            return p.get(proxy as D)
+                        }
+                        if (args?.size == 2 && methodName == "set") {
+                            val p = args[0] as PropertyNullable<D, Any>
+                            return p.set(proxy as D, args[1])
+                        }
+                    }
                     val msg = "Method is not imlemented:" +
                             " '${model.utils().entityClass.simpleName}.$methodName()'"
                     TODO(msg)

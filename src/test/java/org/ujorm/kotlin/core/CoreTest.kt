@@ -85,28 +85,33 @@ internal class CoreTest {
         }
 
         // Read and Write values by entity metamodel:
-        val id: Int = employees.id[employee]
-        val name: String = employees.name[employee]
-        val contractDay: LocalDate = employees.contractDay[employee]
-        val department: Department = employees.department[employee]
-        val supervisor: Employee? = employees.supervisor[employee]
-        employees.id[employee] = id
-        employees.name[employee] = name
-        employees.contractDay[employee] = contractDay
-        employees.department[employee] = department
-        employees.supervisor[employee] = supervisor
+        val id: Int = employee.get(employees.id)
+        val name: String = employee[employees.name]
+        val contractDay: LocalDate = employee[employees.contractDay]
+        val department: Department = employee[employees.department]
+        val supervisor: Employee? = employee[employees.supervisor]
+        employee[employees.id] = id
+        employee[employees.name] = name
+        employee[employees.contractDay] = contractDay
+        employee[employees.department] = department
+        employee[employees.supervisor] = supervisor
 
         // Composed properties:
-        val employeeDepartmentId = (employees.department + departments.id)[employee]
-        val employeeDepartmentName = (employees.department + departments.name)[employee]
+        val employeeDepartmentId = employee[employees.department + departments.id]
+        val employeeDepartmentName = employee[employees.department + departments.name]
         expect(employeeDepartmentId).toEqual(2) // "Department id must be 2
         expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
 
         // Prepared composed properties.:
-        val employeeDepartmentId2 = employees.departmentId[employee]
-        val employeeDepartmentName2 = employees.departmentName[employee]
+        val employeeDepartmentId2 = employee[employees.departmentId]
+        val employeeDepartmentName2 = employee[employees.departmentName]
         expect(employeeDepartmentId2).toEqual(2) // Department id must be 2
         expect(employeeDepartmentName2).toEqual("D") // Department name must be 'D'
+
+        // Create relation instance(s): // TODO:
+        val employee2 = employees.new()
+        val departmentNameProperty = employees.department + departments.name
+//      employee2[departmentNameProperty] = "Test"
     }
 
     /** Test conditions */

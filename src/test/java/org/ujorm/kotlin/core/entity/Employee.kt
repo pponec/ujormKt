@@ -2,11 +2,13 @@ package org.ujorm.kotlin.core.entity
 
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.PropertyAccessor
 import org.ujorm.kotlin.core.impl.EntityModel
 
-/** An user entity */
+/** An user entity
+ * (with an optional interface to access property values by a property descriptor). */
 @Entity
-interface Employee {
+interface Employee : PropertyAccessor<Employee> {
     var id: Int
     var name: String
     var contractDay: LocalDate
