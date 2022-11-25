@@ -59,7 +59,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
                         return Unit
                     }
                 } else {
-                    if (methodName.length == prefixLength && proxy is PropertyAccessor<*>) {
+                    if (methodName.length == prefixLength && method?.isDefault ?: false) {
                         if (args?.size == 1 && methodName == "get") {
                             val p = args[0] as PropertyNullable<D, Any>
                             return p.get(proxy as D)
