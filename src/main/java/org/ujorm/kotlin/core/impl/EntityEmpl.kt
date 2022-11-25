@@ -69,6 +69,10 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
                             return p.set(proxy as D, args[1])
                         }
                     }
+                    if (method?.isDefault ?: false) {
+                        val arguments = args ?: emptyArray()
+                        return InvocationHandler.invokeDefault(proxy, method, *arguments)
+                    }
                     val msg = "Method is not imlemented:" +
                             " '${model.utils().entityClass.simpleName}.$methodName()'"
                     TODO(msg)
