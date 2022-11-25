@@ -15,40 +15,13 @@
  */
 package org.ujorm.kotlin.core.impl
 
+import org.ujorm.kotlin.core.AbstractEntity
+import org.ujorm.kotlin.core.DbRecord
+import org.ujorm.kotlin.core.PropertyNullable
+import org.ujorm.kotlin.core.Session
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.util.*
-
-interface AbstractEntity<D : Any> {
-
-    /** Provides a RawEntity object.
-     * The method name must not match the name of any method of the real entity.
-     * TODO: change this method to the property (?) */
-    // @Suppress("INAPPLICABLE_JVM_NAME")
-    // @JvmName("___$") // For Java compatibility (?)
-    val `~~`: RawEntity<D>
-}
-
-/** Use this interface if you want to access the entity object via the entity model. */
-interface PropertyAccessor<D : Any> : AbstractEntity<D> {
-
-    /** Method for reading value by property */
-    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`[property]
-
-    /** Method for reading value by property */
-    operator fun <V : Any> get(property : Property<D, V>) = `~~`[property] as V
-
-    /** Method for reading value by property */
-    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`.set(property, value)
-
-    /** Method for reading value by property */
-    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`.set(property, value)
-}
-
-
-/** A session context */
-interface Session {
-}
 
 /** Raw Entity data model
  * See the link: https://www.baeldung.com/java-dynamic-proxies
@@ -154,8 +127,5 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
     /** Hash code of the values */
     override fun hashCode() = values.contentHashCode()
 }
-
-/** Common database recored entity */
-interface DbRecord : AbstractEntity<Any>
 
 open class TempModel : EntityModel<DbRecord>(DbRecord::class)

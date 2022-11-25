@@ -20,8 +20,6 @@ import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
-import org.ujorm.kotlin.core.impl.AbstractEntity
-import org.ujorm.kotlin.core.impl.Property
 
 internal class CoreTest {
 

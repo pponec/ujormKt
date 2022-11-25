@@ -16,6 +16,7 @@
 package org.ujorm.kotlin.coreComposed
 
 import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.AbstractEntity
 import org.ujorm.kotlin.core.impl.*
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
