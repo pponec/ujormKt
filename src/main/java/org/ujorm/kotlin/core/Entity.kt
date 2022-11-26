@@ -27,7 +27,13 @@ interface AbstractEntity<D : Any> {
     val `~~`: RawEntity<D>
 }
 
-/** Use this interface if you want to access the entity object via the entity model. */
+/**
+ * Use this interface if you want to access the entity object via the entity model.
+ *
+ * WARNING: for better performance of reading and writing values, use the following methods rather:
+ * 1. [PropertyNullable.get]
+ * 2. [PropertyNullable.set]
+ */
 interface PropertyAccessor<D : Any> : AbstractEntity<D> {
 
     /** Method for reading value by property */
