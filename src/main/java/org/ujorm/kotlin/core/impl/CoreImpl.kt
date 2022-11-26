@@ -589,8 +589,11 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
     }
 
     override fun set(entity: D, value: V?) {
-        val entity2 = metadata.primaryProperty[entity]
-            ?: throw IllegalArgumentException("Value of property ${info()} is null")
+        var entity2 = metadata.primaryProperty[entity]
+        if (entity2 == null) {
+            throw IllegalArgumentException("Value of property ${info()} is null")
+            // TODO: create new instance
+        }
         metadata.secondaryProperty.set(entity2, value)
     }
 

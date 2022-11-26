@@ -198,6 +198,22 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
+    @Test
+    fun createNewRelationBySetter() {
+        val entities = Entities.close<Entities>()
+        val employees = entities.employees
+        val departments = entities.departments
+
+        val employee: Employee = employees.new()
+
+        (employees.department + departments.id).set(employee, 1)
+
+        employee[employees.department + departments.id] = 99 // Method creates new Department
+        employee[employees.department + departments.name] = "Catherine"
+        expect(employee[employees.department + departments.id]).toEqual(99)
+        expect(employee[employees.department + departments.name]).toEqual("Catherine")
+    }
+
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndAlias() {
