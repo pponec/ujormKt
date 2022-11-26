@@ -104,16 +104,12 @@ internal class CoreTest {
         employee[employees.supervisor] = supervisor
 
         // Composed properties:
-        val employeeDepartmentId = employee[employees.department + departments.id]
-        val employeeDepartmentName = employee[employees.department + departments.name]
-        expect(employeeDepartmentId).toEqual(2) // "Department id must be 2
-        expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
-
-        // Prepared composed properties.:
-        val employeeDepartmentId2 = employee[employees.departmentId]
-        val employeeDepartmentName2 = employee[employees.departmentName]
-        expect(employeeDepartmentId2).toEqual(2) // Department id must be 2
-        expect(employeeDepartmentName2).toEqual("D") // Department name must be 'D'
+        employee[employees.department + departments.id] = 3
+        employee[employees.department + departments.name] = "C"
+        expect(employee.department.id).toEqual(3) // "Department id must be 2
+        expect(employee.department.name).toEqual("C") // Department name must be 'D'
+        expect( employee[employees.department + departments.id]).toEqual(3) // "Department id must be 20
+        expect(employee[employees.department + departments.name]).toEqual("C") // Department name must be 'D2'
 
         // Create relation instance(s): // TODO:
         val employee2 = employees.new()
