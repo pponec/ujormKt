@@ -54,6 +54,7 @@ internal class CoreTest {
 
         expect(development.id).toEqual(1)
         expect(joe.name).toEqual("Joe")
+        expect(joe.married).toEqual(false)
         expect(joe.department.name).toEqual("development")
         expect(joe.supervisor?.name).toEqual("Lucy")
         expect(joe.supervisor?.department?.name).toEqual("development")
@@ -82,6 +83,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
+            married = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
@@ -124,6 +126,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
+            married = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
@@ -155,6 +158,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
+            married = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
