@@ -90,7 +90,7 @@ internal class CoreTest {
         }
 
         // Read and Write values by entity metamodel:
-        val id: Int = employee.get(employees.id)
+        val id: Int = employee[employees.id]
         val name: String = employee[employees.name]
         val senior: Boolean = employee[employees.senior]
         val contractDay: LocalDate = employee[employees.contractDay]
