@@ -101,10 +101,10 @@ employee[employees.supervisor] = supervisor
 // Composed properties:
 employee[employees.department + departments.id] = 3
 employee[employees.department + departments.name] = "C"
-expect(employee.department.id).toEqual(3) // "Department id must be 2
-expect(employee.department.name).toEqual("C") // Department name must be 'D'
-expect( employee[employees.department + departments.id]).toEqual(3) // "Department id must be 20
-expect(employee[employees.department + departments.name]).toEqual("C") // Department name must be 'D2'
+expect(employee.department.id).toEqual(3)
+expect(employee.department.name).toEqual("C")
+expect( employee[employees.department + departments.id]).toEqual(3)
+expect(employee[employees.department + departments.name]).toEqual("C")
 
 // Criterion conditions:
 val crn1 = employees.name EQ "Lucy"
