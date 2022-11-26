@@ -16,6 +16,7 @@
 package org.ujorm.kotlin.orm
 
 import org.ujorm.kotlin.core.*
+import org.ujorm.kotlin.core.impl.*
 import java.util.stream.Stream
 
 abstract class AbstractDatabase : AbstractEntityProvider() {
@@ -35,7 +36,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
     fun save(vararg entities: Any) {
         entities.forEachIndexed { index, element ->
             if (element is AbstractEntity<*>) {
-                saveRawEntity(element.`~~`())
+                saveRawEntity(element.`~~`)
             } else {
                 val expectedClassName = AbstractEntity::class.simpleName
                 throw IllegalArgumentException("The expected type of argument #$index is $expectedClassName.")
@@ -44,7 +45,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
     }
 
     fun saveEntity(vararg entities: AbstractEntity<*>) {
-        entities.forEach { saveRawEntity(it.`~~`()) }
+        entities.forEach { saveRawEntity(it.`~~`) }
     }
 
     protected fun saveRawEntity(entity: RawEntity<*>) {

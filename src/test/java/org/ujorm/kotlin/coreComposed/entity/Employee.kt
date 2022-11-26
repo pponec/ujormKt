@@ -1,13 +1,14 @@
 package org.ujorm.kotlin.coreComposed.entity
 
-import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.PropertyAccessor
+import org.ujorm.kotlin.core.impl.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
-import org.ujorm.kotlin.anotation.Entity
 
-/** An user entity */
+/** A user entity with reading value by properties */
 @Entity
-interface Employee {
+interface Employee: PropertyAccessor<Employee> {
     var id: Int
     var name: String
     var contractDay: LocalDate

@@ -79,27 +79,32 @@ val departments = Entities.departments // Department metamodel
 val employee: Employee = employees.new { // Create new employee object
     id = 11
     name = "John"
+    senior = false
     contractDay = LocalDate.now()
     department = getDepartment(2, "D")
 }
 
 // Read and Write values by entity metamodel:
-val id: Int = employees.id[employee]
-val name: String = employees.name[employee]
-val contractDay: LocalDate = employees.contractDay[employee]
-val department: Department = employees.department[employee]
-val supervisor: Employee? = employees.supervisor[employee]
-employees.id[employee] = id
-employees.name[employee] = name
-employees.contractDay[employee] = contractDay
-employees.department[employee] = department
-employees.supervisor[employee] = supervisor
+val id: Int = employee[employees.id]
+val name: String = employee[employees.name]
+val senior: Boolean = employee[employees.senior]
+val contractDay: LocalDate = employee[employees.contractDay]
+val department: Department = employee[employees.department]
+val supervisor: Employee? = employee[employees.supervisor]
+employee[employees.id] = id
+employee[employees.name] = name
+employee[employees.senior] = senior
+employee[employees.contractDay] = contractDay
+employee[employees.department] = department
+employee[employees.supervisor] = supervisor
 
 // Composed properties:
-val employeeDepartmentId = (employees.department + departments.id)[employee]
-val employeeDepartmentName = (employees.department + departments.name)[employee]
-expect(employeeDepartmentId).toEqual(2) // "Department id must be 2
-expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
+employee[employees.department + departments.id] = 3
+employee[employees.department + departments.name] = "C"
+expect(employee.department.id).toEqual(3) // "Department id must be 2
+expect(employee.department.name).toEqual("C") // Department name must be 'D'
+expect( employee[employees.department + departments.id]).toEqual(3) // "Department id must be 20
+expect(employee[employees.department + departments.name]).toEqual("C") // Department name must be 'D2'
 
 // Criterion conditions:
 val crn1 = employees.name EQ "Lucy"
@@ -123,26 +128,29 @@ expect(crn5.toString()).toEqual("""Employee: (NOT (name EQ "Lucy")) OR (id GT 1)
 Building domain entity model:
 
 ```kotlin
-data class Employee constructor(
-    var id: Int,
-    var name: String,
-    var contractDay: LocalDate,
-    var department: Department = Department(1, "A"),
-    var supervisor: Employee? = null
-)
+@Entity
+interface Employee : PropertyAccessor<Employee> {
+    var id: Int
+    var name: String
+    var senior: Boolean
+    var contractDay: LocalDate
+    var department: Department
+    var supervisor: Employee?
+}
 
 /** Model of the entity can be a generated class in the feature */
-open class Employess : EntityModel<Employee>(Employee::class) {
+class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val contractDay = property("contract_day") { it.contractDay }
+    val senior = property { it.senior }
+    val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
 }
 
 /** Initialize, register and close the entity model. */
-val ModelProvider.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { 
-    Employess().close() as Employess 
+val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    Entities.add(Employees().close<Employees>())
 }
 ```
 

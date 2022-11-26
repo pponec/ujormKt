@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.coreComposed.entity
 
 import org.ujorm.kotlin.anotation.Entity
-import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.impl.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 

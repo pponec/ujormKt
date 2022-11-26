@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.ormBreaf.entity
 
 import org.ujorm.kotlin.anotation.Entity
-import org.ujorm.kotlin.core.EntityModel
+import org.ujorm.kotlin.core.impl.EntityModel
 import java.time.LocalDate
 
 /** A Department entity */

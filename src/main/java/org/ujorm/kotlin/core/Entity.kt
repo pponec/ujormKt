@@ -15,127 +15,44 @@
  */
 package org.ujorm.kotlin.core
 
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.util.*
+import org.ujorm.kotlin.core.impl.RawEntity
 
 interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object.
-     * The method name must not match the name of any method of the real entity. */
-    fun `~~`(): RawEntity<D>
+     * The method name must not match the name of any method of the real entity.
+     * TODO: change this method to the property (?) */
+    // @Suppress("INAPPLICABLE_JVM_NAME")
+    // @JvmName("___$") // For Java compatibility (?)
+    val `~~`: RawEntity<D>
 }
+
+/**
+ * Use this interface if you want to access the entity object via the entity model.
+ *
+ * WARNING: for better performance of reading and writing values, use the following methods rather:
+ * 1. [PropertyNullable.get]
+ * 2. [PropertyNullable.set]
+ */
+interface PropertyAccessor<D : Any> : AbstractEntity<D> {
+
+    /** Method for reading value by property */
+    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`[property]
+
+    /** Method for reading value by property */
+    operator fun <V : Any> get(property : Property<D, V>) = `~~`[property] as V
+
+    /** Method for reading value by property */
+    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`.set(property, value)
+
+    /** Method for reading value by property */
+    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`.set(property, value)
+}
+
 
 /** A session context */
 interface Session {
 }
 
-/** Raw Entity data model
- * See the link: https://www.baeldung.com/java-dynamic-proxies
- * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
- * */
-open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D>{
-    private val model: EntityModel<D>
-    private val values: Array<Any?>
-    private var changes: BitSet? = null
-    var session: Session? = null
-
-    constructor(model: EntityModel<D>) {
-        this.model = model
-        this.values = model.createArray()
-    }
-
-    override fun invoke(proxy: Any?, method: Method?, args: Array<out Any?>?): Any? {
-        val methodName = method?.name ?: ""
-        return when (methodName) {
-            "toString" -> toString()
-            "hashCode" -> hashCode()
-            "equals" -> equals(args?.first())
-            "~~" -> `~~`()
-            else -> {
-                if (methodName.length > 3 && (
-                    methodName.startsWith("get") ||
-                    methodName.startsWith("set"))
-                ) {
-                    val position = 3
-                    val propertyName = "${methodName[position].lowercaseChar()}${methodName.substring(position + 1)}"
-                    val property = model.utils().findProperty(propertyName) as PropertyNullable<D, Any>
-                    if (args.isNullOrEmpty()) {
-                        return property.get(values)
-                    } else {
-                        property.set(values, args.first())
-                        return Unit
-                    }
-                } else {
-                    val msg = "Method: ${model.utils().entityClass.simpleName}.$methodName()"
-                    TODO(msg)
-                }
-            }
-        }
-    }
-
-    protected fun get(name: String): Any? = get(model.utils().findProperty(name))
-
-    /** Get value */
-    fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
-
-    /** Set value */
-    fun <V : Any> set(property: PropertyNullable<D, V>, value: V) {
-        if (session != null) {
-            if (changes == null) changes = BitSet(model.utils().size)
-            changes!!.set(1)
-        }
-        property[values] = value
-    }
-
-    fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
-        changes?.get(property.data().indexToInt()) ?: false
-
-    override fun `~~`(): RawEntity<D> = this
-
-    override fun toString() = toString(40)
-
-    protected fun toString(itemValueMaxLength : Int, maxDepth: Int = 3): String {
-        val result = StringBuilder().append(model.utils().entityClass.simpleName)
-        model.utils().properties.forEachIndexed { i, property ->
-            result.append(if (i == 0) "{" else ", ")
-            result.append(property.name())
-            result.append('=')
-            val value = values[i]
-            if (value is RawEntity<*>) {
-                if (maxDepth > 0) {
-                    result.append(value.toString(itemValueMaxLength, maxDepth - 1))
-                } else {
-                    result.append("...")
-                }
-            } else {
-                val separator = if (value is CharSequence) "\"" else ""
-                val text = "$value"
-                result.append(separator)
-                result.append(
-                    if (text.length <= itemValueMaxLength) text
-                    else "${text.substring(0, itemValueMaxLength - 4)}...}"
-                )
-                result.append(separator)
-            }
-        }
-        return result.append('}').toString()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (!(other is AbstractEntity<*>)) return false
-        val raw2 = other.`~~`()
-        if (model.javaClass != raw2.model.javaClass) return false
-        if (!values.contentEquals(raw2.values)) return false
-        return true
-    }
-
-    /** Hash code of the values */
-    override fun hashCode() = values.contentHashCode()
-}
-
 /** Common database recored entity */
 interface DbRecord : AbstractEntity<Any>
-
-open class TempModel : EntityModel<DbRecord>(DbRecord::class)

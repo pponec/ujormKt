@@ -1,14 +1,17 @@
 package org.ujorm.kotlin.core.entity
 
-import org.ujorm.kotlin.core.*
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.PropertyAccessor
+import org.ujorm.kotlin.core.impl.EntityModel
 
-/** An user entity */
+/** A user entity
+ * (with an optional interface to access property values by a property descriptor). */
 @Entity
-interface Employee {
+interface Employee : PropertyAccessor<Employee> {
     var id: Int
     var name: String
+    var senior: Boolean
     var contractDay: LocalDate
     var department: Department
     var supervisor: Employee?
@@ -18,11 +21,12 @@ interface Employee {
 class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val contractDay = property(/*"contract_day"*/) { it.contractDay } // TODO()
+    val senior = property { it.senior }
+    val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
 
-    // Optional composed properties:
+    // Sample of the optional composed properties:
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         department + Entities.departments.name }
     val departmentId by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {

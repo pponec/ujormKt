@@ -25,7 +25,7 @@ import org.ujorm.kotlin.core.PropertyNullable
 
 internal class CoreComposedTest {
 
-    //@Disabled("Implementation is not finished")
+    //@org.junit.jupiter.api.Disabled("Implementation is not finished")
     @Test
     fun testReadWrite() {
         val entities = Entities.close<Entities>() // Lock the metamodel first
@@ -33,7 +33,7 @@ internal class CoreComposedTest {
         val employee: Employee = employees.new {
             id = 11
             name = "John"
-            contractDay = LocalDate.now()
+            contractDay = LocalDate.parse("2022-11-19")
             department = getDepartment(2, "Development")
         }
 
@@ -45,6 +45,8 @@ internal class CoreComposedTest {
                 ", department=Department{id=2, name=\"Development\",...}" +
                 ", supervisor=null}")
 
+        val emplId: PropertyNullable<Employee, Int> = employees.id
+        expect(employee[emplId]).toEqual(11)
         val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (Fix it!)
 
         // Read and Write values by entity metamodel:
