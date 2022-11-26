@@ -103,7 +103,7 @@ employee[employees.department + departments.id] = 3
 employee[employees.department + departments.name] = "C"
 expect(employee.department.id).toEqual(3)
 expect(employee.department.name).toEqual("C")
-expect( employee[employees.department + departments.id]).toEqual(3)
+expect(employee[employees.department + departments.id]).toEqual(3)
 expect(employee[employees.department + departments.name]).toEqual("C")
 
 // Criterion conditions:
@@ -129,7 +129,7 @@ Building domain entity model:
 
 ```kotlin
 @Entity
-interface Employee : PropertyAccessor<Employee> {
+interface Employee {
     var id: Int
     var name: String
     var senior: Boolean
