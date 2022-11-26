@@ -129,7 +129,7 @@ Building domain entity model:
 
 ```kotlin
 @Entity
-interface Employee : PropertyAccessor<Employee> {
+interface Employee {
     var id: Int
     var name: String
     var senior: Boolean
