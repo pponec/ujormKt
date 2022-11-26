@@ -136,12 +136,9 @@ internal class CoreTest {
         val crn3 = (employees.department + departments.id) LT 99
         val crn4 = crn1 OR (crn2 AND crn3)
         val crn5 = crn1.not() OR (crn2 AND crn3)
-        val noValid: Boolean = crn1(employee)
-        val isValid: Boolean = crn4(employee)
 
-        // Criterion logs:
-        expect(noValid).toEqual(false) // crn1(employee)
-        expect(isValid).toEqual(true)  // crn4(employee)
+        expect(crn1(employee)).equals(false) // Invalid employee
+        expect(crn4(employee)).equals(true)  // Valid employee
         expect(crn1.toString()).toEqual("""Employee: name EQ "Lucy"""")
         expect(crn2.toString()).toEqual("""Employee: id GT 1""")
         expect(crn3.toString()).toEqual("""Employee: department.id LT 99""")
