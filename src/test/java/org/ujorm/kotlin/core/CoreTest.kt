@@ -38,6 +38,7 @@ internal class CoreTest {
         val lucy: Employee = employees.new {
             id = 2
             name = "Lucy"
+            married = true
             contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
@@ -45,6 +46,7 @@ internal class CoreTest {
         val joe: Employee = employees.new {
             id = 3
             name = "Joe"
+            married = false
             contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development

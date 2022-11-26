@@ -6,7 +6,7 @@ import org.ujorm.kotlin.core.impl.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
 
-/** An user entity with reading value by properties */
+/** A user entity with reading value by properties */
 @Entity
 interface Employee: PropertyAccessor<Employee> {
     var id: Int

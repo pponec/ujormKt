@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.core.impl.EntityModel
 
-/** An user entity */
+/** A user entity */
 @Entity
 interface Employee {
     var id: Int
