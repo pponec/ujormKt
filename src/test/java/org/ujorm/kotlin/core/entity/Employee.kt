@@ -11,7 +11,7 @@ import org.ujorm.kotlin.core.impl.EntityModel
 interface Employee : PropertyAccessor<Employee> {
     var id: Int
     var name: String
-    var married: Boolean
+    var senior: Boolean
     var contractDay: LocalDate
     var department: Department
     var supervisor: Employee?
@@ -21,7 +21,7 @@ interface Employee : PropertyAccessor<Employee> {
 class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val married = property { it.married }
+    val senior = property { it.senior }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }

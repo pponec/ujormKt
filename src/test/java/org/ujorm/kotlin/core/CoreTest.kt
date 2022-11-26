@@ -38,7 +38,7 @@ internal class CoreTest {
         val lucy: Employee = employees.new {
             id = 2
             name = "Lucy"
-            married = true
+            senior = true
             contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
@@ -46,7 +46,7 @@ internal class CoreTest {
         val joe: Employee = employees.new {
             id = 3
             name = "Joe"
-            married = false
+            senior = false
             contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development
@@ -54,7 +54,7 @@ internal class CoreTest {
 
         expect(development.id).toEqual(1)
         expect(joe.name).toEqual("Joe")
-        expect(joe.married).toEqual(false)
+        expect(joe.senior).toEqual(false)
         expect(joe.department.name).toEqual("development")
         expect(joe.supervisor?.name).toEqual("Lucy")
         expect(joe.supervisor?.department?.name).toEqual("development")
@@ -64,16 +64,16 @@ internal class CoreTest {
                 ", created=2021-10-15}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
                 ", name=\"Lucy\"" +
-                ", married=true" +
+                ", senior=true" +
                 ", contractDay=2022-01-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
                 ", supervisor=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
                 ", name=\"Joe\"" +
-                ", married=false" +
+                ", senior=false" +
                 ", contractDay=2022-02-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
-                ", supervisor=Employee{id=2, name=\"Lucy\", married=...}}")
+                ", supervisor=Employee{id=2, name=\"Lucy\", senior=t...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */
@@ -84,7 +84,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            married = false
+            senior = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
@@ -92,13 +92,13 @@ internal class CoreTest {
         // Read and Write values by entity metamodel:
         val id: Int = employee.get(employees.id)
         val name: String = employee[employees.name]
-        val married: Boolean = employee[employees.married]
+        val senior: Boolean = employee[employees.senior]
         val contractDay: LocalDate = employee[employees.contractDay]
         val department: Department = employee[employees.department]
         val supervisor: Employee? = employee[employees.supervisor]
         employee[employees.id] = id
         employee[employees.name] = name
-        employee[employees.married] = married
+        employee[employees.senior] = senior
         employee[employees.contractDay] = contractDay
         employee[employees.department] = department
         employee[employees.supervisor] = supervisor
@@ -129,7 +129,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            married = false
+            senior = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
@@ -161,7 +161,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            married = false
+            senior = false
             contractDay = LocalDate.now()
             department = getDepartment(2, "D")
         }
@@ -185,7 +185,7 @@ internal class CoreTest {
         expect(properties.size).toEqual(6) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
         expect(properties[1].name()).toEqual("name") // property name
-        expect(properties[2].name()).toEqual("married") // property name
+        expect(properties[2].name()).toEqual("senior") // property name
         expect(properties[3].name()).toEqual("contractDay")// ContractDay
         expect(properties[4].name()).toEqual("department") // property department
         expect(properties[5].name()).toEqual("supervisor") // property supervisor
