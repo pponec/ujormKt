@@ -92,17 +92,17 @@ internal class OrmTest {
     internal fun insertRows() {
         val development = Database.departments.new {
             name = "Development"
-            created = LocalDate.of(2020, 10 , 1)
+            created = LocalDate.of(2020, 10, 1)
         }
         val lucy = Database.employees.new {
             name = "lucy"
-            contractDay = LocalDate.of(2022, 1 , 1)
+            contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
         }
         val joe = Database.employees.new {
             name = "Joe"
-            contractDay = LocalDate.of(2022, 2 , 1)
+            contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development
         }
