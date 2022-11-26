@@ -64,15 +64,16 @@ internal class CoreTest {
                 ", created=2021-10-15}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
                 ", name=\"Lucy\"" +
+                ", married=true" +
                 ", contractDay=2022-01-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
                 ", supervisor=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
                 ", name=\"Joe\"" +
+                ", married=false" +
                 ", contractDay=2022-02-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
-                ", supervisor=Employee{id=2, name=\"Lucy\"" +
-                ", contract...}}")
+                ", supervisor=Employee{id=2, name=\"Lucy\", married=...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */
@@ -179,12 +180,13 @@ internal class CoreTest {
         expect(employees.id()).toEqual("id") // A shortcut for the name()
 
         val properties = employees.utils().properties
-        expect(properties.size).toEqual(5) // Count of properties
+        expect(properties.size).toEqual(6) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
         expect(properties[1].name()).toEqual("name") // property name
-        expect(properties[2].name()).toEqual("contractDay")// ContractDay
-        expect(properties[3].name()).toEqual("department") // property department
-        expect(properties[4].name()).toEqual("supervisor") // property supervisor
+        expect(properties[2].name()).toEqual("married") // property name
+        expect(properties[3].name()).toEqual("contractDay")// ContractDay
+        expect(properties[4].name()).toEqual("department") // property department
+        expect(properties[5].name()).toEqual("supervisor") // property supervisor
 
         // Value type
         expect(employees.id.data().valueClass).toEqual(Int::class)
