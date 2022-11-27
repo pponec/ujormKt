@@ -147,6 +147,7 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
         }
 }
 
+/** Object maps Entity class to an Entity model. */
 class EntityProviderUtils {
     private var locked: Boolean = false
 
