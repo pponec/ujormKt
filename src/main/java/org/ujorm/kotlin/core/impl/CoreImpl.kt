@@ -187,6 +187,10 @@ class EntityProviderUtils {
         entityModels = Collections.unmodifiableList(entityModels) as MutableList<EntityModel<*>>
         locked = true
     }
+
+    /** Find an entity model acording entity class */
+    fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
+        entityMap[entityClass] as EntityModel<D>
 }
 
 /** Interface of the domain metamodel */
@@ -589,23 +593,25 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
         return if (entity2 != null) metadata.secondaryProperty[entity2] else null
     }
 
+    /** Set a value to entity. */
     override fun set(entity: D, value: V?) {
-        val entity2 = (entity as AbstractEntity<D>).`~~`().get(metadata.primaryProperty)
-        if (entity2 == null) {
-            throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
-        }
-        metadata.secondaryProperty.set(entity2, value)
+        set(entity, value, null)
     }
 
-    /** Set a value and create missing relations */
-    fun setEnforced(entity: D, value: V?, entityModel: EntityModel<D>) {
-        var entity2 = (entity as AbstractEntity<D>).`~~`().get(metadata.primaryProperty)
-        if (entity2 == null) {
-            // TODO:
-            // entity2 = entityModel.new(metadata.primaryProperty);
-            throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
+    /** Set a value and create missing relation(s) - if entityProvider is available. */
+    fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
+        val metaEntity = (entity as AbstractEntity<D>).`~~`()
+        var valueEntity = metaEntity.get(metadata.primaryProperty)
+        if (valueEntity == null) {
+            if (entityProvider != null) {
+                val valueClass = (metadata.primaryProperty as PropertyNullableImpl).metadata.valueClass
+                valueEntity = entityProvider.utils().findEntityModel(valueClass).new()
+                metadata.primaryProperty.set(entity, valueEntity)
+            } else {
+                throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
+            }
         }
-        metadata.secondaryProperty.set(entity2, value)
+        metadata.secondaryProperty.set(valueEntity, value)
     }
 
     override fun toString(): String {

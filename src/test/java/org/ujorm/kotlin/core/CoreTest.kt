@@ -20,6 +20,7 @@ import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import org.ujorm.kotlin.core.impl.ComposedPropertyImpl
 
 internal class CoreTest {
 
@@ -199,18 +200,18 @@ internal class CoreTest {
     }
 
     @Test
-    fun createNewRelationBySetter() {
+    fun createNewRelationBySpecialSetter() {
         val entities = Entities.close<Entities>()
         val employees = entities.employees
         val departments = entities.departments
-
         val employee: Employee = employees.new()
 
-        (employees.department + departments.id).set(employee, 1)
+        val deparmentIdProperty = (employees.department.plus(departments.id))
+                as ComposedPropertyImpl<Employee, *, Int>
+        deparmentIdProperty.set(employee, 99, Entities) // Method creates new Department
+        expect(employee[deparmentIdProperty]).toEqual(99)
 
-        employee[employees.department + departments.id] = 99 // Method creates new Department
         employee[employees.department + departments.name] = "Catherine"
-        expect(employee[employees.department + departments.id]).toEqual(99)
         expect(employee[employees.department + departments.name]).toEqual("Catherine")
     }
 
