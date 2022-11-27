@@ -153,11 +153,11 @@ val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 
 ## Class diagram
 
-Common classes of the framework (released: 2021-07-06)
+Common classes of the framework (released: 2022-11-26)
 
 ![Class diagram](docs/Ujorm.png)
 
-An example implementation of this demo project (released: 2021-07-07)
+An example implementation of this demo project (released: 2022-11-26)
 
 ![Class diagram](docs/Demo.png)
 
