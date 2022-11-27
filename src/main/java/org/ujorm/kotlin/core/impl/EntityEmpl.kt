@@ -82,8 +82,9 @@ open class RawEntity<D : Any> : InvocationHandler {
 
     protected fun get(name: String): Any? = get(model.utils().findProperty(name))
 
-    /** Get value */
-    operator fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
+    /** Get nullable value by a direct access. */
+    operator fun <V : Any> get(property: PropertyNullable<D, V>) : V? =
+        values[property.data().indexToInt()] as V?
 
     /** Set a nullable value */
     operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) {
@@ -91,7 +92,7 @@ open class RawEntity<D : Any> : InvocationHandler {
             if (changes == null) changes = BitSet(model.utils().size)
             changes!!.set(1)
         }
-        property[values] = value
+        values[property.data().indexToInt()] = value
     }
 
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
