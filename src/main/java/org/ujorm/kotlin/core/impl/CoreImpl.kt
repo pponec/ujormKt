@@ -590,10 +590,20 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
     }
 
     override fun set(entity: D, value: V?) {
-        var entity2 = (entity as AbstractEntity<D>).`~~`().get(metadata.primaryProperty)
+        val entity2 = (entity as AbstractEntity<D>).`~~`().get(metadata.primaryProperty)
         if (entity2 == null) {
             throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
-            // TODO: how to create new instance (?)
+        }
+        metadata.secondaryProperty.set(entity2, value)
+    }
+
+    /** Set a value and create missing relations */
+    fun setEnforced(entity: D, value: V?, entityModel: EntityModel<D>) {
+        var entity2 = (entity as AbstractEntity<D>).`~~`().get(metadata.primaryProperty)
+        if (entity2 == null) {
+            // TODO:
+            // entity2 = entityModel.new(metadata.primaryProperty);
+            throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
         }
         metadata.secondaryProperty.set(entity2, value)
     }
