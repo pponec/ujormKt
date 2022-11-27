@@ -21,10 +21,10 @@ interface AbstractEntity<D : Any> {
 
     /** Provides a RawEntity object.
      * The method name must not match the name of any method of the real entity.
-     * TODO: change this method to the property (?) */
+     */
     // @Suppress("INAPPLICABLE_JVM_NAME")
     // @JvmName("___$") // For Java compatibility (?)
-    val `~~`: RawEntity<D>
+    fun `~~`(): RawEntity<D>
 }
 
 /**
@@ -37,16 +37,16 @@ interface AbstractEntity<D : Any> {
 interface PropertyAccessor<D : Any> : AbstractEntity<D> {
 
     /** Method for reading value by property */
-    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`[property]
+    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`().get(property)
 
     /** Method for reading value by property */
-    operator fun <V : Any> get(property : Property<D, V>) = `~~`[property] as V
+    operator fun <V : Any> get(property : Property<D, V>) = `~~`().get(property) as V
 
     /** Method for reading value by property */
-    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`.set(property, value)
+    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`().set(property, value)
 
     /** Method for reading value by property */
-    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`.set(property, value)
+    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`().set(property, value)
 }
 
 

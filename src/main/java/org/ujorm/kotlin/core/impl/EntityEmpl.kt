@@ -23,13 +23,12 @@ import java.util.*
 /** Raw Entity data model
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
- * */
-open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
+ */
+open class RawEntity<D : Any> : InvocationHandler {
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
     var session: Session? = null
-    final override val `~~`: RawEntity<D> get() = this
 
     constructor(model: EntityModel<D>) {
         this.model = model
@@ -42,7 +41,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
             "toString" -> toString()
             "hashCode" -> hashCode()
             "equals" -> equals(args?.first())
-            "~~", "get~~" -> `~~`
+            "~~", "get~~" -> this
             else -> {
                 val prefixLength = 3
                 if (methodName.length > prefixLength && (
@@ -130,7 +129,7 @@ open class RawEntity<D : Any> : InvocationHandler, AbstractEntity<D> {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (!(other is AbstractEntity<*>)) return false
-        val raw2 = other.`~~`
+        val raw2 = other.`~~`()
         if (model.javaClass != raw2.model.javaClass) return false
         if (!values.contentEquals(raw2.values)) return false
         return true
