@@ -600,17 +600,8 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     /** Set a value and create missing relation(s) - if entityProvider is available. */
     fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
-        val metaEntity = (entity as AbstractEntity<D>).`~~`()
-        var valueEntity = metaEntity.get(metadata.primaryProperty)
-        if (valueEntity == null) {
-            if (entityProvider != null) {
-                val valueClass = (metadata.primaryProperty as PropertyNullableImpl).metadata.valueClass
-                valueEntity = entityProvider.utils().findEntityModel(valueClass).new()
-                metadata.primaryProperty.set(entity, valueEntity)
-            } else {
-                throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
-            }
-        }
+        val valueEntity = metadata.primaryProperty[entity]
+            ?: throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
         metadata.secondaryProperty.set(valueEntity, value)
     }
 
