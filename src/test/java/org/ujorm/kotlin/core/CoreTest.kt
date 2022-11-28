@@ -22,6 +22,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
 import org.ujorm.kotlin.core.impl.ComposedPropertyImpl
 import org.ujorm.kotlin.core.impl.ComposedPropertyNullableImpl
+import org.junit.jupiter.api.Disabled
 
 internal class CoreTest {
 
@@ -200,6 +201,7 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
+    @Disabled("TODO...")
     @Test
     fun createNewRelationBySpecialSetter() {
         val entities = Entities.close<Entities>()

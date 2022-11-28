@@ -21,7 +21,7 @@ interface Employee : PropertyAccessor<Employee> {
 class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val senior = property { it.senior }
+    val senior = property({ it.senior }, { true })
     val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
