@@ -1,5 +1,8 @@
 package org.ujorm.kotlin.anotation
 
+import org.ujorm.kotlin.core.EntityInitializer
+import kotlin.reflect.KClass
+
 /**
  * Optional annotation to indicate a persistent entity.
  *
@@ -12,8 +15,12 @@ package org.ujorm.kotlin.anotation
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Entity(
+    /** Entity name */
     val name: String = "",
+    /** Entity description */
     val description: String = "",
+    /** An implementation of initializing a new entity. */
+    val init: KClass<out EntityInitializer<*>> = EntityInitializer::class
 )
 
 /** Database table description */
