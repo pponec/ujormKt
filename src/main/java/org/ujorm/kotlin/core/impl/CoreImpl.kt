@@ -96,11 +96,15 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
             else throw IllegalStateException(CLOSED_MESSAGE)
         }
 
-    override fun get(entity: D): V? = getter.invoke(entity)
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+    override fun get(entity: D): V? = // getter.invoke(entity)
+        (entity as AbstractEntity<D>).`~~`().get(this)
+
+    override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
+        (entity as AbstractEntity<D>).`~~`().set(this, value)
 
     /** Returns a nullable value */
-    open fun getNullable(entity: D): V? = getter.invoke(entity)
+    open fun getNullable(entity: D): V? =
+        (entity as AbstractEntity<D>).`~~`().get(this)
 
     final override fun data() = metadata
 

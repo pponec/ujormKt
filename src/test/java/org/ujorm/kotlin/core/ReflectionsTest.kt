@@ -24,6 +24,7 @@ internal class ReflectionsTest {
     /**
      * https://stackoverflow.com/questions/28294509/accessing-kotlin-extension-functions-from-java
      */
+    @org.junit.jupiter.api.Disabled
     @Test
     fun findMemberExtensionObjectOfPackage() {
         val provider = RefEntityProvider
