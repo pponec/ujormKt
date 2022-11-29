@@ -24,7 +24,7 @@ import java.util.*
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  */
-open class RawEntity<D : Any> : InvocationHandler {
+class RawEntity<D : Any> : InvocationHandler {
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
@@ -97,6 +97,9 @@ open class RawEntity<D : Any> : InvocationHandler {
 
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
         changes?.get(property.data().indexToInt()) ?: false
+
+    fun <V : Any> isNull(property: PropertyNullable<D, V>) : Boolean =
+        values[property.data().indexToInt()] == null
 
     override fun toString() = toString(40)
 
