@@ -98,6 +98,10 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     override fun get(entity: D): V? = getter.invoke(entity)
     override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+
+    /** Returns a nullable value */
+    open fun getNullable(entity: D): V? = getter.invoke(entity)
+
     final override fun data() = metadata
 
     /** Clone this property for a new alias */
@@ -600,9 +604,25 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     /** Set a value and create missing relation(s) - if entityProvider is available. */
     fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
-        val valueEntity = metadata.primaryProperty[entity]
-            ?: throw IllegalArgumentException("Value of property ${metadata.primaryProperty.info()} is null")
+
+
+
+        val metaEntity = (entity as AbstractEntity<D>).`~~`()
+        var valueEntity = metaEntity.get(metadata.primaryProperty)
+        if (valueEntity == null) {
+            if (entityProvider != null) {
+                val valueClass = (metadata.primaryProperty as PropertyNullableImpl).metadata.valueClass
+                valueEntity = entityProvider.utils().findEntityModel(valueClass).new()
+                metadata.primaryProperty.set(entity, valueEntity)
+            } else {
+                throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
+            }
+        }
         metadata.secondaryProperty.set(valueEntity, value)
+    }
+
+    private fun getValue() {
+
     }
 
     override fun toString(): String {
