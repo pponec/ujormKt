@@ -79,7 +79,6 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     }
 
     /** Composed property to the entity model. */
-    @Suppress("UNCHECKED_CAST")
     fun domainProperty(): PropertyNullable<D, V> {
         return composedProperty ?: coreProperty as PropertyNullable<D, V>
     }

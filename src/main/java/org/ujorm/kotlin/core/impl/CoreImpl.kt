@@ -34,7 +34,6 @@ class PropertyMetadataImpl<D : Any, V : Any> (
     name: String = "",
     internal val entityModel: BriefEntityModel<D>,
     override val valueClass: KClass<V>, // KClass<out V>
-    internal val initValue: () -> V? = Constants.UNDEFINED_PROVIDER,
     override val readOnly: Boolean = false,
     /** Is the value nullable or required ? */
     override val nullable: Boolean = false,
@@ -134,7 +133,6 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
         setter: (D, V?) -> Unit,
     ) : super(metadata, getter, setter)
 
-    @Suppress("UNCHECKED_CAST")
     override val getter: (D) -> V = super.getter as (D) -> V
     override fun set(entity: D, value: V?) = setter.invoke(entity, value
         ?: throw IllegalArgumentException("Notnull value is expected")
@@ -191,7 +189,6 @@ class EntityProviderUtils {
     }
 
     /** Find an entity model acording entity class */
-    @Suppress("unused")
     fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
         entityMap[entityClass] as EntityModel<D>
 }
@@ -316,11 +313,10 @@ class EntityUtils<D : Any>(
         valueClass: KClass<V>,
         getter: (D) -> V,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        initValue: () -> V? = Constants.UNDEFINED_PROVIDER,
         name: String = "",
     ): Property<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
-            name, briefModel, valueClass, initValue, false, false)
+            name, briefModel, valueClass, false, false)
         val result = PropertyImpl(propertyMetadata, getter, setter)
         addToList(result)
         return result
@@ -331,11 +327,10 @@ class EntityUtils<D : Any>(
         valueClass: KClass<V>,
         getter: (D) -> V?,
         setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
-        initValue: () -> V? = Constants.UNDEFINED_PROVIDER,
         name: String = ""
     ): PropertyNullable<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
-            name, briefModel, valueClass, initValue, false, true)
+            name, briefModel, valueClass, false, true)
         val result = PropertyNullableImpl(propertyMetadata, getter, setter)
         addToList(result)
         return result
@@ -398,14 +393,6 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
         noinline getter: (D) -> V
     ) = propertyBuilder.createProperty(V::class, getter)
 
-    /** Create a non-null property.
-     * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
-     */
-    protected inline fun <reified V : Any> property(
-        noinline getter: (D) -> V,
-        noinline initValue : () -> V,
-    ) = propertyBuilder.createProperty(V::class, getter, initValue = initValue)
-
     /** Create a non-null property by a class.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
@@ -427,14 +414,6 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     protected inline fun <reified V : Any> propertyNullable(
         noinline getter: (D) -> V?
     ) = propertyBuilder.createPropertyNullable(V::class, getter)
-
-    /** Create new non-null property.
-     * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
-     */
-    protected inline fun <reified V : Any> propertyNullable(
-        noinline getter: (D) -> V?,
-        noinline initValue: () -> V?,
-    ) = propertyBuilder.createPropertyNullable(V::class, getter, initValue = initValue)
 
     /** Create new non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
@@ -543,10 +522,6 @@ object Constants {
     /** Undefined property setter */
     val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v ->
         TODO("read-only")
-    }
-    /** Undefined provider for all types */
-    val UNDEFINED_PROVIDER: () -> Nothing = {
-        TODO("unsupported")
     }
     const val CLOSED_MESSAGE = "Object is closed"
 }
