@@ -97,18 +97,15 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
         }
 
     /** Returns a nullable value */
-    inline fun getNullable(entity: D): V? = // getter.invoke(entity)
+    @Suppress("UNCHECKED_CAST")
+    fun getNullable(entity: D): V? = // getter.invoke(entity)
         (entity as AbstractEntity<D>).`~~`().get(this)
 
     override fun get(entity: D): V? = getNullable(entity)
 
+    @Suppress("UNCHECKED_CAST")
     override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
         (entity as AbstractEntity<D>).`~~`().set(this, value)
-
-    /** Set a value to the entity */
-    internal fun set(entity: Array<Any?>, value: V?) {
-        //require(value != null || data().nullable) { "${info()} is required" }
-        entity[data().indexToInt()] = value }
 
     final override fun data() = metadata
 
@@ -138,6 +135,7 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 }
 
 /** An implementation of the direct property descriptor */
+@Suppress("UNCHECKED_CAST")
 open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
     internal constructor(
         metadata: PropertyMetadataImpl<D, V>,
@@ -201,6 +199,7 @@ class EntityProviderUtils {
     }
 
     /** Find an entity model acording entity class */
+    @Suppress("UNCHECKED_CAST")
     fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
         entityMap[entityClass] as EntityModel<D>
 }
@@ -328,7 +327,7 @@ class EntityUtils<D : Any>(
         name: String = "",
     ): Property<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
-            name, briefModel, valueClass, false, false)
+            name, briefModel, valueClass, readOnly = false, nullable = false)
         val result = PropertyImpl(propertyMetadata, getter, setter)
         addToList(result)
         return result
@@ -375,7 +374,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun <R : EntityModel<D>> close(): R = propertyBuilder.close() as R
 
     /** Initialize and close the entity model. */
-    fun closeModel() : Unit {
+    fun closeModel() {
          propertyBuilder.close()
     }
 
@@ -440,6 +439,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)
 
     /** Create new instance of the domain object */
+    @Suppress("UNCHECKED_CAST")
     @Throws(IllegalAccessException::class, IllegalArgumentException::class, InvocationTargetException::class)
     fun new(): D {
         val entityClass = propertyBuilder.entityClass.java
@@ -612,9 +612,6 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     /** Set a value and create missing relation(s) - if entityProvider is available. */
     fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
-
-
-
         val metaEntity = (entity as AbstractEntity<D>).`~~`()
         var valueEntity = metaEntity.get(metadata.primaryProperty)
         if (valueEntity == null) {
