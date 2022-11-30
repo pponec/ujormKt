@@ -28,6 +28,12 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.full.memberProperties
 
+/** Returns a nullable middle value of the composite property */
+interface PropertyMiddleAccesory<D : Any, V : Any> {
+    /** Provies a middle value of the composite property */
+    fun getMiddleValue(entity: D) : V?
+}
+
 /** API of the property descriptor for a nullable values */
 class PropertyMetadataImpl<D : Any, V : Any> (
     override val index: UByte,
@@ -81,7 +87,7 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal open val getter: (D) -> V?,
     /** Value writer is not the part of API */
     setter: (D, V?) -> Unit,
-) : PropertyNullable<D, V> {
+) : PropertyNullable<D, V>, PropertyMiddleAccesory<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Objects.hash(metadata.entityClass, entityAlias(), name())
@@ -98,10 +104,10 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     /** Returns a nullable value */
     @Suppress("UNCHECKED_CAST")
-    fun getNullable(entity: D): V? = // getter.invoke(entity)
+    override fun getMiddleValue(entity: D): V? = // getter.invoke(entity)
         (entity as AbstractEntity<D>).`~~`().get(this)
 
-    override fun get(entity: D): V? = getNullable(entity)
+    override fun get(entity: D): V? = getMiddleValue(entity)
 
     @Suppress("UNCHECKED_CAST")
     override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
@@ -186,7 +192,6 @@ class EntityProviderUtils {
                     entityModels.add(it)
                 }
         }
-        println(">>>" + entityModels.size)
 
         var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
         entityModels.forEach {
@@ -581,14 +586,17 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 }
 
 /** Composed nullable property implementation */
-open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNullable<D, V> {
+open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
+    PropertyNullable<D, V>,
+    PropertyMiddleAccesory<D, M>
+{
     protected val metadata: ComposedPropertyMetadata<D, M, V>
 
     constructor(
-        leftProperty : PropertyNullable<D, M>,
-        righProperty : PropertyNullable<M, V>
+        primaryProperty : PropertyNullable<D, M>,
+        secondaryProperty : PropertyNullable<M, V>
     ) {
-        this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
+        this.metadata = ComposedPropertyMetadata(primaryProperty, secondaryProperty)
     }
 
     override fun data() = this.metadata
@@ -600,9 +608,16 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
         TODO("Method is not supported for composed properties")
     }
 
+    @Suppress("UNCHECKED_CAST")
+    override fun getMiddleValue(entity: D): M? {
+        val property = metadata.primaryProperty as PropertyMiddleAccesory<D, M>
+        return property.getMiddleValue(entity)
+    }
+
     override fun get(entity: D): V? {
-        val entity2 = metadata.primaryProperty[entity]
-        return if (entity2 != null) metadata.secondaryProperty[entity2] else null
+        val entity2 = getMiddleValue(entity)
+        return if (entity2 != null) metadata.secondaryProperty[entity2]
+               else null
     }
 
     /** Set a value to entity. */
@@ -612,22 +627,17 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
 
     /** Set a value and create missing relation(s) - if entityProvider is available. */
     fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
-        val metaEntity = (entity as AbstractEntity<D>).`~~`()
-        var valueEntity = metaEntity.get(metadata.primaryProperty)
-        if (valueEntity == null) {
+        var middleObject = getMiddleValue(entity)
+        if (middleObject == null) {
             if (entityProvider != null) {
                 val valueClass = (metadata.primaryProperty as PropertyNullableImpl).metadata.valueClass
-                valueEntity = entityProvider.utils().findEntityModel(valueClass).new()
-                metadata.primaryProperty.set(entity, valueEntity)
+                middleObject = entityProvider.utils().findEntityModel(valueClass).new()
+                metadata.primaryProperty.set(entity, middleObject)
             } else {
                 throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
             }
         }
-        metadata.secondaryProperty.set(valueEntity, value)
-    }
-
-    private fun getValue() {
-
+        metadata.secondaryProperty.set(middleObject, value)
     }
 
     override fun toString(): String {
