@@ -74,7 +74,7 @@ class PropertyMetadataImpl<D : Any, V : Any> (
             ", closed=${entityModel.closed}"
 }
 
-/** An implementation of the property descriptor for nullable values */
+/** An implementation of the direct property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
     /** Value provider is not the part of API */
@@ -137,7 +137,7 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     override fun hashCode(): Int = hashCode
 }
 
-/** An implementation of the property descriptor */
+/** An implementation of the direct property descriptor */
 open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
     internal constructor(
         metadata: PropertyMetadataImpl<D, V>,
