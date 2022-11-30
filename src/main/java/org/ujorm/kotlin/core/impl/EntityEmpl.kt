@@ -50,11 +50,11 @@ class RawEntity<D : Any> : InvocationHandler {
                 ) {
                     val propertyName = "${methodName[prefixLength]
                         .lowercaseChar()}${methodName.substring(prefixLength + 1)}"
-                    val property = model.utils().findProperty(propertyName) as PropertyNullable<D, Any>
+                    val property = model.utils().findProperty(propertyName) as PropertyNullableImpl<D, Any>
                     if (args.isNullOrEmpty()) {
-                        return property.get(values)
+                        return get(property)
                     } else {
-                        property.set(values, args.first())
+                        set(property, args.first())
                         return Unit
                     }
                 } else {

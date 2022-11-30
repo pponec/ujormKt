@@ -111,16 +111,6 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     /** Set a value to the entity */
     operator fun set(entity: D, value: V?)
 
-    /** Get a value from the entity */
-    @Suppress("UNCHECKED_CAST")
-    operator fun get(entity: Array<Any?>): V? =
-        entity[data().indexToInt()] as V?
-
-    /** Set a value to the entity */
-    operator fun set(entity: Array<Any?>, value: V?) {
-        require(value != null || data().nullable) { "${info()} is required" }
-        entity[data().indexToInt()] = value }
-
     fun operate(operator: ValueOperator, value: V): ValueCriterion<D, V> {
         return ValueCriterion(this, operator, value)
     }
@@ -207,11 +197,6 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
 /** API of the property descriptor */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     override operator fun get(entity: D): V
-
-    /** Get a value from the entity */
-    @Suppress("UNCHECKED_CAST")
-    override operator fun get(entity: Array<Any?>): V =
-        entity[data().indexToInt()] as V
 
     /** Create new composite property */
     operator fun <N: Any> plus(nextProperty : Property<V, N>) : Property<D, N> =

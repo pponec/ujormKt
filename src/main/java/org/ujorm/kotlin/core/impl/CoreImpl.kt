@@ -96,15 +96,19 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
             else throw IllegalStateException(CLOSED_MESSAGE)
         }
 
-    override fun get(entity: D): V? = // getter.invoke(entity)
+    /** Returns a nullable value */
+    inline fun getNullable(entity: D): V? = // getter.invoke(entity)
         (entity as AbstractEntity<D>).`~~`().get(this)
+
+    override fun get(entity: D): V? = getNullable(entity)
 
     override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
         (entity as AbstractEntity<D>).`~~`().set(this, value)
 
-    /** Returns a nullable value */
-    open fun getNullable(entity: D): V? =
-        (entity as AbstractEntity<D>).`~~`().get(this)
+    /** Set a value to the entity */
+    internal fun set(entity: Array<Any?>, value: V?) {
+        //require(value != null || data().nullable) { "${info()} is required" }
+        entity[data().indexToInt()] = value }
 
     final override fun data() = metadata
 
@@ -269,7 +273,7 @@ class EntityUtils<D : Any>(
     /** Get an entity class type */
     val entityType : ClassType get() = briefModel.entityType
 
-    var properties: List<PropertyNullable<D, Any>> = mutableListOf()
+    var properties: List<PropertyNullableImpl<D, Any>> = mutableListOf()
         private set(value) { field = if (briefModel.open) value
         else throw java.lang.IllegalStateException(CLOSED_MESSAGE)}
     val size get() = properties.size
@@ -282,7 +286,7 @@ class EntityUtils<D : Any>(
     val columnStyle: Boolean = columnNameStyle ?: false
 
     /** Mapping a property name to its property */
-    private lateinit var map : Map<String, PropertyNullable<D, *>>
+    private lateinit var map : Map<String, PropertyNullableImpl<D, *>>
 
     /** Initialize and close the entity model. */
     fun close() : EntityModel<D> {
@@ -302,8 +306,8 @@ class EntityUtils<D : Any>(
     }
 
     /** Validate unique property name and build a name map */
-    private fun buildPropertyMap() : Map<String, PropertyNullable<D, *>> {
-        val result = HashMap<String, PropertyNullable<D, *>>(properties.size)
+    private fun buildPropertyMap() : Map<String, PropertyNullableImpl<D, *>> {
+        val result = HashMap<String, PropertyNullableImpl<D, *>>(properties.size)
         properties.forEach{
             val previous = result.put( it.name(), it)
             check(previous == null) { "The attribute name is occupied: $it" }
@@ -312,7 +316,7 @@ class EntityUtils<D : Any>(
     }
 
     /** Find property by its name or throw an exception */
-    fun findProperty(name: String): PropertyNullable<D, *> =
+    fun findProperty(name: String): PropertyNullableImpl<D, *> =
         map.get(name) ?: throw NoSuchElementException(
             "For: ${entityModel.utils().entityClass.simpleName}.$name")
 

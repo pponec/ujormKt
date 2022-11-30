@@ -132,7 +132,7 @@ internal class OrmTest {
         result24.forEach{
             val id : Int = db.id[it]
             val name : String = db.name[it]
-            val created : LocalDate = db.created[it]
+            val created : LocalDate = db.created.get(it)
             println("Db record: id = $id, name = $name, created = $created")
         }
 

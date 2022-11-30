@@ -271,23 +271,6 @@ internal class CoreTest {
         expect(department1).notToEqual(department3)
         expect(department2).notToEqual(department3)
     }
-
-    /** Create new object by a constructor (for immutable objects) */
-    @Test
-    fun createArrayOfEntity() {
-        val employees = Entities.employees
-        val emplyee: Array<Any?> = employees.createArray()
-
-        val id = 17 // Reference value
-        employees.id[emplyee] = id
-        val expectedId: Int = employees.id[emplyee]
-        expect(id).toEqual(expectedId)
-
-        val name = "John" // Reference value
-        employees.name[emplyee] = name
-        val expectedName: String = employees.name[emplyee]
-        expect(name).toEqual(expectedName)
-    }
 }
 
 /** Helper method to create new department */
