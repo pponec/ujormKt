@@ -123,12 +123,12 @@ internal class OrmTest {
         }
 
         // Result object list:
-        val result24 = Database.selectFor()
+        val result = Database.selectFor()
             .item(employees.id, "+", 10).to(db.id)
             .item(departments.name).to(db.created)
             .where(employees.department.id, "=", departments.id)
             .toList()
-        result24.forEach{
+        result.forEach{
             val id : Int = db.id[it]
             val name : String = db.name[it]
             val created : LocalDate = db.created.get(it)
