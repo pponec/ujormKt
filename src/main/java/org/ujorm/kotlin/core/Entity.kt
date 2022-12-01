@@ -27,6 +27,13 @@ interface AbstractEntity<D : Any> {
     fun `~~`(): RawEntity<D>
 }
 
+/** Interface to initialize entity object */
+interface EntityInitializer<D : Any> {
+    /** Implement the initial entity value settings. */
+    fun initialize(entity: D)
+}
+
+
 /**
  * Use this interface if you want to access the entity object via the entity model.
  *

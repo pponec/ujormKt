@@ -20,6 +20,8 @@ import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
+import org.ujorm.kotlin.core.impl.ComposedPropertyImpl
+import org.ujorm.kotlin.core.impl.ComposedPropertyNullableImpl
 
 internal class CoreTest {
 
@@ -198,20 +200,25 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
+    //@org.junit.jupiter.api.Disabled
     @Test
-    fun createNewRelationBySetter() {
+    fun createNewRelationBySpecialSetter() {
         val entities = Entities.close<Entities>()
         val employees = entities.employees
         val departments = entities.departments
-
         val employee: Employee = employees.new()
 
-        (employees.department + departments.id).set(employee, 1)
-
-        employee[employees.department + departments.id] = 99 // Method creates new Department
+        val deparmentIdProperty = (employees.department + departments.id)
+                as ComposedPropertyNullableImpl<Employee, *, Int>
+        deparmentIdProperty.set(employee, 88, Entities) // Method creates new Department
         employee[employees.department + departments.name] = "Catherine"
-        expect(employee[employees.department + departments.id]).toEqual(99)
+        expect(employee[deparmentIdProperty]).toEqual(88)
         expect(employee[employees.department + departments.name]).toEqual("Catherine")
+
+        val deparmentIdOfDSupervisorProperty = (employees.supervisor + employees.department + departments.id)
+                as ComposedPropertyNullableImpl<Employee, *, Int>
+        deparmentIdOfDSupervisorProperty.set(employee, 99, Entities) // Method creates new Department
+        expect(employee[deparmentIdOfDSupervisorProperty]).toEqual(99)
     }
 
     /** Create new object by a constructor (for immutable objects) */
@@ -263,23 +270,6 @@ internal class CoreTest {
         expect(department1).toEqual(department2)
         expect(department1).notToEqual(department3)
         expect(department2).notToEqual(department3)
-    }
-
-    /** Create new object by a constructor (for immutable objects) */
-    @Test
-    fun createArrayOfEntity() {
-        val employees = Entities.employees
-        val emplyee: Array<Any?> = employees.createArray()
-
-        val id = 17 // Reference value
-        employees.id[emplyee] = id
-        val expectedId: Int = employees.id[emplyee]
-        expect(id).toEqual(expectedId)
-
-        val name = "John" // Reference value
-        employees.name[emplyee] = name
-        val expectedName: String = employees.name[emplyee]
-        expect(name).toEqual(expectedName)
     }
 }
 

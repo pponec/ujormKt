@@ -28,6 +28,12 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.full.memberProperties
 
+/** Returns a nullable middle value of the composite property */
+interface PropertyMiddleAccesory<D : Any, V : Any> {
+    /** Provies a middle value of the composite property */
+    fun getMiddleValue(entity: D) : V?
+}
+
 /** API of the property descriptor for a nullable values */
 class PropertyMetadataImpl<D : Any, V : Any> (
     override val index: UByte,
@@ -74,14 +80,14 @@ class PropertyMetadataImpl<D : Any, V : Any> (
             ", closed=${entityModel.closed}"
 }
 
-/** An implementation of the property descriptor for nullable values */
+/** An implementation of the direct property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
     /** Value provider is not the part of API */
     internal open val getter: (D) -> V?,
     /** Value writer is not the part of API */
     setter: (D, V?) -> Unit,
-) : PropertyNullable<D, V> {
+) : PropertyNullable<D, V>, PropertyMiddleAccesory<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Objects.hash(metadata.entityClass, entityAlias(), name())
@@ -96,8 +102,17 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
             else throw IllegalStateException(CLOSED_MESSAGE)
         }
 
-    override fun get(entity: D): V? = getter.invoke(entity)
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value)
+    /** Returns a nullable value */
+    @Suppress("UNCHECKED_CAST")
+    override fun getMiddleValue(entity: D): V? = // getter.invoke(entity)
+        (entity as AbstractEntity<D>).`~~`().get(this)
+
+    override fun get(entity: D): V? = getMiddleValue(entity)
+
+    @Suppress("UNCHECKED_CAST")
+    override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
+        (entity as AbstractEntity<D>).`~~`().set(this, value)
+
     final override fun data() = metadata
 
     /** Clone this property for a new alias */
@@ -125,7 +140,8 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     override fun hashCode(): Int = hashCode
 }
 
-/** An implementation of the property descriptor */
+/** An implementation of the direct property descriptor */
+@Suppress("UNCHECKED_CAST")
 open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
     internal constructor(
         metadata: PropertyMetadataImpl<D, V>,
@@ -147,6 +163,7 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
         }
 }
 
+/** Object maps Entity class to an Entity model. */
 class EntityProviderUtils {
     private var locked: Boolean = false
 
@@ -175,7 +192,6 @@ class EntityProviderUtils {
                     entityModels.add(it)
                 }
         }
-        println(">>>" + entityModels.size)
 
         var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
         entityModels.forEach {
@@ -186,6 +202,11 @@ class EntityProviderUtils {
         entityModels = Collections.unmodifiableList(entityModels) as MutableList<EntityModel<*>>
         locked = true
     }
+
+    /** Find an entity model acording entity class */
+    @Suppress("UNCHECKED_CAST")
+    fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
+        entityMap[entityClass] as EntityModel<D>
 }
 
 /** Interface of the domain metamodel */
@@ -256,7 +277,7 @@ class EntityUtils<D : Any>(
     /** Get an entity class type */
     val entityType : ClassType get() = briefModel.entityType
 
-    var properties: List<PropertyNullable<D, Any>> = mutableListOf()
+    var properties: List<PropertyNullableImpl<D, Any>> = mutableListOf()
         private set(value) { field = if (briefModel.open) value
         else throw java.lang.IllegalStateException(CLOSED_MESSAGE)}
     val size get() = properties.size
@@ -269,7 +290,7 @@ class EntityUtils<D : Any>(
     val columnStyle: Boolean = columnNameStyle ?: false
 
     /** Mapping a property name to its property */
-    private lateinit var map : Map<String, PropertyNullable<D, *>>
+    private lateinit var map : Map<String, PropertyNullableImpl<D, *>>
 
     /** Initialize and close the entity model. */
     fun close() : EntityModel<D> {
@@ -289,8 +310,8 @@ class EntityUtils<D : Any>(
     }
 
     /** Validate unique property name and build a name map */
-    private fun buildPropertyMap() : Map<String, PropertyNullable<D, *>> {
-        val result = HashMap<String, PropertyNullable<D, *>>(properties.size)
+    private fun buildPropertyMap() : Map<String, PropertyNullableImpl<D, *>> {
+        val result = HashMap<String, PropertyNullableImpl<D, *>>(properties.size)
         properties.forEach{
             val previous = result.put( it.name(), it)
             check(previous == null) { "The attribute name is occupied: $it" }
@@ -299,7 +320,7 @@ class EntityUtils<D : Any>(
     }
 
     /** Find property by its name or throw an exception */
-    fun findProperty(name: String): PropertyNullable<D, *> =
+    fun findProperty(name: String): PropertyNullableImpl<D, *> =
         map.get(name) ?: throw NoSuchElementException(
             "For: ${entityModel.utils().entityClass.simpleName}.$name")
 
@@ -311,7 +332,7 @@ class EntityUtils<D : Any>(
         name: String = "",
     ): Property<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
-            name, briefModel, valueClass, false, false)
+            name, briefModel, valueClass, readOnly = false, nullable = false)
         val result = PropertyImpl(propertyMetadata, getter, setter)
         addToList(result)
         return result
@@ -358,7 +379,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun <R : EntityModel<D>> close(): R = propertyBuilder.close() as R
 
     /** Initialize and close the entity model. */
-    fun closeModel() : Unit {
+    fun closeModel() {
          propertyBuilder.close()
     }
 
@@ -423,6 +444,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)
 
     /** Create new instance of the domain object */
+    @Suppress("UNCHECKED_CAST")
     @Throws(IllegalAccessException::class, IllegalArgumentException::class, InvocationTargetException::class)
     fun new(): D {
         val entityClass = propertyBuilder.entityClass.java
@@ -564,14 +586,17 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 }
 
 /** Composed nullable property implementation */
-open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNullable<D, V> {
+open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
+    PropertyNullable<D, V>,
+    PropertyMiddleAccesory<D, M>
+{
     protected val metadata: ComposedPropertyMetadata<D, M, V>
 
     constructor(
-        leftProperty : PropertyNullable<D, M>,
-        righProperty : PropertyNullable<M, V>
+        primaryProperty : PropertyNullable<D, M>,
+        secondaryProperty : PropertyNullable<M, V>
     ) {
-        this.metadata = ComposedPropertyMetadata(leftProperty, righProperty)
+        this.metadata = ComposedPropertyMetadata(primaryProperty, secondaryProperty)
     }
 
     override fun data() = this.metadata
@@ -583,18 +608,36 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> : PropertyNul
         TODO("Method is not supported for composed properties")
     }
 
-    override fun get(entity: D): V? {
-        val entity2 = metadata.primaryProperty[entity]
-        return if (entity2 != null) metadata.secondaryProperty[entity2] else null
+    @Suppress("UNCHECKED_CAST")
+    override fun getMiddleValue(entity: D): M? {
+        val property = metadata.primaryProperty as PropertyMiddleAccesory<D, M>
+        return property.getMiddleValue(entity)
     }
 
+    override fun get(entity: D): V? {
+        val entity2 = getMiddleValue(entity)
+        return if (entity2 != null) metadata.secondaryProperty[entity2]
+               else null
+    }
+
+    /** Set a value to entity. */
     override fun set(entity: D, value: V?) {
-        var entity2 = metadata.primaryProperty[entity]
-        if (entity2 == null) {
-            throw IllegalArgumentException("Value of property ${info()} is null")
-            // TODO: create new instance
+        set(entity, value, null)
+    }
+
+    /** Set a value and create missing relation(s) - if entityProvider is available. */
+    fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
+        var middleObject = getMiddleValue(entity)
+        if (middleObject == null) {
+            if (entityProvider != null) {
+                val valueClass = (metadata.primaryProperty as PropertyNullableImpl).metadata.valueClass
+                middleObject = entityProvider.utils().findEntityModel(valueClass).new()
+                metadata.primaryProperty.set(entity, middleObject)
+            } else {
+                throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
+            }
         }
-        metadata.secondaryProperty.set(entity2, value)
+        metadata.secondaryProperty.set(middleObject, value)
     }
 
     override fun toString(): String {

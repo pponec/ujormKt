@@ -24,7 +24,7 @@ import java.util.*
  * See the link: https://www.baeldung.com/java-dynamic-proxies
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  */
-open class RawEntity<D : Any> : InvocationHandler {
+class RawEntity<D : Any> : InvocationHandler {
     private val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
@@ -50,11 +50,11 @@ open class RawEntity<D : Any> : InvocationHandler {
                 ) {
                     val propertyName = "${methodName[prefixLength]
                         .lowercaseChar()}${methodName.substring(prefixLength + 1)}"
-                    val property = model.utils().findProperty(propertyName) as PropertyNullable<D, Any>
+                    val property = model.utils().findProperty(propertyName) as PropertyNullableImpl<D, Any>
                     if (args.isNullOrEmpty()) {
-                        return property.get(values)
+                        return get(property)
                     } else {
-                        property.set(values, args.first())
+                        set(property, args.first())
                         return Unit
                     }
                 } else {
@@ -82,8 +82,9 @@ open class RawEntity<D : Any> : InvocationHandler {
 
     protected fun get(name: String): Any? = get(model.utils().findProperty(name))
 
-    /** Get value */
-    operator fun <V : Any> get(property: PropertyNullable<D, V>) = property[values]
+    /** Get nullable value by a direct access. */
+    operator fun <V : Any> get(property: PropertyNullable<D, V>) : V? =
+        values[property.data().indexToInt()] as V?
 
     /** Set a nullable value */
     operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) {
@@ -91,11 +92,14 @@ open class RawEntity<D : Any> : InvocationHandler {
             if (changes == null) changes = BitSet(model.utils().size)
             changes!!.set(1)
         }
-        property[values] = value
+        values[property.data().indexToInt()] = value
     }
 
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =
         changes?.get(property.data().indexToInt()) ?: false
+
+    fun <V : Any> isNull(property: PropertyNullable<D, V>) : Boolean =
+        values[property.data().indexToInt()] == null
 
     override fun toString() = toString(40)
 

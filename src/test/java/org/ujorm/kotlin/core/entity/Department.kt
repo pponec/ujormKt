@@ -2,10 +2,11 @@ package org.ujorm.kotlin.core.entity
 
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.core.EntityInitializer
 import org.ujorm.kotlin.core.impl.EntityModel
 
 /** A Department entity */
-@Entity
+@Entity(init = DepartmentInitializer::class )
 interface Department {
     var id: Int
     var name: String
@@ -17,6 +18,12 @@ class Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
     val created = property { it.created }
+}
+
+class DepartmentInitializer : EntityInitializer<Department> {
+    override fun initialize(entity: Department) {
+        entity.created = LocalDate.now()
+    }
 }
 
 /** Initialize, register and close the entity model. */

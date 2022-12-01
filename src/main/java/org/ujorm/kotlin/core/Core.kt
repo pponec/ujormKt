@@ -87,7 +87,7 @@ interface PropertyMetadata<D : Any, V : Any> {
     fun status(): String
 }
 
-/** API of the property descriptor for a nullable values. */
+/** API of the direct property descriptor for a nullable values. */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
 
@@ -111,7 +111,6 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     /** Set a value to the entity */
     operator fun set(entity: D, value: V?)
 
-    /** Get a value from the entity */
     @Suppress("UNCHECKED_CAST")
     operator fun get(entity: Array<Any?>): V? =
         entity[data().indexToInt()] as V?
@@ -204,7 +203,7 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = info().subSequence(startIndex, endIndex)
 }
 
-/** API of the property descriptor */
+/** API of the direct property descriptor */
 interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
     override operator fun get(entity: D): V
 

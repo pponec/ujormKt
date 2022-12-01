@@ -17,9 +17,9 @@ The execution of database queries will then be delegated to an existing implemen
 See the target `SELECT` example:
 
 ```kotlin
-internal fun comprehensiveDatabaseSelect() {
-    val employees = Database.employees
-    val employeRows = Database.select(
+fun comprehensiveDatabaseSelect() {
+    val employees: Employees<Employee> = Database.employees
+    val employeRows: List<Employee> = Database.select(
         employees.id,
         employees.name,
         employees.department.name, // Required relation by the inner join!
@@ -39,24 +39,23 @@ internal fun comprehensiveDatabaseSelect() {
 and an `INSERT` example:
 
 ```kotlin
-internal fun insertRows() {
-    val development = Database.departments.new {
+    internal fun insertRows() {
+    val development: Department = Database.departments.new {
         name = "Development"
         created = LocalDate.of(2020, 10, 1)
     }
-    val lucy = Database.employees.new {
+    val lucy: Employee = Database.employees.new {
         name = "lucy"
         contractDay = LocalDate.of(2022, 1, 1)
         supervisor = null
         department = development
     }
-    val joe = Database.employees.new {
+    val joe: Employee = Database.employees.new {
         name = "Joe"
         contractDay = LocalDate.of(2022, 2, 1)
         supervisor = lucy
         department = development
     }
-
     Database.save(development, lucy, joe)
 }
 ```

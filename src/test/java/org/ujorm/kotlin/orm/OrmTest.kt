@@ -12,8 +12,8 @@ internal class OrmTest {
 
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
-        val employees = Database.employees
-        val employeRows = Database.select(
+        val employees: Employees<Employee> = Database.employees // get meta-model
+        val employeRows: List<Employee> = Database.select(
             employees.id,
             employees.name,
             employees.department.name, // Required relation by the inner join
@@ -90,23 +90,22 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun insertRows() {
-        val development = Database.departments.new {
+        val development: Department = Database.departments.new {
             name = "Development"
             created = LocalDate.of(2020, 10, 1)
         }
-        val lucy = Database.employees.new {
+        val lucy: Employee = Database.employees.new {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
         }
-        val joe = Database.employees.new {
+        val joe: Employee = Database.employees.new {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development
         }
-
         Database.save(development, lucy, joe)
     }
 
@@ -132,7 +131,7 @@ internal class OrmTest {
         result24.forEach{
             val id : Int = db.id[it]
             val name : String = db.name[it]
-            val created : LocalDate = db.created[it]
+            val created : LocalDate = db.created.get(it)
             println("Db record: id = $id, name = $name, created = $created")
         }
 
