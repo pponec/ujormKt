@@ -23,10 +23,8 @@ import java.util.*
 import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
-import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.full.memberProperties
 
 /** Returns a nullable middle value of the composite property */
 interface PropertyMiddleAccesory<D : Any, V : Any> {
@@ -46,6 +44,11 @@ class PropertyMetadataImpl<D : Any, V : Any> (
 ) : PropertyMetadata<D, V> {
     override val entityClass: KClass<D> get() = entityModel.entityClass
     override val entityType : ClassType get() = entityModel.entityType
+    override var relation: Boolean = false
+        internal set(value) {
+            field = if (entityModel.open) value
+            else throw IllegalStateException(CLOSED_MESSAGE)
+        }
 
     override var name: String = name
         internal set(value) {
@@ -85,8 +88,6 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
     /** Value provider is not the part of API */
     internal open val getter: (D) -> V?,
-    /** Value writer is not the part of API */
-    setter: (D, V?) -> Unit,
 ) : PropertyNullable<D, V>, PropertyMiddleAccesory<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -94,13 +95,6 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     }
 
     override fun entityAlias(): String = metadata.entityModel.entityAlias
-
-    /** Value writer is not the part of API */
-    internal open var setter: (D, V?) -> Unit = setter
-        set(value) {
-            field = if (metadata.entityModel.open) value
-            else throw IllegalStateException(CLOSED_MESSAGE)
-        }
 
     /** Returns a nullable value */
     @Suppress("UNCHECKED_CAST")
@@ -117,7 +111,7 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     /** Clone this property for a new alias */
     override fun entityAlias(entityAlias : String) : PropertyNullable<D, V> =
-        object : PropertyNullableImpl<D, V>(metadata, getter, setter) {
+        object : PropertyNullableImpl<D, V>(metadata, getter) {
            override fun entityAlias(): String = entityAlias
         }
 
@@ -146,19 +140,15 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
     internal constructor(
         metadata: PropertyMetadataImpl<D, V>,
         getter: (D) -> V,
-        setter: (D, V?) -> Unit,
-    ) : super(metadata, getter, setter)
+    ) : super(metadata, getter)
 
     override val getter: (D) -> V = super.getter as (D) -> V
-    override fun set(entity: D, value: V?) = setter.invoke(entity, value
-        ?: throw IllegalArgumentException("Notnull value is expected")
-    )
 
     final override fun get(entity: D): V = getter.invoke(entity)
 
     /** Clone this property for a new alias */
     override fun entityAlias(entityAlias : String) : Property<D, V> =
-        object : PropertyImpl<D, V>(metadata, getter, setter) {
+        object : PropertyImpl<D, V>(metadata, getter) {
             override fun entityAlias(): String = entityAlias
         }
 }
@@ -301,7 +291,6 @@ class EntityUtils<D : Any>(
                 val kProperty = kPropertyArray[p.data().index.toShort()]
                     ?: throw IllegalStateException("Property not found: ${p.data().entityClass.simpleName}.${p.data().index}")
                 Utils.assignName(p, kProperty)
-                Utils.assignSetter(p, kProperty)
             }
             map = buildPropertyMap()
             briefModel.closed = true
@@ -333,7 +322,7 @@ class EntityUtils<D : Any>(
     ): Property<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
             name, briefModel, valueClass, readOnly = false, nullable = false)
-        val result = PropertyImpl(propertyMetadata, getter, setter)
+        val result = PropertyImpl(propertyMetadata, getter)
         addToList(result)
         return result
     }
@@ -347,7 +336,7 @@ class EntityUtils<D : Any>(
     ): PropertyNullable<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
             name, briefModel, valueClass, false, true)
-        val result = PropertyNullableImpl(propertyMetadata, getter, setter)
+        val result = PropertyNullableImpl(propertyMetadata, getter)
         addToList(result)
         return result
     }
@@ -511,22 +500,6 @@ internal object Utils {
             uProperty.data().name = name
         }
     }
-
-    /** Assign a property setter to the uProperty */
-    fun <D : Any> assignSetter(
-        /** Ujorm property */
-        uProperty: PropertyNullable<D, Any>,
-        /** Kotlin property */
-        kProperty: KProperty1<EntityModel<D>, PropertyNullable<EntityModel<D>, *>>,
-    ) {
-        val eProperty = uProperty.data().entityClass.memberProperties.find { it.name == kProperty.name }
-        if (eProperty is KMutableProperty<*>) when (uProperty) {
-            is PropertyNullableImpl -> {
-                if (uProperty.setter === Constants.UNDEFINED_SETTER)
-                    uProperty.setter = { d, v -> eProperty.setter.call(d, v) }
-            }
-        }
-    }
 }
 
 /** Sorting property */
@@ -554,6 +527,7 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     override val entityClass: KClass<D> get() = primaryProperty.data().entityClass
     override val entityType: ClassType get() = primaryProperty.data().entityType
     override val valueClass: KClass<V> get() = secondaryProperty.data().valueClass
+    override val relation: Boolean get() = secondaryProperty.data().relation
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
     override val nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable
 
