@@ -12,7 +12,7 @@ internal class OrmTest {
 
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
-        val employees: Employees<Employee> = Database.employees // get meta-model
+        val employees: Employees<Employee> = Database.employees // Employee metamodel
         val employeRows: List<Employee> = Database.select(
             employees.id,
             employees.name,

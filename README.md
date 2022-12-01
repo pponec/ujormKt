@@ -18,7 +18,7 @@ See the target `SELECT` example:
 
 ```kotlin
 fun comprehensiveDatabaseSelect() {
-    val employees: Employees<Employee> = Database.employees
+    val employees: Employees<Employee> = Database.employees // Employee metamodel
     val employeRows: List<Employee> = Database.select(
         employees.id,
         employees.name,
