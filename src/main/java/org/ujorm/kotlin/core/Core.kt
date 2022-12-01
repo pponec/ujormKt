@@ -71,7 +71,9 @@ interface PropertyMetadata<D : Any, V : Any> {
     val name: String
     val entityClass: KClass<D>
     val valueClass: KClass<V> // KClass<out V>
-    /** Is the property a relation to another entity? */
+    /** Is the property a relation to another entity?
+     * See the method [org.ujorm.kotlin.core.impl.EntityProviderUtils.isRelation] */
+    @Deprecated("How to initialize the attribute in time of building the model?")
     val relation: Boolean
     /** Is the property value read-only? */
     val readOnly: Boolean

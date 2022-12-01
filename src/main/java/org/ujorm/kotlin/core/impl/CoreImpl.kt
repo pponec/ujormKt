@@ -191,6 +191,10 @@ class EntityProviderUtils {
     @Suppress("UNCHECKED_CAST")
     fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
         entityMap[entityClass] as EntityModel<D>
+
+    /** Is the property a relation to some Entity? */
+    fun <V: Any> isRelation(property : PropertyNullable<*, V>) =
+        entityMap[property.data().valueClass]
 }
 
 /** Interface of the domain metamodel */
