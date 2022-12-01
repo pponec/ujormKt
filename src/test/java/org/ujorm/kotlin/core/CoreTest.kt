@@ -200,7 +200,7 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
-    //@org.junit.jupiter.api.Disabled
+    @org.junit.jupiter.api.Disabled
     @Test
     fun createNewRelationBySpecialSetter() {
         val entities = Entities.close<Entities>()

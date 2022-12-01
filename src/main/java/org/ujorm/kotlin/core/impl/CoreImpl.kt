@@ -384,12 +384,11 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** Create a non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
+    @Suppress("UNUSED_PARAMETER")
     protected inline fun <reified V : Any> property(getter: (D) -> V) =
         propertyBuilder.createProperty(V::class)
 
-    /** Create a non-null property by a class.
-     * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
-     */
+    @Deprecated("Method will be removed ?")
     protected inline fun <reified V : Any> property(valueClass: KClass<V>) : Property<RawEntity<D>, V> = TODO()
         //propertyBuilder.createPropertyRaw(valueClass, TODO())
 
@@ -397,25 +396,31 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
     @Deprecated("Unsupported method")
+    @Suppress("UNUSED_PARAMETER")
     private inline fun <reified V : Any> property(
         name: String,
-        noinline getter: (D) -> V
+        getter: (D) -> V
     ) = propertyBuilder.createProperty(V::class, name = hasLength(name))
 
     /** Create new non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
-    protected inline fun <reified V : Any> propertyNullable(
-        noinline getter: (D) -> V?
-    ) = propertyBuilder.createPropertyNullable(V::class)
+    @Suppress("UNUSED_PARAMETER")
+    protected inline fun <reified V : Any> propertyNullable(getter: (D) -> V?) =
+        propertyBuilder.createPropertyNullable(V::class)
+
+    @Deprecated("Method will be removed")
+    internal inline fun <reified V : Any> propertyNullable(valueClass: KClass<V>
+    ) = propertyBuilder.createProperty(valueClass)
 
     /** Create new non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
     @Deprecated("Unsupported method")
+    @Suppress("UNUSED_PARAMETER")
     private inline fun <reified V : Any> propertyNullable(
         name: String,
-        noinline getter: (D) -> V?,
+        getter: (D) -> V?,
     ) = propertyBuilder.createPropertyNullable(V::class, name = hasLength(name))
 
     /** Create new Array */
