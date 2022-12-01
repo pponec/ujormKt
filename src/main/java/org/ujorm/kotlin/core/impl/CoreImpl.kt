@@ -86,8 +86,6 @@ class PropertyMetadataImpl<D : Any, V : Any> (
 /** An implementation of the direct property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
-    /** Value provider is not the part of API */
-    internal open val getter: (D) -> V?,
 ) : PropertyNullable<D, V>, PropertyMiddleAccesory<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -98,20 +96,20 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     /** Returns a nullable value */
     @Suppress("UNCHECKED_CAST")
-    override fun getMiddleValue(entity: D): V? = // getter.invoke(entity)
+    override fun getMiddleValue(entity: D): V? =
         (entity as AbstractEntity<D>).`~~`().get(this)
 
     override fun get(entity: D): V? = getMiddleValue(entity)
 
     @Suppress("UNCHECKED_CAST")
-    override fun set(entity: D, value: V?) = // setter.invoke(entity, value)
+    override fun set(entity: D, value: V?) =
         (entity as AbstractEntity<D>).`~~`().set(this, value)
 
     final override fun data() = metadata
 
     /** Clone this property for a new alias */
     override fun entityAlias(entityAlias : String) : PropertyNullable<D, V> =
-        object : PropertyNullableImpl<D, V>(metadata, getter) {
+        object : PropertyNullableImpl<D, V>(metadata) {
            override fun entityAlias(): String = entityAlias
         }
 
@@ -135,20 +133,16 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 }
 
 /** An implementation of the direct property descriptor */
-@Suppress("UNCHECKED_CAST")
 open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl<D, V> {
     internal constructor(
         metadata: PropertyMetadataImpl<D, V>,
-        getter: (D) -> V,
-    ) : super(metadata, getter)
+    ) : super(metadata)
 
-    override val getter: (D) -> V = super.getter as (D) -> V
-
-    final override fun get(entity: D): V = getter.invoke(entity)
+    final override fun get(entity: D): V = super.getMiddleValue(entity) as V
 
     /** Clone this property for a new alias */
     override fun entityAlias(entityAlias : String) : Property<D, V> =
-        object : PropertyImpl<D, V>(metadata, getter) {
+        object : PropertyImpl<D, V>(metadata) {
             override fun entityAlias(): String = entityAlias
         }
 }
@@ -316,13 +310,11 @@ class EntityUtils<D : Any>(
     /** Create new not-null Property model using the method with all necessary parameters. */
     fun <V : Any> createProperty(
         valueClass: KClass<V>,
-        getter: (D) -> V,
-        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         name: String = "",
     ): Property<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
             name, briefModel, valueClass, readOnly = false, nullable = false)
-        val result = PropertyImpl(propertyMetadata, getter)
+        val result = PropertyImpl(propertyMetadata)
         addToList(result)
         return result
     }
@@ -330,13 +322,11 @@ class EntityUtils<D : Any>(
     /** Creates new not-null Property model using the method with all necessary parameters. */
     fun <V : Any> createPropertyNullable(
         valueClass: KClass<V>,
-        getter: (D) -> V?,
-        setter: (D, V?) -> Unit = Constants.UNDEFINED_SETTER,
         name: String = ""
     ): PropertyNullable<D, V> {
         val propertyMetadata = PropertyMetadataImpl(properties.size.toUByte(),
             name, briefModel, valueClass, false, true)
-        val result = PropertyNullableImpl(propertyMetadata, getter)
+        val result = PropertyNullableImpl(propertyMetadata)
         addToList(result)
         return result
     }
@@ -394,9 +384,8 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     /** Create a non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
-    protected inline fun <reified V : Any> property(
-        noinline getter: (D) -> V
-    ) = propertyBuilder.createProperty(V::class, getter)
+    protected inline fun <reified V : Any> property(getter: (D) -> V) =
+        propertyBuilder.createProperty(V::class)
 
     /** Create a non-null property by a class.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
@@ -411,14 +400,14 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     private inline fun <reified V : Any> property(
         name: String,
         noinline getter: (D) -> V
-    ) = propertyBuilder.createProperty(V::class, getter, name = hasLength(name))
+    ) = propertyBuilder.createProperty(V::class, name = hasLength(name))
 
     /** Create new non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
     protected inline fun <reified V : Any> propertyNullable(
         noinline getter: (D) -> V?
-    ) = propertyBuilder.createPropertyNullable(V::class, getter)
+    ) = propertyBuilder.createPropertyNullable(V::class)
 
     /** Create new non-null property.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
@@ -427,7 +416,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     private inline fun <reified V : Any> propertyNullable(
         name: String,
         noinline getter: (D) -> V?,
-    ) = propertyBuilder.createPropertyNullable(V::class, getter, name = hasLength(name))
+    ) = propertyBuilder.createPropertyNullable(V::class, name = hasLength(name))
 
     /** Create new Array */
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)
@@ -509,10 +498,6 @@ class SortingProperty<D : Any, V : Any> (
 
 /** See: https://stackoverflow.com/questions/44038721/constants-in-kotlin-whats-a-recommended-way-to-create-them */
 object Constants {
-    /** Undefined property setter */
-    val UNDEFINED_SETTER: (d: Any, v: Any?) -> Unit = { d, v ->
-        TODO("read-only")
-    }
     const val CLOSED_MESSAGE = "Object is closed"
 }
 

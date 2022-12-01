@@ -18,7 +18,6 @@ package org.ujorm.kotlin.core
 import org.ujorm.kotlin.core.impl.*
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 /** Common condition operator */
 interface Operator {
