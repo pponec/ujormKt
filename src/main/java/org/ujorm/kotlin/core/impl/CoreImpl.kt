@@ -218,6 +218,7 @@ abstract class AbstractEntityProvider {
     /** Register a new entity */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
 
+    /** Initialize and close the entity model */
     @Suppress("UNCHECKED_CAST")
     open fun <R : AbstractEntityProvider> close() : R {
         utils.init(this)
