@@ -188,8 +188,8 @@ class EntityProviderUtils {
         entityMap[entityClass] as EntityModel<D>
 
     /** Is the property a relation to some Entity? */
-    fun <V: Any> isRelation(property : PropertyNullable<*, V>) =
-        entityMap[property.data().valueClass]
+    fun <V: Any> isRelation(property : PropertyNullable<*, V>): Boolean =
+        entityMap[property.data().valueClass] != null
 }
 
 /** Interface of the domain metamodel */
