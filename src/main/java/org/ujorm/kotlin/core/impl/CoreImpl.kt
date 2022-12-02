@@ -44,11 +44,6 @@ class PropertyMetadataImpl<D : Any, V : Any> (
 ) : PropertyMetadata<D, V> {
     override val entityClass: KClass<D> get() = entityModel.entityClass
     override val entityType : ClassType get() = entityModel.entityType
-    override var relation: Boolean = false
-        internal set(value) {
-            field = if (entityModel.open) value
-            else throw IllegalStateException(CLOSED_MESSAGE)
-        }
 
     override var name: String = name
         internal set(value) {
@@ -149,7 +144,6 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
 
 /** Object maps Entity class to an Entity model. */
 class EntityProviderUtils {
-    private var initialized: Boolean = false
     private var locked: Boolean = false
 
     /** Get all entity models */
@@ -166,9 +160,9 @@ class EntityProviderUtils {
 
     fun entityModels() : List<EntityModel<*>> = entityModels
 
-    /** Initializa the model if it hasn't already. */
-    fun init(entities : AbstractEntityProvider) {
-        if (initialized) return
+    /** Lock the model if it hasn't already. */
+    fun close(entities : AbstractEntityProvider) {
+        if (locked) return
 
         if (entityModels.isEmpty()) {
             Reflections(EntityModel::class).findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
@@ -180,22 +174,12 @@ class EntityProviderUtils {
 
         var map = HashMap<KClass<*>, EntityModel<*>>(this.entityModels.size)
         entityModels.forEach {
-            //it.closeModel() // Relation attribute must be initialized after building maps.
+            it.closeModel()
             map[it.utils().entityClass] = it
         }
         entityMap = map
         entityModels = Collections.unmodifiableList(entityModels) as MutableList<EntityModel<*>>
-        initialized = true
-    }
-
-    /** Lock the model if it hasn't already. */
-    fun close(entities : AbstractEntityProvider) {
-        if (!locked) {
-            entityModels.forEach {
-                it.closeModel(entities.utils())
-            }
-            locked = true
-        }
+        locked = true
     }
 
     /** Find an entity model acording entity class */
@@ -203,9 +187,9 @@ class EntityProviderUtils {
     fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
         entityMap[entityClass] as EntityModel<D>
 
-    /** Is the Property a relation to some Entity? */
-    fun <V: Any> isRelation(property : PropertyNullable<*, V>, entityUtils: EntityProviderUtils): Boolean =
-        entityMap[property.data().valueClass] != null
+    /** Is the property a relation to some Entity? */
+    fun <V: Any> isRelation(property : PropertyNullable<*, V>) =
+        entityMap[property.data().valueClass]
 }
 
 /** Interface of the domain metamodel */
@@ -221,7 +205,6 @@ abstract class AbstractEntityProvider {
     /** Initialize and close the entity model */
     @Suppress("UNCHECKED_CAST")
     open fun <R : AbstractEntityProvider> close() : R {
-        utils.init(this)
         utils.close(this)
         return this as R
     }
@@ -294,7 +277,7 @@ class EntityUtils<D : Any>(
     private lateinit var map : Map<String, PropertyNullableImpl<D, *>>
 
     /** Initialize and close the entity model. */
-    fun close(entityUtils: EntityProviderUtils) : EntityModel<D> {
+    fun close() : EntityModel<D> {
         if (!briefModel.closed) {
             properties = Collections.unmodifiableList(properties)
             val kPropertyArray = Utils.getKPropertyMap(entityModel)
@@ -302,7 +285,6 @@ class EntityUtils<D : Any>(
                 val kProperty = kPropertyArray[p.data().index.toShort()]
                     ?: throw IllegalStateException("Property not found: ${p.data().entityClass.simpleName}.${p.data().index}")
                 Utils.assignName(p, kProperty)
-                Utils.assignRelation(p, entityUtils)
             }
             map = buildPropertyMap()
             briefModel.closed = true
@@ -376,8 +358,8 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun <R : EntityModel<D>> close(): R = propertyBuilder.close() as R
 
     /** Initialize and close the entity model. */
-    fun closeModel(entityUtils: EntityProviderUtils) {
-         propertyBuilder.close(entityUtils)
+    fun closeModel() {
+         propertyBuilder.close()
     }
 
     /** Clone the metamodel for required alias.
@@ -512,16 +494,6 @@ internal object Utils {
             uProperty.data().name = name
         }
     }
-
-    /** Assign a property name to the uProperty */
-    fun <D : Any> assignRelation(
-        /** Ujorm property */
-        uProperty: PropertyNullableImpl<D, Any>,
-        /** Entity Utils */
-        entityUtils: EntityProviderUtils,
-    ) {
-        uProperty.data().relation = entityUtils.isRelation(uProperty, entityUtils)
-    }
 }
 
 /** Sorting property */
@@ -545,7 +517,6 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     override val entityClass: KClass<D> get() = primaryProperty.data().entityClass
     override val entityType: ClassType get() = primaryProperty.data().entityType
     override val valueClass: KClass<V> get() = secondaryProperty.data().valueClass
-    override val relation: Boolean get() = secondaryProperty.data().relation
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
     override val nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable
 
