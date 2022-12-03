@@ -460,8 +460,10 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
     @Suppress("UNUSED_PARAMETER")
-    protected inline fun <reified V : Any> propertyList(getter: (V) -> D): Property<D, List<V>> =
-        propertyBuilder.createListProperty(V::class)
+    internal inline fun <reified V : Any> propertyList(getter: () -> KProperty1<V, D>): Property<D, List<V>> {
+        val itemType = V::class
+        TODO("Not yet implemented for $itemType")
+    }
 
     /** Create new Array */
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)
