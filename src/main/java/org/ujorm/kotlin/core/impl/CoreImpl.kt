@@ -456,13 +456,12 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
         getter: (D) -> V?,
     ) = propertyBuilder.createPropertyNullable(V::class, name = hasLength(name))
 
-    /** Create a non-null property.
+    /** Create a non-null property type of List.
      * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
      */
     @Suppress("UNUSED_PARAMETER")
     internal inline fun <reified V : Any> propertyList(getter: () -> KProperty1<V, D>): Property<D, List<V>> {
-        val itemType = V::class
-        TODO("Not yet implemented for $itemType")
+        return propertyBuilder.createListProperty(V::class, "")
     }
 
     /** Create new Array */

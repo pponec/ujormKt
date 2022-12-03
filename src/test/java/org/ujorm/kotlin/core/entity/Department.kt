@@ -19,7 +19,7 @@ class Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
     val created = property { Department::created } // Alternative notation
-    val members = propertyList { Employee::department } // Type of relation
+    val members = propertyList { Employee::department } // Notation for a Relation
 }
 
 class DepartmentInitializer : EntityInitializer<Department> {
