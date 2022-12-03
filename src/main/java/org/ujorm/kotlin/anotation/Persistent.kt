@@ -1,6 +1,8 @@
 package org.ujorm.kotlin.anotation
 
+import org.ujorm.kotlin.core.CriterionProvider
 import org.ujorm.kotlin.core.EntityInitializer
+import org.ujorm.kotlin.orm.AbstractDatabase
 import kotlin.reflect.KClass
 
 /**
@@ -29,4 +31,11 @@ annotation class Entity(
 annotation class Table(
     val name: String = "",
     val schema: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class OneToMany(
+    /** An implementation of initializing a new entity. */
+    val criterion: KClass<out CriterionProvider<out Any, out AbstractDatabase>> = CriterionProvider::class
 )

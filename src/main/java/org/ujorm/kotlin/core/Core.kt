@@ -16,6 +16,7 @@
 package org.ujorm.kotlin.core
 
 import org.ujorm.kotlin.core.impl.*
+import org.ujorm.kotlin.orm.AbstractDatabase
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -62,6 +63,14 @@ interface Criterion<D : Any, out OP : Operator, out V : Any?> {
     infix fun OR_NOT(crn: Criterion<D, Operator, Any>): BinaryCriterion<D> {
         return BinaryCriterion(this, BinaryOperator.OR_NOT, crn)
     }
+}
+
+interface CriterionProvider<D: Any, DB: AbstractDatabase> {
+    /**
+     * The condition of relationship 1:M limits the number of foreign rows.
+     * The entity type of D corresponds to the type on which we want to limit the number of rows.
+     */
+    fun get(database: DB): Criterion<D, *, *>
 }
 
 /** API of the property metadata descriptor */

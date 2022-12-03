@@ -1,6 +1,7 @@
 package org.ujorm.kotlin.orm.entity
 
 import org.ujorm.kotlin.anotation.Entity
+import org.ujorm.kotlin.anotation.OneToMany
 import org.ujorm.kotlin.core.impl.EntityModel
 import org.ujorm.kotlin.coreComposed.DomainEntityModel
 import java.time.LocalDate
@@ -11,6 +12,7 @@ interface Department {
     var id: Int
     var name: String
     var created: LocalDate
+    @OneToMany(criterion = SeniorEmployeeFilter::class)
     var members: List<Employee>
 }
 
