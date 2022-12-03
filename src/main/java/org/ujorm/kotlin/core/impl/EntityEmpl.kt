@@ -109,7 +109,8 @@ class RawEntity<D : Any> : InvocationHandler {
             result.append(if (i == 0) "{" else ", ")
             result.append(property.name())
             result.append('=')
-            val value = values[i]
+            val collection = property.data().isTypeOf(List::class)
+            val value = if (collection) null else values[i]
             if (value is RawEntity<*>) {
                 if (maxDepth > 0) {
                     result.append(value.toString(itemValueMaxLength, maxDepth - 1))
@@ -118,7 +119,7 @@ class RawEntity<D : Any> : InvocationHandler {
                 }
             } else {
                 val separator = if (value is CharSequence) "\"" else ""
-                val text = "$value"
+                val text = if (collection) "?" else  "$value"
                 result.append(separator)
                 result.append(
                     if (text.length <= itemValueMaxLength) text

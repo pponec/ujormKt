@@ -24,6 +24,7 @@ import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
 /** Returns a nullable middle value of the composite property */
@@ -50,6 +51,9 @@ open class PropertyMetadataImpl<D : Any, V : Any> (
             field = if (entityModel.open) value
             else throw IllegalStateException(CLOSED_MESSAGE)
         }
+
+    /** Returns true if the property class is the same or subtype of the parameter class. */
+    fun isTypeOf(clazz: KClass<*>) = valueClass.isSubclassOf(clazz)
 
     /** Compare three attributes: 'entity class', 'entity alias' and 'property name'. */
     override fun equals(other: Any?): Boolean {

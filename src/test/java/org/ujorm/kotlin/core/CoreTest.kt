@@ -63,7 +63,8 @@ internal class CoreTest {
 
         expect(development.toString()).toEqual("Department{id=1" +
                 ", name=\"development\"" +
-                ", created=2021-10-15}")
+                ", created=2021-10-15" +
+                ", members=?}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
                 ", name=\"Lucy\"" +
                 ", senior=true" +
