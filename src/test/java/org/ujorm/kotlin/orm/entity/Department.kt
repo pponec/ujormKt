@@ -11,13 +11,15 @@ interface Department {
     var id: Int
     var name: String
     var created: LocalDate
+    var members: List<Employee>
 }
 
 /** Model of the entity can be a generated class in the feature */
 open class _Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val created = property { it.created }
+    val created = property { org.ujorm.kotlin.core.entity.Department::created } // Alternative notation
+    val members = propertyList { Employee::department } // Notation for a Relation 1:M
 }
 
 /** Model of the entity can be a generated class in the feature */

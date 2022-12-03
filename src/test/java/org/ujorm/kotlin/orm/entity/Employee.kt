@@ -10,6 +10,7 @@ import org.ujorm.kotlin.core.impl.EntityModel
 interface Employee {
     var id: Int
     var name: String
+    var senior: Boolean
     var contractDay: LocalDate
     var department: Department
     var supervisor: Employee?
@@ -19,6 +20,7 @@ interface Employee {
 open class _Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
+    val senior = property { it.senior }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
@@ -30,6 +32,7 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
 
     val id get() = property(core.id)
     val name get() = property(core.name)
+    val senior get() = property(core.senior)
     val contractDay get() = property(core.contractDay)
     val department: Departments<D> get() = property(core.department)
     val supervisor: Employees<D> get() = property(core.supervisor)
