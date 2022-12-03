@@ -11,13 +11,15 @@ interface Department {
     var id: Int
     var name: String
     var created: LocalDate
+    var members: List<Employee>
 }
 
 /** Model of the entity can be a generated class in the feature */
 class Departments : EntityModel<Department>(Department::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val created = property { it.created }
+    val created = property { Department::created } // Alternative notation
+    //val members: Property<Department, List<Employee>> = propertyList { Employee::department } // Collection
 }
 
 class DepartmentInitializer : EntityInitializer<Department> {

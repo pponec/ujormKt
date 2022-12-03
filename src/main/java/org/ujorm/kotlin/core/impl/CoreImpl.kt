@@ -33,7 +33,7 @@ interface PropertyMiddleAccesory<D : Any, V : Any> {
 }
 
 /** API of the property descriptor for a nullable values */
-class PropertyMetadataImpl<D : Any, V : Any> (
+open class PropertyMetadataImpl<D : Any, V : Any> (
     override val index: UByte,
     name: String = "",
     internal val entityModel: BriefEntityModel<D>,
@@ -76,6 +76,27 @@ class PropertyMetadataImpl<D : Any, V : Any> (
             ", required=$required" +
             ", readOnly=$readOnly" +
             ", closed=${entityModel.closed}"
+}
+
+/** API of the property descriptor for a List item values.
+ * See: https://stackoverflow.com/questions/51800653/how-to-get-kclass-of-generic-classes-like-baseresponseiterableuser */
+open class ListPropertyMetadataImpl<D : Any, V : Any> : PropertyMetadataImpl<D, List<V>> {
+
+    val itemClass: KClass<V> // KClass<out V>
+
+    constructor(
+        index: UByte,
+        name: String,
+        entityModel: BriefEntityModel<D>,
+        itemClass: KClass<V>,
+        readOnly: Boolean,
+        nullable: Boolean,
+    ) : super(index, name, entityModel,
+        List::class as KClass<List<V>>,
+        readOnly,
+        nullable) {
+        this.itemClass = itemClass
+    }
 }
 
 /** An implementation of the direct property descriptor for nullable values */
@@ -319,6 +340,18 @@ class EntityUtils<D : Any>(
         return result
     }
 
+    /** Create new not-null List Property model using the method with all necessary parameters. */
+    fun <V : Any> createListProperty(
+        valueClass: KClass<V>,
+        name: String = "",
+    ): Property<D, List<V>> {
+        val propertyMetadata = ListPropertyMetadataImpl(properties.size.toUByte(),
+            name, briefModel, valueClass, readOnly = false, nullable = false)
+        val result = PropertyImpl(propertyMetadata)
+        addToList(result)
+        return result
+    }
+
     /** Creates new not-null Property model using the method with all necessary parameters. */
     fun <V : Any> createPropertyNullable(
         valueClass: KClass<V>,
@@ -422,6 +455,13 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
         name: String,
         getter: (D) -> V?,
     ) = propertyBuilder.createPropertyNullable(V::class, name = hasLength(name))
+
+    /** Create a non-null property.
+     * NOTE: The field must heave the same as the original Entity, or use the same name by a name argument.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    protected inline fun <reified V : Any> propertyList(getter: (V) -> D): Property<D, List<V>> =
+        propertyBuilder.createListProperty(V::class)
 
     /** Create new Array */
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)

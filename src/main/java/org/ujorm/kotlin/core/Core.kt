@@ -87,6 +87,11 @@ interface PropertyMetadata<D : Any, V : Any> {
     fun status(): String
 }
 
+/** API of the list property metadata descriptor */
+interface ListPropertyMetadata<D : Any, I: Any> : PropertyMetadata<D, List<I>> {
+    val itemClass: KClass<I>
+}
+
 /** API of the direct property descriptor for a nullable values. */
 interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun data() : PropertyMetadata<D, V>
@@ -221,6 +226,12 @@ interface Property<D : Any, V : Any> : PropertyNullable<D, V> {
 
     /** Clone this property with a new alias */
     override operator fun invoke(entityAlias : String): Property<D, V> = entityAlias(entityAlias)
+}
+
+/** API of the direct list property descriptor */
+interface ListProperty<D : Any, V : Any> : Property<D, List<V>> {
+
+    override fun data(): ListPropertyMetadata<D, V>
 }
 
 /** An operator for a BinaryCriterion */
