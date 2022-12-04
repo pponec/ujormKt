@@ -160,5 +160,7 @@ An example implementation of this demo project (released: 2022-11-26)
 
 ![Class diagram](docs/Demo.png)
 
-For more information see the 
-[source code](https://github.com/pponec/ujormKt/blob/main/src/main/java/org/ujorm/kotlin/Demo.kt).
+For more information see links to source code of API tests:
+
+* [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/core/CoreTest.kt)
+* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/orm/OrmTest.kt) .
