@@ -92,7 +92,7 @@ internal class CoreTest {
             department = getDepartment(2, "D")
         }
 
-        // Read and Write values by entity metamodel:
+        // Read and Write values by property descriptors:
         val id: Int = employee[employees.id]
         val name: String = employee[employees.name]
         val senior: Boolean = employee[employees.senior]

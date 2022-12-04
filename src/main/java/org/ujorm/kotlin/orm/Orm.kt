@@ -73,7 +73,7 @@ open class Query<D : Any> {
         TODO("Not yet implemented")
     }
 
-    /** Sort all properties accending */
+    /** Sort the result accending */
     fun orderBy(vararg properies: PropertyNullable<D, *>): Query<D> {
         val sortingProperties = properies
             .map { SortingProperty(it, true) }

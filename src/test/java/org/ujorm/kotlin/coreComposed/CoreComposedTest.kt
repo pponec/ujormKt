@@ -49,7 +49,7 @@ internal class CoreComposedTest {
         expect(employee[emplId]).toEqual(11)
         val emplDepId: PropertyNullable<Employee, Int> = employees.department.id // (Fix it!)
 
-        // Read and Write values by entity metamodel:
+        // Read and Write values by property descriptors:
         val id: Int? = employees.id[employee]
         val name: String? = employees.name[employee]
         val contractDay: LocalDate? = employees.contractDay[employee]
