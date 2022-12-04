@@ -27,7 +27,7 @@ fun comprehensiveDatabaseSelect() {
         employees.department.created,
     ).where((employees.department.id LE 1) 
         AND (employees.department.name STARTS "D"))
-        .orderBy((employees.department.created).desc())
+        .orderBy(employees.department.created.desc())
         .toList()
 
     expect(employeRows).toHaveSize(1)
