@@ -88,6 +88,8 @@ interface PropertyMetadata<D : Any, V : Any> {
     val required get() = !nullable
     /** Entity type */
     val entityType : ClassType
+    /** Number of direct properties. A base property has a value of one. */
+    val level : UByte
     /** Is the property composed? */
     fun isComposed() = index == UByte.MAX_VALUE
     fun indexToInt() = index.toInt()

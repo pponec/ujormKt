@@ -46,7 +46,7 @@ open class PropertyMetadataImpl<D : Any, V : Any> (
 ) : PropertyMetadata<D, V> {
     override val entityClass: KClass<D> get() = entityModel.entityClass
     override val entityType : ClassType get() = entityModel.entityType
-
+    override val level: UByte get() = 1U
     override var name: String = name
         internal set(value) {
             field = if (entityModel.open) value
@@ -569,6 +569,9 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     override val valueClass: KClass<V> get() = secondaryProperty.data().valueClass
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
     override val nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable
+    override val level: UByte by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        (primaryProperty.data().level + secondaryProperty.data().level) as UByte
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
