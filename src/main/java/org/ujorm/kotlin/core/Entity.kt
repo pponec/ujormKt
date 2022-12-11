@@ -35,7 +35,7 @@ interface EntityInitializer<D : Any> {
 
 
 /**
- * Use this interface if you want to access the entity object via the entity model.
+ * Use this interface if you want to access the entity attributes via the entity model.
  *
  * WARNING: for better performance of reading and writing values, use the following methods rather:
  * 1. [PropertyNullable.get]
@@ -44,16 +44,16 @@ interface EntityInitializer<D : Any> {
 interface PropertyAccessor<D : Any> : AbstractEntity<D> {
 
     /** Method for reading value by property */
-    operator fun <V : Any> get(property : PropertyNullable<D, V>) = `~~`().get(property)
+    operator fun <V : Any> get(property: PropertyNullable<D, V>) = property.get(this as D)
 
     /** Method for reading value by property */
-    operator fun <V : Any> get(property : Property<D, V>) = `~~`().get(property) as V
+    operator fun <V : Any> get(property: Property<D, V>) = property.get(this as D)
 
     /** Method for reading value by property */
-    operator fun <V : Any> set(property : PropertyNullable<D, V>, value: V?) = `~~`().set(property, value)
+    operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) = property.set(this as D, value)
 
     /** Method for reading value by property */
-    operator fun <V : Any> set(property : Property<D, V>, value: V) = `~~`().set(property, value)
+    operator fun <V : Any> set(property: Property<D, V>, value: V) = property.set(this as D, value)
 }
 
 
