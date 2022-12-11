@@ -199,25 +199,27 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
-    //@org.junit.jupiter.api.Disabled TODO(ponec)
+    /** Test method setValueWithRelations() */
     @Test
-    fun createNewRelationBySpecialSetter() {
+    fun createNewRelationBy_setValueWithRelationsMethod() {
         val entities = Entities.close<Entities>()
         val employees = entities.employees
         val departments = entities.departments
         val employee: Employee = employees.new()
 
-//        val deparmentIdProperty = (employees.department + departments.id)
-//                as ComposedPropertyNullableImpl<Employee, *, Int>
-//        deparmentIdProperty.set(employee, 88, Entities) // Method creates new Department
-//        employee[employees.department + departments.name] = "Catherine"
-//        expect(employee[deparmentIdProperty]).toEqual(88)
-//        expect(employee[employees.department + departments.name]).toEqual("Catherine")
-//
-//        val deparmentIdOfDSupervisorProperty = (employees.supervisor + employees.department + departments.id)
-//                as ComposedPropertyNullableImpl<Employee, *, Int>
-//        deparmentIdOfDSupervisorProperty.set(employee, 99, Entities) // Method creates new Department
-//        expect(employee[deparmentIdOfDSupervisorProperty]).toEqual(99)
+        // Method creates new  Department entity:
+        entities.utils().setValueWithRelations(employee, 88,
+            employees.department + departments.id);
+        expect(employee[employees.department + departments.id]).toEqual(88)
+
+        entities.utils().setValueWithRelations(employee, "Advertising",
+            employees.department + departments.name);
+        expect(employee[employees.department + departments.name]).toEqual("Advertising")
+
+        // Method creates new Department entity:
+        entities.utils().setValueWithRelations(employee, 99,
+            employees.supervisor + employees.department + departments.id);
+        expect(employee[employees.supervisor + employees.department + departments.id]).toEqual(99)
     }
 
     /** Create new object by a constructor (for immutable objects) */

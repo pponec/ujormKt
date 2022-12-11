@@ -215,9 +215,11 @@ class EntityProviderUtils {
     inline fun <D: Any, V: Any> newRelation(property: PropertyNullable<D, V>): V =
         findEntityModel(property.data().valueClass).new()
 
-    /** Is the property a relation to some Entity? */
-    fun <V: Any> isRelation(property : PropertyNullable<*, V>): Boolean =
-        entityMap[property.data().valueClass] != null
+    /** Set a new value to any entity by the composed relation, where missing relation is created. */
+    fun <D: Any, V: Any> setValueWithRelations(domain: D, value: V, property: PropertyNullable<D, V>) {
+        val chainedProperty = ChainedProperty<D, V>(property, this);
+        chainedProperty[domain] = value
+    }
 }
 
 /** Interface of the domain metamodel */
@@ -670,6 +672,7 @@ class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, Composed
     }
 }
 
+/** This property implementation allows writing valuees to entity -  including creation of missing relations. */
 class ChainedProperty<D: Any, V: Any> {
     private val utils: EntityProviderUtils
     private val properties = mutableListOf<PropertyNullableImpl<Any, Any>>()
@@ -689,7 +692,8 @@ class ChainedProperty<D: Any, V: Any> {
         }
     }
 
-    fun set(domain: D, value: V?) {
+    /** Set value to a domain */
+    operator fun set(domain: D, value: V?) {
         var myDomain: Any = domain
         for (i in 0 .. properties.size - 2) {
             val p = properties[i]
@@ -703,4 +707,16 @@ class ChainedProperty<D: Any, V: Any> {
         properties.last().set(myDomain, value)
     }
 
+    override fun toString(): String {
+        val result = StringBuilder()
+        properties.forEachIndexed{ i, p ->
+           if (i == 0) {
+               result.append(p.metadata.entityModel.entityClass.simpleName).append(": ")
+           } else {
+               result.append('.')
+           }
+           result.append(p.data().name)
+        }
+        return result.toString()
+    }
 }
