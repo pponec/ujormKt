@@ -698,11 +698,11 @@ class ChainedProperty<D : Any, V : Any> {
         }
     }
 
-    /** Set value to a domain */
+    /** Set value to a domain including missing relations */
     operator fun set(domain: D, value: V?) {
         var myDomain: Any = domain
         for (i in 0..properties.size - 2) {
-            val p = properties[i]!!
+            val p = properties[i] ?: throw IllegalStateException("properties[$i]")
             var relation = p.getNullable(myDomain)
             if (relation == null) {
                 relation = utils.newRelation(p)
@@ -719,7 +719,7 @@ class ChainedProperty<D : Any, V : Any> {
     override fun toString(): String {
         val result = StringBuilder()
         properties.forEachIndexed { i, p ->
-            val metadata = p?.metadata ?: throw IllegalStateException("p")
+            val metadata = p?.metadata ?: throw IllegalStateException("properties[$i]")
             if (i == 0) {
                 result.append(metadata.entityModel.entityClass.simpleName).append(": ")
             } else {

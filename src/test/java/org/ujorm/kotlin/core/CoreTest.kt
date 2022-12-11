@@ -201,7 +201,7 @@ internal class CoreTest {
 
     /** Test method setValueWithRelations() */
     @Test
-    fun createNewRelationBy_setValueWithRelationsMethod() {
+    fun createNewRelationsByUtilsSetter() {
         val entities = Entities.close<Entities>()
         val employees = entities.employees
         val departments = entities.departments
