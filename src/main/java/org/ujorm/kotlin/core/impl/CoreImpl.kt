@@ -570,7 +570,8 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
     override val nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable
     override val level: UByte by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        (primaryProperty.data().level + secondaryProperty.data().level) as UByte
+        ( primaryProperty.data().level
+        + secondaryProperty.data().level).toUByte()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -676,30 +677,32 @@ class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, Composed
 }
 
 /** This property implementation allows writing valuees to entity -  including creation of missing relations. */
-class ChainedProperty<D: Any, V: Any> {
+class ChainedProperty<D : Any, V : Any> {
     private val utils: EntityProviderUtils
-    private val properties = mutableListOf<PropertyNullableImpl<Any, Any>>()
+    private val properties: Array<PropertyNullableImpl<Any, Any>?>
+    private var idx = 0
 
     constructor(property: PropertyNullable<D, V>, utils: EntityProviderUtils) {
         this.utils = utils
+        this.properties = arrayOfNulls(property.data().level.toInt())
         add(property)
     }
 
-    fun add(property: PropertyNullable<*,*>) {
-        if(property is ComposedPropertyNullableImpl<*,*,*>) {
+    fun add(property: PropertyNullable<*, *>) {
+        if (property is ComposedPropertyNullableImpl<*, *, *>) {
             val data = property.data()
             add(data.primaryProperty)
             add(data.secondaryProperty)
         } else {
-            properties.add(property as PropertyNullableImpl<Any, Any>)
+            properties[idx++] = property as PropertyNullableImpl<Any, Any>
         }
     }
 
     /** Set value to a domain */
     operator fun set(domain: D, value: V?) {
         var myDomain: Any = domain
-        for (i in 0 .. properties.size - 2) {
-            val p = properties[i]
+        for (i in 0..properties.size - 2) {
+            val p = properties[i]!!
             var relation = p.getNullable(myDomain)
             if (relation == null) {
                 relation = utils.newRelation(p)
@@ -707,18 +710,22 @@ class ChainedProperty<D: Any, V: Any> {
             }
             myDomain = relation
         }
-        properties.last().set(myDomain, value)
+        properties.last()!!.set(myDomain, value)
     }
+
+    /** Get count of the property items */
+    fun size() = idx
 
     override fun toString(): String {
         val result = StringBuilder()
-        properties.forEachIndexed{ i, p ->
-           if (i == 0) {
-               result.append(p.metadata.entityModel.entityClass.simpleName).append(": ")
-           } else {
-               result.append('.')
-           }
-           result.append(p.data().name)
+        properties.forEachIndexed { i, p ->
+            val metadata = p?.metadata ?: throw IllegalStateException("p")
+            if (i == 0) {
+                result.append(metadata.entityModel.entityClass.simpleName).append(": ")
+            } else {
+                result.append('.')
+            }
+            result.append(metadata.name)
         }
         return result.toString()
     }
