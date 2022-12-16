@@ -12,9 +12,7 @@ internal class ScriptTests {
     internal fun runScript1() {
         val f = File("test22.txt")
 
-        val engine = ScriptEngineManager().getEngineByExtension("kts")!!.apply {
-            put("f", f)
-        }
+        val engine = ScriptEngineManager().getEngineByExtension("kts")
 
         var e1 = "${f.getAbsolutePath()}" as Any?
         var e2 = engine.eval("\"${f.getAbsolutePath()}\"")
@@ -35,6 +33,22 @@ internal class ScriptTests {
         var e2 = engine.eval("\"${data.i}\"")
 
         expect(e1).toEqual(e2)
+    }
+
+
+    @Test
+    internal fun runScript3() {
+
+        val stringBuilder2 = StringBuilder().append("")
+        val data = Data(100, 20, Data())
+
+        val engine = ScriptEngineManager().getEngineByExtension("kts")!!.apply {
+            put("stringBuilder2", stringBuilder2)
+            put("data", data)
+        }
+
+        var result = engine.eval("stringBuilder2.append(\"XYZ_${data.i}\")")
+        expect(result).toEqual("XYZ")
     }
 
 }

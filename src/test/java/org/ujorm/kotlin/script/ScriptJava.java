@@ -29,16 +29,16 @@ public class ScriptJava {
 
     @Test
     public void testEval() throws Exception {
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("nashorn");
-        engine.put("data", new org.ujorm.kotlin.script.Data());
-
-
-        // evaluate JavaScript code
-        var result = engine.eval("data.text");
-
-        System.out.println(result);
-        assert "X".equals(String.valueOf(result)): "error";
+//        ScriptEngineManager manager = new ScriptEngineManager();
+//        ScriptEngine engine = manager.getEngineByName("nashorn");
+//        engine.put("data", new org.ujorm.kotlin.script.Data());
+//
+//
+//        // evaluate JavaScript code
+//        var result = engine.eval("data.text");
+//
+//        System.out.println(result);
+//        assert "X".equals(String.valueOf(result)): "error";
         // ch.tutteli.atrium.api.verbs.ExpectKt.expect(result).toEqual(7)
     }
 
