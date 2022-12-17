@@ -13,7 +13,6 @@ internal class ScriptTests {
         private const val CONTEXT = "data"
     }
 
-    /** Fails due: javax.script.ScriptException: Unresolved reference: data */
     @Test
     internal fun runScriptKt() {
         val ctx = Data(100, 20, Data())
@@ -24,16 +23,16 @@ internal class ScriptTests {
             put(CONTEXT, ctx)
         }
 
-        val script = getScript();
+        val script = getScript()
         engine.eval(script)
-        expect(ctx.appender.toString()).toEqual("AB100")
+        expect(ctx.appender.toString()).toEqual("AB400")
     }
 
     private fun getScript() = arrayOf(
         "var ctx = bindings.get(\"$CONTEXT\") as ${Data::class.fullName}",
         "val appender = ctx.appender",
         "appender.append('B')",
-        "appender.append(ctx.i)",
+        "appender.append(ctx.data?.i)",
     ).joinToString(separator = "\n")
 }
 
@@ -51,7 +50,7 @@ class Data (
 class MyAppender {
     val a = StringBuilder()
 
-    fun append(a : Any) {
+    fun append(a : Any?) {
         this.a.append(a)
     }
 
