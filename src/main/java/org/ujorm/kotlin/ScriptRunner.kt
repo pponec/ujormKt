@@ -22,7 +22,7 @@ object ScriptRunner {
                 .get()
 
             val statement = args.first()
-            val arguments = args.filterIndexed { index, s ->  index > 0}
+            val arguments = args.filterIndexed { index, s -> index > 0 }
                 .toTypedArray()
 
             engine.put(ARGUMENTS, arguments)
