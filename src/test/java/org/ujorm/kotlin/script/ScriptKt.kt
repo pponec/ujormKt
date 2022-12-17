@@ -2,55 +2,39 @@ package org.ujorm.kotlin.script
 
 import ch.tutteli.atrium.api.fluent.en_GB.toEqual
 import ch.tutteli.atrium.api.verbs.expect
+import ch.tutteli.atrium.core.polyfills.fullName
 import org.junit.jupiter.api.Test
-import java.io.File
 import javax.script.ScriptEngineManager
 
 internal class ScriptTests {
 
-    @Test
-    internal fun runScript1() {
-        val f = File("test22.txt")
-
-        val engine = ScriptEngineManager().getEngineByExtension("kts")
-
-        var e1 = "${f.getAbsolutePath()}" as Any?
-        var e2 = engine.eval("\"${f.getAbsolutePath()}\"")
-
-        expect(e1).toEqual(e2)
+    companion object {
+        private const val KOTLIN_EXTENSION = "kts"
+        private const val CONTEXT = "data"
     }
 
+    /** Fails due: javax.script.ScriptException: Unresolved reference: data */
     @Test
-    internal fun runScript2() {
+    internal fun runScriptKt() {
+        val ctx = Data(100, 20, Data())
+        val apender: org.ujorm.kotlin.script.MyAppender = ctx.appender
+        apender.append('A')
 
-        val data = Data(10, 20, Data())
-
-        val engine = ScriptEngineManager().getEngineByExtension("kts")!!.apply {
-            put("data", data)
+        val engine = ScriptEngineManager().getEngineByExtension(KOTLIN_EXTENSION)!!.apply {
+            put(CONTEXT, ctx)
         }
 
-        var e1 = "${data.i}" as Any?
-        var e2 = engine.eval("\"${data.i}\"")
-
-        expect(e1).toEqual(e2)
+        val script = getScript();
+        engine.eval(script)
+        expect(ctx.appender.toString()).toEqual("AB100")
     }
 
-    /** Fails due */
-    @Test
-    internal fun runScript3() {
-        val data = Data(100, 20, Data())
-
-        val engine = ScriptEngineManager().getEngineByExtension("kts")!!.apply {
-            put("data", data)
-        }
-        data.appender.append('A')
-        var result = engine.eval(getScript())
-        expect(data.appender.toString()).toEqual("AB")
-    }
-
-    private fun getScript() = """
-        data.appender.append('B');
-    """.trimIndent()
+    private fun getScript() = arrayOf(
+        "var ctx = bindings.get(\"$CONTEXT\") as ${Data::class.fullName}",
+        "val appender = ctx.appender",
+        "appender.append('B')",
+        "appender.append(ctx.i)",
+    ).joinToString(separator = "\n")
 }
 
 class Data (
