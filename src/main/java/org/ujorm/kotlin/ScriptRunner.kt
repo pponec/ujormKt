@@ -10,7 +10,7 @@ object ScriptRunner {
     @JvmStatic
     fun main(args: Array<String>) {
         if (args.isEmpty()) {
-            println("Hello Word!")
+            println("Enter a Kotlin script")
         } else {
             val engine = ScriptEngineManager()
                 .engineFactories
