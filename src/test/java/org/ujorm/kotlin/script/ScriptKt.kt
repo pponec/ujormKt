@@ -5,6 +5,7 @@ import ch.tutteli.atrium.api.verbs.expect
 import ch.tutteli.atrium.core.polyfills.fullName
 import org.junit.jupiter.api.Test
 import javax.script.ScriptEngineManager
+import kotlin.reflect.KClass
 
 internal class ScriptTests {
 
@@ -23,13 +24,13 @@ internal class ScriptTests {
             put(CONTEXT, ctx)
         }
 
-        val script = getScript()
+        val script = getScript(ctx:: class)
         engine.eval(script)
         expect(ctx.appender.toString()).toEqual("AB400")
     }
 
-    private fun getScript() = arrayOf(
-        "var ctx = bindings.get(\"$CONTEXT\") as ${Data::class.fullName}",
+    private fun getScript(contextType: KClass<*>) = arrayOf(
+        "var ctx = bindings.get(\"$CONTEXT\") as ${contextType.fullName}",
         "val appender = ctx.appender",
         "appender.append('B')",
         "appender.append(ctx.data?.i)",
