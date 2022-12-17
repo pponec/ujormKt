@@ -35,33 +35,45 @@ internal class ScriptTests {
         expect(e1).toEqual(e2)
     }
 
-
+    /** Fails due */
     @Test
     internal fun runScript3() {
-
-        val stringBuilder2 = StringBuilder().append("")
         val data = Data(100, 20, Data())
 
         val engine = ScriptEngineManager().getEngineByExtension("kts")!!.apply {
-            put("stringBuilder2", stringBuilder2)
             put("data", data)
         }
-
-        var result = engine.eval("stringBuilder2.append(\"XYZ_${data.i}\")")
-        expect(result).toEqual("XYZ")
+        data.appender.append('A')
+        var result = engine.eval(getScript())
+        expect(data.appender.toString()).toEqual("AB")
     }
 
+    private fun getScript() = """
+        data.appender.append('B');
+    """.trimIndent()
 }
 
 class Data (
     val i: Int = 400,
     val j: Int = 555,
     val data: Data? = null,
+    val appender: MyAppender = MyAppender()
 ) {
     override fun toString(): String {
         return "Data(i=$i, j=$j)"
     }
 }
 
+class MyAppender {
+    val a = StringBuilder()
+
+    fun append(a : Any) {
+        this.a.append(a)
+    }
+
+    override fun toString(): String {
+        return a.toString()
+    }
+}
 
 

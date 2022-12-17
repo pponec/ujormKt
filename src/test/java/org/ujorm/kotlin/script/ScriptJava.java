@@ -13,6 +13,23 @@ import static ch.tutteli.atrium.api.verbs.ExpectKt.expect;
 
 public class ScriptJava {
 
+
+
+    @Test
+    public void test3() throws Exception {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("nashorn");
+        // create File object
+        var f = new StringBuilder();
+        f.append('A');
+        // expose File object as a global variable to the engine
+        engine.put("f", f);
+        // evaluate JavaScript code and access the variable
+        engine.eval("f.append('B');");
+
+        System.out.println("...." + f.toString());
+    }
+
     @Test
     public void test2() throws Exception {
         ScriptEngineManager manager = new ScriptEngineManager();
@@ -47,4 +64,5 @@ public class ScriptJava {
         public int j = 20;
         public String text = "TEXT";
     }
+
 }
