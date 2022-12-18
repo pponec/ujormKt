@@ -22,8 +22,7 @@ object ScriptRunner {
                 .get()
 
             val statement = args.first()
-            val arguments = args.filterIndexed { index, s -> index > 0 }
-                .toTypedArray()
+            val arguments = args.drop(1).toTypedArray()
 
             engine.put(ARGUMENTS, arguments)
             val argsGetter = "val args = bindings.get(\"$ARGUMENTS\")" +
