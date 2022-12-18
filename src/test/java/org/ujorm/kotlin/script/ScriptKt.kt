@@ -61,11 +61,3 @@ class MyAppender {
     }
 }
 
-class SecureClassFilter: ClassFilter {
-
-    override fun exposeToScripts(className: String?): Boolean {
-        return true;
-    }
-}
-
-

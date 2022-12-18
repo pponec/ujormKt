@@ -1,68 +1,105 @@
-package org.ujorm.kotlin.script;
+package org.ujorm.kotlin.script
 
-import org.junit.jupiter.api.Test;
+import ch.tutteli.atrium.api.fluent.en_GB.message
+import ch.tutteli.atrium.api.fluent.en_GB.toContain
+import ch.tutteli.atrium.api.fluent.en_GB.toEqual
+import ch.tutteli.atrium.api.fluent.en_GB.toThrow
+import ch.tutteli.atrium.api.verbs.expect
+import org.junit.jupiter.api.Test
+import org.openjdk.nashorn.api.scripting.ClassFilter
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory
+import java.io.File
+import kotlin.reflect.KClass
 
-import javax.script.*;
-import ch.tutteli.atrium.api.fluent.en_GB.*;
-import ch.tutteli.atrium.api.verbs.*;
-import org.junit.jupiter.api.Test;
-import javax.script.ScriptEngineManager;
-import java.io.File;
+internal class ScriptJava {
 
-import static ch.tutteli.atrium.api.verbs.ExpectKt.expect;
-
-public class ScriptJava {
-
-
-
-    @Test
-    public void test3() throws Exception {
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("nashorn");
-        // create File object
-        var f = new StringBuilder();
-        f.append('A');
-        // expose File object as a global variable to the engine
-        engine.put("f", f);
-        // evaluate JavaScript code and access the variable
-        engine.eval("f.append('B');");
-
-        System.out.println("...." + f.toString());
+    companion object {
+        private const val CONTEXT = "ctx"
     }
 
     @Test
-    public void test2() throws Exception {
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("nashorn");
-        // create File object
-        File f = new File("test.txt");
-        // expose File object as a global variable to the engine
-        engine.put("file", f);
-        // evaluate JavaScript code and access the variable
-        engine.eval("print(file.getAbsolutePath())");
+    internal fun runScriptKt() {
+        val ctx = JData(100, 20, JData())
+        val apender: org.ujorm.kotlin.script.JAppender = ctx.appender
+        apender.append('A')
 
-        System.out.println("....");
+        val engine = NashornScriptEngineFactory().getScriptEngine(SecureClassFilter())!!.apply {
+            put(CONTEXT, ctx)
+        }
+
+        val script = getScript(ctx:: class)
+        engine.eval(script)
+        expect(ctx.appender.toString()).toEqual("AB400")
     }
 
     @Test
-    public void testEval() throws Exception {
-//        ScriptEngineManager manager = new ScriptEngineManager();
-//        ScriptEngine engine = manager.getEngineByName("nashorn");
-//        engine.put("data", new org.ujorm.kotlin.script.Data());
-//
-//
-//        // evaluate JavaScript code
-//        var result = engine.eval("data.text");
-//
-//        System.out.println(result);
-//        assert "X".equals(String.valueOf(result)): "error";
-        // ch.tutteli.atrium.api.verbs.ExpectKt.expect(result).toEqual(7)
+    internal fun runScriptEquals() {
+        val ctx = JData(100, 20, JData())
+        val apender: org.ujorm.kotlin.script.JAppender = ctx.appender
+        apender.append('A')
+
+        val engine = NashornScriptEngineFactory().getScriptEngine(SecureClassFilter())!!.apply {
+            put(CONTEXT, ctx)
+        }
+
+        val script = getScript(ctx:: class)
+        engine.eval(script)
+        expect(ctx.appender.toString()).toEqual("AB400")
     }
 
-    class Data {
-        public int i = 10;
-        public int j = 20;
-        public String text = "TEXT";
-    }
+    @Test
+    internal fun runScriptKtForbidden() {
+        val ctx = JData(100, 20, JData())
+        val apender: org.ujorm.kotlin.script.JAppender = ctx.appender
+        apender.append('A')
 
+        val engine = NashornScriptEngineFactory().getScriptEngine(SecureClassFilter())!!.apply {
+            put(CONTEXT, ctx)
+        }
+
+        expect {
+            engine.eval("var file = new java.io.File(\"/\")")
+        }.toThrow<RuntimeException>()
+            .message.toContain("ClassNotFoundException: java.io.File")
+    }
 }
+
+class JData (
+    val i: Int = 400,
+    val j: Int = 555,
+    val data: JData? = null,
+    val appender: JAppender = JAppender()
+) {
+    override fun toString(): String {
+        return "JData(i=$i, j=$j)"
+    }
+}
+
+class JAppender {
+    val a = StringBuilder()
+
+    fun append(a : Any?) {
+        this.a.append(a)
+    }
+
+    override fun toString(): String {
+        return a.toString()
+    }
+}
+
+private fun getScript(contextType: KClass<*>) = arrayOf(
+    "var appender = ctx.appender;",
+    "appender.append('B')",
+    "appender.append(ctx.data.i)",
+    "if (appender.toString() != \"AB400\") throw new IllegalArgumentException(\"Wrong comparator\")",
+).joinToString(separator = "\n")
+
+
+// How to use?
+class SecureClassFilter : ClassFilter {
+    override fun exposeToScripts(className: String): Boolean = when (className) {
+        File::class.java.name -> false
+        else -> true
+    }
+}
+
