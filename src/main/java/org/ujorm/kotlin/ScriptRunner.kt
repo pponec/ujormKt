@@ -1,10 +1,11 @@
 package org.ujorm.kotlin
 
+import org.openjdk.nashorn.api.scripting.ClassFilter
 import javax.script.ScriptEngineManager
 import javax.script.ScriptException
 
 object ScriptRunner {
-    private const val ENGINE_NAME = "kts"
+    private const val KOTLIN_NAME = "kotlin"
     private const val ARGUMENTS = "args"
 
     @Throws(ScriptException::class)
@@ -13,14 +14,7 @@ object ScriptRunner {
         if (args.isEmpty()) {
             println("Enter a Kotlin script with arguments")
         } else {
-            val engine = ScriptEngineManager()
-                .engineFactories
-                .stream()
-                .filter { it.extensions.contains(ENGINE_NAME) }
-                .findFirst()
-                .map { it.scriptEngine }
-                .get()
-
+            val engine = ScriptEngineManager().getEngineByName(KOTLIN_NAME)
             val statement = args.first()
             val arguments = args.drop(1).toTypedArray()
 
@@ -31,6 +25,13 @@ object ScriptRunner {
             val result = engine.eval(statement)
             println(">>> Script: $statement")
             println(">>> Result: $result")
+        }
+    }
+
+    // How to use?
+    class SecureClassFilter: ClassFilter {
+        override fun exposeToScripts(className: String?): Boolean {
+            return false;
         }
     }
 }

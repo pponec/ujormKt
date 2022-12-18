@@ -4,13 +4,14 @@ import ch.tutteli.atrium.api.fluent.en_GB.toEqual
 import ch.tutteli.atrium.api.verbs.expect
 import ch.tutteli.atrium.core.polyfills.fullName
 import org.junit.jupiter.api.Test
+import org.openjdk.nashorn.api.scripting.ClassFilter
 import javax.script.ScriptEngineManager
 import kotlin.reflect.KClass
 
 internal class ScriptTests {
 
     companion object {
-        private const val KOTLIN_EXTENSION = "kts"
+        private const val KOTLIN_NAME = "kotlin"
         private const val CONTEXT = "data"
     }
 
@@ -20,7 +21,7 @@ internal class ScriptTests {
         val apender: org.ujorm.kotlin.script.MyAppender = ctx.appender
         apender.append('A')
 
-        val engine = ScriptEngineManager().getEngineByExtension(KOTLIN_EXTENSION)!!.apply {
+        val engine = ScriptEngineManager().getEngineByName(KOTLIN_NAME)!!.apply {
             put(CONTEXT, ctx)
         }
 
@@ -57,6 +58,13 @@ class MyAppender {
 
     override fun toString(): String {
         return a.toString()
+    }
+}
+
+class SecureClassFilter: ClassFilter {
+
+    override fun exposeToScripts(className: String?): Boolean {
+        return true;
     }
 }
 
