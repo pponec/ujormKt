@@ -698,7 +698,7 @@ class ChainedProperty<D : Any, V : Any> {
         }
     }
 
-    /** Set value to a domain including missing relations */
+    /** Set value to a domain including missing relations. */
     operator fun set(domain: D, value: V?) {
         var myDomain: Any = domain
         for (i in 0..properties.size - 2) {
