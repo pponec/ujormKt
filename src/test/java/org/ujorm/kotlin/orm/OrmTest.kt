@@ -10,6 +10,7 @@ import java.time.LocalDate
 
 internal class OrmTest {
 
+    @Test
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
         val employees: Employees<Employee> = Database.employees // Employee metamodel
@@ -136,6 +137,27 @@ internal class OrmTest {
         }
 
     }
+
+    @Disabled("Select to a map")
+    internal fun selectToMap() {
+        val employees: Employees<Employee> = Database.employees // Employee metamodel
+        val employeRows: List<PropertyMap> = Database.selectToMap(Employee::class,
+            employees.id,
+            employees.name,
+            employees.department.name, // Required relation by the inner join
+            employees.supervisor.name, // Optional relation by the left outer join
+            employees.department.created,
+        ).where((employees.department.id LE 1)
+                AND (employees.department.name STARTS "D"))
+            .orderBy(employees.department.created.desc())
+            .toMaps()
+
+        expect(employeRows).toHaveSize(1)
+        expect(employeRows.first()[employees.department.name])
+            .toEqual("Development")
+    }
+
+
 }
 
 
