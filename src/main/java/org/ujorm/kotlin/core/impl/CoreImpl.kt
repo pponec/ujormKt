@@ -430,7 +430,6 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     protected inline fun <reified V : Any> property(getter: (D) -> V) =
         propertyBuilder.createProperty(V::class)
 
-    @Deprecated("Method will be removed ?")
     protected inline fun <reified V : Any> property(valueClass: KClass<V>) : Property<RawEntity<D>, V> = TODO()
         //propertyBuilder.createPropertyRaw(valueClass, TODO())
 

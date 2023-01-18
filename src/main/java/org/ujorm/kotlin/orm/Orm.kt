@@ -154,7 +154,7 @@ open class NativeQuery {
         TODO("Not yet implemented")
     }
 
-    fun toList(): List<Array<Any?>> = TODO()
+    fun toMaps(): List<PropertyMap> = TODO()
 }
 
 open class Column(

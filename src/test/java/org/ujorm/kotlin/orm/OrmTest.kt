@@ -111,8 +111,8 @@ internal class OrmTest {
     }
 
     @Test
-    @Disabled("Only a first draft of API is implemented")
-    internal fun nativeQuery() {
+    @Disabled("Select native query to a map)")
+    internal fun nativeQueryToMap() {
         val employees = Database.employees //.entityAlias("e")
         val departments = Database.departments // .entityAlias("d")
 
@@ -126,37 +126,17 @@ internal class OrmTest {
         // Result object list:
         val result = Database.selectFor()
             .item(employees.id, "+", 10).to(db.id)
-            .item(departments.name).to(db.created)
+            .item(departments.name).to(db.name)
             .where(employees.department.id, "=", departments.id)
-            .toList()
+            .toMaps()
         result.forEach{
-            val id : Int = db.id[it]
-            val name : String = db.name[it]
-            val created : LocalDate = db.created.get(it)
+            val id : Int = it[db.id]
+            val name : String = it[db.name]
+            val created : LocalDate = it[db.created]
             println("Db record: id = $id, name = $name, created = $created")
         }
 
     }
-
-    @Disabled("Select to a map")
-    internal fun selectToMap() {
-        val employees: Employees<Employee> = Database.employees // Employee metamodel
-        val employeRows: List<PropertyMap> = Database.selectToMap(Employee::class,
-            employees.id,
-            employees.name,
-            employees.department.name, // Required relation by the inner join
-            employees.supervisor.name, // Optional relation by the left outer join
-            employees.department.created,
-        ).where((employees.department.id LE 1)
-                AND (employees.department.name STARTS "D"))
-            .orderBy(employees.department.created.desc())
-            .toMaps()
-
-        expect(employeRows).toHaveSize(1)
-        expect(employeRows.first()[employees.department.name])
-            .toEqual("Development")
-    }
-
 
 }
 
