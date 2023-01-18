@@ -31,10 +31,6 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
         TODO()
     }
 
-    fun <D : Any> selectToMap(type : KClass<D>, vararg properies: PropertyNullable<*, *>): Query<D> {
-        TODO()
-    }
-
     fun <D : Any> where(criterion: Criterion<D, *, *>): Query<D> {
         TODO("Not yet implemented")
     }
@@ -60,7 +56,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
 
     // --- Native query
 
-    fun selectFor(): NativeQuery {
+    fun selectToMaps(): NativeQuery {
         TODO()
     }
 

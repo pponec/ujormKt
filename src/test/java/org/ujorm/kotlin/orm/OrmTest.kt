@@ -112,7 +112,7 @@ internal class OrmTest {
 
     @Test
     @Disabled("Select native query to a map)")
-    internal fun nativeQueryToMap() {
+    internal fun nativeQueryToMaps() {
         val employees = Database.employees //.entityAlias("e")
         val departments = Database.departments // .entityAlias("d")
 
@@ -124,15 +124,16 @@ internal class OrmTest {
         }
 
         // Result object list:
-        val result = Database.selectFor()
+        val result = Database.selectToMaps()
             .item(employees.id, "+", 10).to(db.id)
             .item(departments.name).to(db.name)
             .where(employees.department.id, "=", departments.id)
             .toMaps()
-        result.forEach{
-            val id : Int = it[db.id]
-            val name : String = it[db.name]
-            val created : LocalDate = it[db.created]
+
+        result.forEach{ map ->
+            val id : Int = map[db.id]
+            val name : String = map[db.name]
+            val created : LocalDate = map[db.created]
             println("Db record: id = $id, name = $name, created = $created")
         }
 
