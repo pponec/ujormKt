@@ -87,7 +87,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         // Read and Write values by property descriptors:
@@ -128,7 +128,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         // Criterion conditions:
@@ -157,7 +157,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         val id: Int = employees.id[employee]
@@ -258,9 +258,9 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndEquals() {
-        val department1 = getDepartment(1, "development")
-        val department2 = getDepartment(1, "development")
-        val department3 = getDepartment(1, "accounting")
+        val department1 = createDepartment(1, "development")
+        val department2 = createDepartment(1, "development")
+        val department3 = createDepartment(1, "accounting")
 
         expect(department1.hashCode()).toEqual(department2.hashCode())
         expect(department1.hashCode()).notToEqual(department3.hashCode())
@@ -275,7 +275,7 @@ internal class CoreTest {
 }
 
 /** Helper method to create new department */
-private fun getDepartment(id: Int, name: String): Department =
+private fun createDepartment(id: Int, name: String): Department =
     Entities.departments.new {
         this.id = id
         this.name = name

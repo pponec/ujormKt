@@ -80,7 +80,7 @@ val employee: Employee = employees.new { // Create new employee object
     name = "John"
     senior = false
     contractDay = LocalDate.now()
-    department = getDepartment(2, "D")
+    department = createDepartment(2, "D")
 }
 
 // Read and Write values by property descriptors:
