@@ -48,15 +48,10 @@ class SelfProperty<D : Any> : PropertyNullable<D, D> {
 /** Composed Entity model */
 abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
-    /** Direct Entity Model (with direct properties) */
+    /** Original entity model with direct properties. */
     abstract protected val core: EntityModel<V>
 
-    /** Core property */
-    private val coreProperty by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        SelfProperty(core.utils().entityClass)
-    }
-
-    /** Composed property to the entity model. */
+    /** Composed property to this entity model. */
     private val composedProperty: PropertyNullable<D, V>?
 
     /** Entity model with direct properties (TODO remove it ?). */
@@ -80,7 +75,7 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
 
     /** Composed property to the entity model. */
     fun domainProperty(): PropertyNullable<D, V> {
-        return composedProperty ?: coreProperty as PropertyNullable<D, V>
+        return composedProperty ?: composedProperty as PropertyNullable<D, V>
     }
 
     override fun data(): PropertyMetadata<D, V> {
