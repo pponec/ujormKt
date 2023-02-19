@@ -51,53 +51,40 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     /** Original entity model with direct properties. */
     abstract protected val core: EntityModel<V>
 
-    /** Composed property to this entity model. */
+    /** Composed property to this entity model.
+     * The first level of domain metamodel has undefined property. */
     private val composedProperty: PropertyNullable<D, V>?
 
-    /** Entity model with direct properties (TODO remove it ?). */
-    val directEntityModel: EntityModel<V>
-
-    /** Is it the primary instance? */
-    val baseInstance get() = composedProperty is SelfProperty<*>
-
-    protected constructor(
-        prefixProperty: PropertyNullable<D, V>,
-        originalEntityModel: EntityModel<V>,
-    ) {
+    protected constructor(prefixProperty: PropertyNullable<D, V>? = null) {
         this.composedProperty = prefixProperty
-        this.directEntityModel = originalEntityModel
     }
 
-    protected constructor() {
-        this.composedProperty = null
-        this.directEntityModel = core
-    }
+    override fun data(): PropertyMetadata<D, V> = composedProperty?.data()!!
 
-    /** Composed property to the entity model. */
-    fun domainProperty(): PropertyNullable<D, V> {
-        return composedProperty ?: composedProperty as PropertyNullable<D, V>
-    }
-
-    override fun data(): PropertyMetadata<D, V> {
-        return domainProperty().data()
-    }
-
-    override fun entityAlias(): String = ""
+    override fun entityAlias(): String = composedProperty?.entityAlias()!!
 
     override fun get(entity: D): V? {
-        return domainProperty()[entity]
+        if (composedProperty != null) {
+            return composedProperty.get(entity);
+        } else {
+            throw UnsupportedOperationException("No property")
+        }
     }
 
     override fun set(entity: D, value: V?) {
-        domainProperty()[entity] = value
+        if (composedProperty != null) {
+            composedProperty.set(entity, value);
+        } else {
+            throw UnsupportedOperationException("No property")
+        }
     }
 
-    /** Build the new Property */
-    protected fun <M : Any, V : Any, R : PropertyNullable<D, V>> property(property : PropertyNullable<M, V>) : R {
-        if (composedProperty != null) {
-            TODO()
+    /** Return the plain the new Property */
+    protected fun <N : Any> property(property : PropertyNullable<V, N>) : PropertyNullable<D, N> {
+        return if (composedProperty != null) {
+            composedProperty + property
         } else {
-            return property as R
+            property as PropertyNullable<D, N>;
         }
     }
 
@@ -185,7 +172,7 @@ class DomainEntityProviderUtils {
         var map = HashMap<KClass<*>, DomainEntityModel<*, *>>(this.entityModels.size)
         entityModels.forEach {
             it.closeModel()
-            map[it.domainProperty().data().entityClass] = it
+            //map[it.domainProperty().data().entityClass] = it // TODO
         }
         entityMap = map
         entityModels = Collections.unmodifiableList(entityModels)
