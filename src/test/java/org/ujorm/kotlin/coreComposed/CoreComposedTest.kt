@@ -62,8 +62,21 @@ internal class CoreComposedTest {
         employees.supervisor[employee] = supervisor
 
         // Composed properties:
-        val employeeDepartmentId = employee[employees.department.id] // (!)
-        val employeeDepartmentName = employee[employees.department.name]
+        val employeeDepartmentId : Int? = employee[employees.department.id] // (!)
+        val employeeDepartmentName : String? = employee[employees.department.name] // (!)
+        val employeeDepartment : Department? = employee[employees.department] // (!)
+
+        val employeeDepartmentId2 : Int? = employee.get(employees.department.id)
+        val employeeDepartmentName2 : String? = employee.get(employees.department.name)
+
+        val propertyFromEmployeeToDepartment : Departments<Employee> = employees.department;
+        val propertyExt : PropertyNullable<Employee, Department> = propertyFromEmployeeToDepartment;
+        val employeeDepartment2 : Department? = employee.get(propertyFromEmployeeToDepartment)
+        val employeeDepartment3 : Department? = propertyFromEmployeeToDepartment.get(employee)
+
+
+
+
         expect(employeeDepartmentId).toEqual(2)  // Department id must be 2
         expect(employeeDepartmentName).toEqual("D") // Department name must be 'D'
     }
