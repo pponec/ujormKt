@@ -138,7 +138,6 @@ internal class OrmTest {
             val created : LocalDate = map[db.created]
             println("Db record: id = $id, name = $name, created = $created")
         }
-
     }
 
 }
