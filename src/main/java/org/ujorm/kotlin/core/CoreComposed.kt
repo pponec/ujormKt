@@ -55,6 +55,9 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
      * The first level of domain metamodel has undefined property. */
     private val composedProperty: PropertyNullable<D, V>?
 
+    /** Entity metamodel context */
+    protected lateinit var context : EntityProviderUtils
+
     protected constructor(prefixProperty: PropertyNullable<D, V>? = null) {
         this.composedProperty = prefixProperty
     }
