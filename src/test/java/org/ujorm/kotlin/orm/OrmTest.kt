@@ -13,16 +13,17 @@ internal class OrmTest {
     @Test
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
-        val employees: Employees<Employee> = Database.employees // Employee metamodel
+        val employees: Employees = Database.employees // Employee metamodel
+        val departments: Departments = Database.departments // Employee metamodel
         val employeRows: List<Employee> = Database.select(
             employees.id,
             employees.name,
-            employees.department.name, // Required relation by the inner join
-            employees.supervisor.name, // Optional relation by the left outer join
-            employees.department.created,
-        ).where((employees.department.id LE 1)
-                    AND (employees.department.name STARTS "D"))
-            .orderBy(employees.department.created.desc())
+            employees.department + departments.name, // Required relation by the inner join
+            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.department + departments.created,
+        ).where((employees.department + departments.id LE 1)
+                    AND (employees.department + departments.name STARTS "D"))
+            .orderBy((employees.department + departments.created).desc())
             .toList()
 
         expect(employeRows).toHaveSize(1)
@@ -34,6 +35,7 @@ internal class OrmTest {
     @Disabled("Only a first draft of API is implemented")
     internal fun simpleSelect_byInnerJoins() {
         val employees = Database.employees
+        val departments = Database.departments
 
         // Hello, selected employee!
         val employeeResult = Database.select(employees)
@@ -61,12 +63,12 @@ internal class OrmTest {
         val employeRows = Database.select(
             employees.id,
             employees.name,
-            employees.department.name, // Required relation by the inner join
-            employees.supervisor.name, // Optional relation by the left outer join
-            employees.department.created,
-        ).where((employees.department.id LE 1)
-                    AND (employees.department.name STARTS "A"))
-            .orderBy(employees.department.created.desc())
+            employees.department + departments.name, // Required relation by the inner join
+            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.department + departments.created,
+        ).where((employees.department + departments.id LE 1)
+                    AND (employees.department + departments.name STARTS "A"))
+            .orderBy((employees.department + departments.created).desc())
             .toList()
 
         expect(employeRows).toHaveSize(3)
@@ -77,11 +79,11 @@ internal class OrmTest {
         val employeesByOuterJoin = Database.select(
             employees.id,
             employees.name,
-            employees.department.name, // Required relation by the inner join
-            employees.supervisor.name, // Optional relation by the left outer join
+            employees.department + departments.name, // Required relation by the inner join
+            employees.supervisor + employees.name, // Optional relation by the left outer join
         )
-            .where(employees.department.name EQ "accounting")
-            .orderBy(employees.supervisor.name.asc(), employees.name.desc())
+            .where(employees.department + departments.name EQ "accounting")
+            .orderBy((employees.supervisor + employees.name).asc(), employees.name.desc())
             .toList()
 
         expect(employeesByOuterJoin).toHaveSize(3)
@@ -127,7 +129,7 @@ internal class OrmTest {
         val result = Database.selectToMaps()
             .item(employees.id, "+", 10).to(db.id)
             .item(departments.name).to(db.name)
-            .where(employees.department.id, "=", departments.id)
+            .where(employees.department + departments.id, "=", departments.id)
             .toMaps()
 
         result.forEach{ map ->
