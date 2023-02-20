@@ -27,9 +27,9 @@ open class Departments<D : Any> : DomainEntityModel<D, Department>() {
 
     // --- Properties ---
 
-    val id get() = propertyModel(core.id)
-    val name get() = propertyModel(core.name)
-    val created get() = propertyModel(core.created)
+    val id get() = property(core.id)
+    val name get() = property(core.name)
+    val created get() = property(core.created)
 }
 
 /** Initialize, register and close the entity model. */

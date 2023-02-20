@@ -30,12 +30,12 @@ open class _Employees : EntityModel<Employee>(Employee::class) {
 open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
     override val core: _Employees = _Employees().close()
 
-    val id get() = propertyModel(core.id)
-    val name get() = propertyModel(core.name)
-    val senior get() = propertyModel(core.senior)
-    val contractDay get() = propertyModel(core.contractDay)
-    val department: Departments<D> get() = propertyModel(core.department)
-    val supervisor: Employees<D> get() = propertyModel(core.supervisor)
+    val id get() = property(core.id)
+    val name get() = property(core.name)
+    val senior get() = property(core.senior)
+    val contractDay get() = property(core.contractDay)
+    val department: Departments<D> get() = property(core.department)
+    val supervisor: Employees<D> get() = property(core.supervisor)
 }
 
 /** Initialize, register and close the entity model. */

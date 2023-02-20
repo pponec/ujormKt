@@ -34,11 +34,11 @@ open class Employees<D : Any>() : DomainEntityModel<D, Employee>() {
     /** Attribute */
     val name get() = property(core.name)
     /** Attribute */
-    val contractDay get() = propertyModel(core.contractDay)
+    val contractDay get() = property(core.contractDay)
     /** Relation */
-    val department: Departments<D> get() = propertyModel(core.department)
+    val department: Departments<D> get() = property(core.department)
     /** Relation */
-    val supervisor: Employees<D> get() = propertyModel(core.supervisor)
+    val supervisor: Employees<D> get() = property(core.supervisor)
 }
 
 /** Initialize, register and close the entity model. */

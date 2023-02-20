@@ -83,16 +83,16 @@ abstract class DomainEntityModel<D : Any, V : Any> : PropertyNullable<D, V> {
     }
 
     /** Build the new Property */
-    protected fun <M : Any, V : Any, R : PropertyNullable<D, V>> propertyModel(property : PropertyNullable<M, V>) : R {
+    protected fun <M : Any, V : Any, R : PropertyNullable<D, V>> property(property : PropertyNullable<M, V>) : R {
         if (composedProperty != null) {
-            TODO()
+            TODO("Implement it")
         } else {
             return property as R
         }
     }
 
     /** Return the plain the new Property */
-    protected fun <N : Any> property(property : PropertyNullable<V, N>) : PropertyNullable<D, N> {
+    protected fun <N : Any> propertySimple(property : PropertyNullable<V, N>) : PropertyNullable<D, N> {
         return if (composedProperty != null) {
             composedProperty + property
         } else {
