@@ -15,7 +15,13 @@ An entity here is an interface that does not depend on any parent.
 At runtime, a virtual implementation is created from the interface that is based on storing values in the object array. 
 Compared to storing data in the `Map` object, this is a more memory-efficient and probably faster solution.
 
-See the target `SELECT` example:
+## Examples
+
+Let's have a simple domain model of employees and their departments, where every employee can have a supervisor.
+
+![Class diagram](docs/DomainClassDiagram.png)
+
+Then the database query (`SELECT`) can look like this:
 
 ```kotlin
 fun comprehensiveDatabaseSelect() {
@@ -38,7 +44,7 @@ fun comprehensiveDatabaseSelect() {
 }
 ```
 
-and an `INSERT` example:
+and an `INSERT` for example:
 
 ```kotlin
     internal fun insertRows() {
