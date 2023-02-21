@@ -3,7 +3,7 @@ package org.ujorm.kotlin.core
 import ch.tutteli.atrium.api.fluent.en_GB.toEqual
 import ch.tutteli.atrium.api.verbs.expect
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.core.entity.Entities
+import org.ujorm.kotlin.core.entity.MyDatabase
 import org.ujorm.kotlin.core.entity.employees
 import org.ujorm.kotlin.orm.PropertyMap
 
@@ -11,7 +11,7 @@ internal class PropertyMapTest {
 
     @Test
     internal fun propertyMap() {
-        val employees = Entities.employees // Employee metamodel
+        val employees = MyDatabase.employees // Employee metamodel
         val map = PropertyMap()
 
         map[employees.id] = 10

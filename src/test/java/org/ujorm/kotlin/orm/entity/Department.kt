@@ -2,7 +2,7 @@ package org.ujorm.kotlin.orm.entity
 
 import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.anotation.OneToMany
-import org.ujorm.kotlin.core.entity.Entities
+import org.ujorm.kotlin.core.entity.MyDatabase
 import org.ujorm.kotlin.core.impl.EntityModel
 import java.time.LocalDate
 
@@ -26,5 +26,5 @@ open class Departments : EntityModel<Department>(Department::class) {
 
 /** Initialize, register and close the entity model. */
 val MyDatabase.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Departments().close<Departments>())
+    MyDatabase.add(Departments().close<Departments>())
 }

@@ -26,8 +26,8 @@ internal class CoreTest {
     @Test
     fun createEntities() {
         // Get the metamodel(s):
-        val employees: Employees = Entities.employees
-        val departments: Departments = Entities.departments
+        val employees: Employees = MyDatabase.employees
+        val departments: Departments = MyDatabase.departments
 
         // Create some new entities:
         val development: Department = departments.new {
@@ -80,8 +80,8 @@ internal class CoreTest {
     /** Test writing and reading to the object using the metamodel. */
     @Test
     fun readAndWrite() {
-        val employees = Entities.employees // Employee metamodel
-        val departments = Entities.departments // Department metamodel
+        val employees = MyDatabase.employees // Employee metamodel
+        val departments = MyDatabase.departments // Department metamodel
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
@@ -121,8 +121,8 @@ internal class CoreTest {
     /** Test conditions */
     @Test
     fun conditions() {
-        val employees = Entities.employees // Employee Entity metamodel
-        val departments = Entities.departments // Department Entity metamodel
+        val employees = MyDatabase.employees // Employee Entity metamodel
+        val departments = MyDatabase.departments // Department Entity metamodel
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
@@ -150,8 +150,8 @@ internal class CoreTest {
     /** Sample of usage */
     @Test
     fun extendedFunctions() {
-        val employees = Entities.employees // Employee Entity metamodel
-        val departments = Entities.departments // Department Entity metamodel
+        val employees = MyDatabase.employees // Employee Entity metamodel
+        val departments = MyDatabase.departments // Department Entity metamodel
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
@@ -202,7 +202,7 @@ internal class CoreTest {
     /** Test method setValueWithRelations() */
     @Test
     fun createNewRelationsByUtilsSetter() {
-        val entities = Entities.close<Entities>()
+        val entities = MyDatabase.close<MyDatabase>()
         val employees = entities.employees
         val departments = entities.departments
         val employee: Employee = employees.new()
@@ -225,8 +225,8 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndAlias() {
-        val aliasEmployees: Employees = Entities.employees.alias("e")
-        val aliasDepartment: Departments = Entities.departments.alias("d")
+        val aliasEmployees: Employees = MyDatabase.employees.alias("e")
+        val aliasDepartment: Departments = MyDatabase.departments.alias("d")
 
         println(aliasEmployees.id.status())
 
@@ -239,7 +239,7 @@ internal class CoreTest {
         expect(aliasEmployees.department.info()).toEqual("Employee(e).department")
 
         var idAliasHash = aliasEmployees.id.hashCode()
-        var idHash = Entities.employees.id.hashCode()
+        var idHash = MyDatabase.employees.id.hashCode()
         var nameAliasHash = aliasEmployees.name.hashCode()
         var idAliasName = aliasEmployees.id.name()
         var idName = aliasEmployees.id.name()
@@ -249,7 +249,7 @@ internal class CoreTest {
         expect(idAliasName).toEqual(idName)
         expect(idAliasHash).notToEqual(idHash) // Different hash codes
         expect(idAliasHash).notToEqual(nameAliasHash) // Different hash codes
-        expect(aliasEmployees.id).notToEqual(Entities.employees.id) // Different properties
+        expect(aliasEmployees.id).notToEqual(MyDatabase.employees.id) // Different properties
         expect(idAliasHash).toEqual(idAlias2.hashCode())
         expect(aliasEmployees.id).toEqual(idAlias2)
         expect(idAlias2).toEqual(idAlias3)
@@ -276,7 +276,7 @@ internal class CoreTest {
 
 /** Helper method to create new department */
 private fun createDepartment(id: Int, name: String): Department =
-    Entities.departments.new {
+    MyDatabase.departments.new {
         this.id = id
         this.name = name
     }
