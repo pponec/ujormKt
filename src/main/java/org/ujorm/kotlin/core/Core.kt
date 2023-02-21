@@ -88,6 +88,8 @@ interface PropertyMetadata<D : Any, V : Any> {
     val required get() = !nullable
     /** Entity type */
     val entityType : ClassType
+    /** Number of direct properties. A base property has a value of one. */
+    val level : UByte
     /** Is the property composed? */
     fun isComposed() = index == UByte.MAX_VALUE
     fun indexToInt() = index.toInt()
@@ -115,9 +117,13 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     operator fun invoke(entityAlias: String): PropertyNullable<D, V> = entityAlias(entityAlias)
 
     /** Ascending sort request */
-    fun asc() : SortingProperty<D, V> = SortingProperty(this, true)
+    fun ascx() : SortingProperty<D, V> = ASCENDING(true)
     /** Descending sort request */
-    fun desc() : SortingProperty<D, V> = SortingProperty(this, false)
+    fun descx() : SortingProperty<D, V> = ASCENDING(false)
+    /** Shortcut for the method [ASCENDING]. */
+    infix fun ASC(ascending: Boolean) = ASCENDING(ascending)
+    /** Sorting direction determined by a parameter. */
+    infix fun ASCENDING(ascending: Boolean) = SortingProperty(this, ascending)
 
     /** Get a value from the entity */
     operator fun get(entity: D): V?

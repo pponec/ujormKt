@@ -17,7 +17,9 @@ package org.ujorm.kotlin.orm
 
 import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.core.impl.*
+import java.util.*
 import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 abstract class AbstractDatabase : AbstractEntityProvider() {
 
@@ -54,7 +56,7 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
 
     // --- Native query
 
-    fun selectFor(): NativeQuery {
+    fun selectToMaps(): NativeQuery {
         TODO()
     }
 
@@ -92,6 +94,11 @@ open class Query<D : Any> {
 
     /** Convert this query to a single result */
     fun toList(): List<D> {
+        TODO("Not yet implemented")
+    }
+
+    /** Convert this query to a single result */
+    fun toMaps(): List<PropertyMap> {
         TODO("Not yet implemented")
     }
 
@@ -143,7 +150,7 @@ open class NativeQuery {
         TODO("Not yet implemented")
     }
 
-    fun toList(): List<Array<Any?>> = TODO()
+    fun toMaps(): List<PropertyMap> = TODO()
 }
 
 open class Column(
@@ -157,5 +164,29 @@ open class Column(
 
 /** Database session */
 interface Session {
+
+}
+
+/** Property Map */
+open class PropertyMap {
+
+    private val map = mutableMapOf<Any, Any?>()
+
+    operator fun <D : Any, V : Any> set(property: PropertyNullable<D, V>, value: V?) {
+        map.put(property, value)
+    }
+
+    operator fun <D : Any, V : Any> get(key: PropertyNullable<D, V>) = map.get(key) as V?
+
+    operator fun <D : Any, V : Any> set(property: Property<D, V>, value: V) {
+        map.put(property, value)
+    }
+
+    operator fun <D : Any, V : Any> get(property: Property<D, V>) = map.get(property) as V
+
+
+    /** Returns optional value */
+    fun <D : Any, V : Any> getOptional(property: PropertyNullable<D, V>) =
+        Optional.ofNullable(get(property))
 
 }

@@ -27,10 +27,11 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
-/** Returns a nullable middle value of the composite property */
-interface PropertyMiddleAccesory<D : Any, V : Any> {
-    /** Provies a middle value of the composite property */
-    fun getMiddleValue(entity: D) : V?
+/** API to provie nullable values */
+interface PropertyNullableAccesor<D : Any, V : Any> {
+    /** Get Nullable value */
+    fun getNullable(entity: D): V?
+
 }
 
 /** API of the property descriptor for a nullable values */
@@ -45,7 +46,7 @@ open class PropertyMetadataImpl<D : Any, V : Any> (
 ) : PropertyMetadata<D, V> {
     override val entityClass: KClass<D> get() = entityModel.entityClass
     override val entityType : ClassType get() = entityModel.entityType
-
+    override val level: UByte get() = 1U
     override var name: String = name
         internal set(value) {
             field = if (entityModel.open) value
@@ -106,7 +107,7 @@ open class ListPropertyMetadataImpl<D : Any, V : Any> : PropertyMetadataImpl<D, 
 /** An implementation of the direct property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
-) : PropertyNullable<D, V>, PropertyMiddleAccesory<D, V> {
+) : PropertyNullable<D, V>, PropertyNullableAccesor<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Objects.hash(metadata.entityClass, entityAlias(), name())
@@ -114,12 +115,10 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     override fun entityAlias(): String = metadata.entityModel.entityAlias
 
-    /** Returns a nullable value */
-    @Suppress("UNCHECKED_CAST")
-    override fun getMiddleValue(entity: D): V? =
-        (entity as AbstractEntity<D>).`~~`().get(this)
+    override fun get(entity: D): V? = getNullable(entity)
 
-    override fun get(entity: D): V? = getMiddleValue(entity)
+    override fun getNullable(entity: D): V? =
+        (entity as AbstractEntity<D>).`~~`().get(metadata)
 
     @Suppress("UNCHECKED_CAST")
     override fun set(entity: D, value: V?) =
@@ -158,7 +157,7 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
         metadata: PropertyMetadataImpl<D, V>,
     ) : super(metadata)
 
-    final override fun get(entity: D): V = super.getMiddleValue(entity) as V
+    final override fun get(entity: D): V = getNullable(entity) as V
 
     /** Clone this property for a new alias */
     override fun entityAlias(entityAlias : String) : Property<D, V> =
@@ -212,9 +211,15 @@ class EntityProviderUtils {
     fun <D: Any> findEntityModel(entityClass: KClass<D>): EntityModel<D> =
         entityMap[entityClass] as EntityModel<D>
 
-    /** Is the property a relation to some Entity? */
-    fun <V: Any> isRelation(property : PropertyNullable<*, V>): Boolean =
-        entityMap[property.data().valueClass] != null
+    /** Create a new relation */
+    inline fun <D: Any, V: Any> newRelation(property: PropertyNullable<D, V>): V =
+        findEntityModel(property.data().valueClass).new()
+
+    /** Set a new value to any entity by the composed relation, where missing relation is created. */
+    fun <D: Any, V: Any> setValueWithRelations(domain: D, value: V, property: PropertyNullable<D, V>) {
+        val chainedProperty = ChainedProperty<D, V>(property, this);
+        chainedProperty[domain] = value
+    }
 }
 
 /** Interface of the domain metamodel */
@@ -425,7 +430,6 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     protected inline fun <reified V : Any> property(getter: (D) -> V) =
         propertyBuilder.createProperty(V::class)
 
-    @Deprecated("Method will be removed ?")
     protected inline fun <reified V : Any> property(valueClass: KClass<V>) : Property<RawEntity<D>, V> = TODO()
         //propertyBuilder.createPropertyRaw(valueClass, TODO())
 
@@ -564,6 +568,10 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
     override val valueClass: KClass<V> get() = secondaryProperty.data().valueClass
     override val readOnly = primaryProperty.data().readOnly || secondaryProperty.data().readOnly
     override val nullable = primaryProperty.data().nullable || secondaryProperty.data().nullable
+    override val level: UByte by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        ( primaryProperty.data().level
+        + secondaryProperty.data().level).toUByte()
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -596,7 +604,7 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 /** Composed nullable property implementation */
 open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
     PropertyNullable<D, V>,
-    PropertyMiddleAccesory<D, M>
+    PropertyNullableAccesor<D, V>
 {
     protected val metadata: ComposedPropertyMetadata<D, M, V>
 
@@ -616,37 +624,23 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
         TODO("Method is not supported for composed properties")
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getMiddleValue(entity: D): M? {
-        val property = metadata.primaryProperty as PropertyMiddleAccesory<D, M>
-        return property.getMiddleValue(entity)
+    override fun get(entity: D): V? = getNullable(entity)
+
+    override fun getNullable(entity: D): V? {
+        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccesor<D, M>)
+            .getNullable(entity)
+        return if (middleObject != null) (metadata.secondaryProperty as PropertyNullableAccesor<M, V>)
+            .getNullable(middleObject)
+        else null
     }
 
-    override fun get(entity: D): V? {
-        val middleObject = getMiddleValue(entity)
-        return if (middleObject != null) metadata.secondaryProperty[middleObject]
-               else null
-    }
-
-    /** Set a value to entity. */
     override fun set(entity: D, value: V?) {
-        set(entity, value, null)
-    }
-
-    /** Set a value and create missing relation(s) - if entityProvider is available. */
-    fun set(entity: D, value: V?, entityProvider: AbstractEntityProvider?) {
-        var middleObject: M? = getMiddleValue(entity)
-        if (middleObject == null) {
-            if (entityProvider != null) {
-                val primaryProperty = metadata.primaryProperty
-                val valueClass = primaryProperty.data().valueClass
-                middleObject = entityProvider.utils().findEntityModel(valueClass).new()
-                primaryProperty.set(entity, middleObject)
-            } else {
-                throw IllegalStateException("Value of property ${metadata.primaryProperty.info()} is null")
-            }
+        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccesor<D, M>).getNullable(entity)
+        if (middleObject != null) {
+            metadata.secondaryProperty.set(middleObject, value)
+        } else {
+            throw java.lang.IllegalStateException("Relation ${metadata.primaryProperty} is null")
         }
-        metadata.secondaryProperty.set(middleObject, value)
     }
 
     override fun toString(): String {
@@ -672,11 +666,66 @@ class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, Composed
         rightProperty: Property<M, V>
     ) : super(leftProperty, rightProperty)
 
-    override fun get(entity: D): V = super<ComposedPropertyNullableImpl>.get(entity)
+    override fun get(entity: D): V = getNullable(entity)
         ?: throw IllegalArgumentException("Value of property ${info()} is null")
 
     @Deprecated("Method is not supported for composed properties")
     override fun entityAlias(entityAlias: String): Property<D, V> {
         TODO("Method is not supported for composed properties")
+    }
+}
+
+/** This property implementation allows writing valuees to entity -  including creation of missing relations. */
+class ChainedProperty<D : Any, V : Any> {
+    private val utils: EntityProviderUtils
+    private val properties: Array<PropertyNullableImpl<Any, Any>?>
+    private var idx = 0
+
+    constructor(property: PropertyNullable<D, V>, utils: EntityProviderUtils) {
+        this.utils = utils
+        this.properties = arrayOfNulls(property.data().level.toInt())
+        add(property)
+    }
+
+    fun add(property: PropertyNullable<*, *>) {
+        if (property is ComposedPropertyNullableImpl<*, *, *>) {
+            val data = property.data()
+            add(data.primaryProperty)
+            add(data.secondaryProperty)
+        } else {
+            properties[idx++] = property as PropertyNullableImpl<Any, Any>
+        }
+    }
+
+    /** Set value to a domain including missing relations. */
+    operator fun set(domain: D, value: V?) {
+        var myDomain: Any = domain
+        for (i in 0..properties.size - 2) {
+            val p = properties[i] ?: throw IllegalStateException("properties[$i]")
+            var relation = p.getNullable(myDomain)
+            if (relation == null) {
+                relation = utils.newRelation(p)
+                p.set(myDomain, relation)
+            }
+            myDomain = relation
+        }
+        properties.last()!!.set(myDomain, value)
+    }
+
+    /** Get count of the property items */
+    fun size() = idx
+
+    override fun toString(): String {
+        val result = StringBuilder()
+        properties.forEachIndexed { i, p ->
+            val metadata = p?.metadata ?: throw IllegalStateException("properties[$i]")
+            if (i == 0) {
+                result.append(metadata.entityModel.entityClass.simpleName).append(": ")
+            } else {
+                result.append('.')
+            }
+            result.append(metadata.name)
+        }
+        return result.toString()
     }
 }

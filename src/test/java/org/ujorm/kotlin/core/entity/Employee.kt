@@ -26,7 +26,7 @@ class Employees : EntityModel<Employee>(Employee::class) {
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
 
-    // Sample of the optional composed properties:
+    // Sample of the extended composed properties (optional):
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         department + Entities.departments.name }
     val departmentId by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {

@@ -18,29 +18,30 @@ See the target `SELECT` example:
 
 ```kotlin
 fun comprehensiveDatabaseSelect() {
-    val employees: Employees<Employee> = Database.employees // Employee metamodel
+    val employees: Employees = MyDatabase.employees // Employee metamodel
+    val departments: Departments = MyDatabase.departments // Employee metamodel
     val employeRows: List<Employee> = Database.select(
         employees.id,
         employees.name,
-        employees.department.name, // Required relation by the inner join!
-        employees.supervisor.name, // Optional relation by the left outer join!
-        employees.department.created,
-    ).where((employees.department.id LE 1) 
-        AND (employees.department.name STARTS "D"))
-        .orderBy(employees.department.created.desc())
+        employees.department + departments.name, // Required relation by the inner join
+        employees.supervisor + employees.name, // Optional relation by the left outer join
+        employees.department + departments.created,
+    ).where((employees.department + departments.id LE 1) 
+        AND (employees.department + departments.name STARTS "D"))
+        .orderBy(employees.department + departments.created ASCENDING false)
         .toList()
 
     expect(employeRows).toHaveSize(1)
     expect(employeRows.first().department.name)
         .toEqual("Development")
-    }
+}
 ```
 
 and an `INSERT` example:
 
 ```kotlin
     internal fun insertRows() {
-    val development: Department = Database.departments.new {
+    val development: Department = MyDatabase.departments.new {
         name = "Development"
         created = LocalDate.of(2020, 10, 1)
     }
@@ -80,7 +81,7 @@ val employee: Employee = employees.new { // Create new employee object
     name = "John"
     senior = false
     contractDay = LocalDate.now()
-    department = getDepartment(2, "D")
+    department = createDepartment(2, "D")
 }
 
 // Read and Write values by property descriptors:

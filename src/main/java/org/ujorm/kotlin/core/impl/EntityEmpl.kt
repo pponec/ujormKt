@@ -83,8 +83,13 @@ class RawEntity<D : Any> : InvocationHandler {
     protected fun get(name: String): Any? = get(model.utils().findProperty(name))
 
     /** Get nullable value by a direct access. */
-    operator fun <V : Any> get(property: PropertyNullable<D, V>) : V? =
-        values[property.data().indexToInt()] as V?
+    @Deprecated("Use the method with argument type of PropertyMetadata rather.")
+    inline internal operator fun <V : Any> get(property: PropertyNullableImpl<D, V>) : V? =
+        get(property.data())
+
+    /** Get nullable value by a direct access. */
+    internal operator fun <V : Any> get(propertyData: PropertyMetadata<D, V>) : V? =
+        values[propertyData.indexToInt()] as V?
 
     /** Set a nullable value */
     operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) {

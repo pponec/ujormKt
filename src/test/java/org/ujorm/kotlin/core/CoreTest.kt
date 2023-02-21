@@ -20,8 +20,6 @@ import org.ujorm.kotlin.core.entity.*
 import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
-import org.ujorm.kotlin.core.impl.ComposedPropertyImpl
-import org.ujorm.kotlin.core.impl.ComposedPropertyNullableImpl
 
 internal class CoreTest {
 
@@ -89,7 +87,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         // Read and Write values by property descriptors:
@@ -130,7 +128,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         // Criterion conditions:
@@ -159,7 +157,7 @@ internal class CoreTest {
             name = "John"
             senior = false
             contractDay = LocalDate.now()
-            department = getDepartment(2, "D")
+            department = createDepartment(2, "D")
         }
 
         val id: Int = employees.id[employee]
@@ -201,25 +199,27 @@ internal class CoreTest {
         expect(employeeDepartmentNameProp.toString()).toEqual("department.name")
     }
 
-    @org.junit.jupiter.api.Disabled
+    /** Test method setValueWithRelations() */
     @Test
-    fun createNewRelationBySpecialSetter() {
+    fun createNewRelationsByUtilsSetter() {
         val entities = Entities.close<Entities>()
         val employees = entities.employees
         val departments = entities.departments
         val employee: Employee = employees.new()
 
-        val deparmentIdProperty = (employees.department + departments.id)
-                as ComposedPropertyNullableImpl<Employee, *, Int>
-        deparmentIdProperty.set(employee, 88, Entities) // Method creates new Department
-        employee[employees.department + departments.name] = "Catherine"
-        expect(employee[deparmentIdProperty]).toEqual(88)
-        expect(employee[employees.department + departments.name]).toEqual("Catherine")
+        // Method creates new  Department entity:
+        entities.utils().setValueWithRelations(employee, 88,
+            employees.department + departments.id);
+        expect(employee[employees.department + departments.id]).toEqual(88)
 
-        val deparmentIdOfDSupervisorProperty = (employees.supervisor + employees.department + departments.id)
-                as ComposedPropertyNullableImpl<Employee, *, Int>
-        deparmentIdOfDSupervisorProperty.set(employee, 99, Entities) // Method creates new Department
-        expect(employee[deparmentIdOfDSupervisorProperty]).toEqual(99)
+        entities.utils().setValueWithRelations(employee, "Advertising",
+            employees.department + departments.name);
+        expect(employee[employees.department + departments.name]).toEqual("Advertising")
+
+        // Method creates new Department entity:
+        entities.utils().setValueWithRelations(employee, 99,
+            employees.supervisor + employees.department + departments.id);
+        expect(employee[employees.supervisor + employees.department + departments.id]).toEqual(99)
     }
 
     /** Create new object by a constructor (for immutable objects) */
@@ -258,9 +258,9 @@ internal class CoreTest {
     /** Create new object by a constructor (for immutable objects) */
     @Test
     fun entityHashAndEquals() {
-        val department1 = getDepartment(1, "development")
-        val department2 = getDepartment(1, "development")
-        val department3 = getDepartment(1, "accounting")
+        val department1 = createDepartment(1, "development")
+        val department2 = createDepartment(1, "development")
+        val department3 = createDepartment(1, "accounting")
 
         expect(department1.hashCode()).toEqual(department2.hashCode())
         expect(department1.hashCode()).notToEqual(department3.hashCode())
@@ -275,7 +275,7 @@ internal class CoreTest {
 }
 
 /** Helper method to create new department */
-private fun getDepartment(id: Int, name: String): Department =
+private fun createDepartment(id: Int, name: String): Department =
     Entities.departments.new {
         this.id = id
         this.name = name
