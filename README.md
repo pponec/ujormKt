@@ -9,10 +9,11 @@ Topical areas of use are:
 - modelling conditions for ORM
 
 The ultimate goal of this project is to provide a programming interface (in Kotlin) 
-for building a database query model in a natural way. 
-That is, the sessions will be modeled in a similar way to how attribute chaining is done when reading the value of an object. 
-An entity here is an interface whose attributes are annotated with annotations similar to the JPA specification.
-The execution of database queries will then be delegated to an existing implementation, probably a clone of the Ujorm framework.
+for building a database query model using [DSL](https://en.wiktionary.org/wiki/DSL) ready API, which allows type-safe compilation of SQL queries at compile time.
+A unique feature is the possibility of **chaining** the properties of the related entities and the simple rules for metamodel building.
+An entity here is an interface that does not depend on any parent.
+At runtime, a virtual implementation is created from the interface that is based on storing values in the `Array` objects. 
+Compared to storing data in the `Map`, this is a more memory-efficient and probably faster solution.
 
 See the target `SELECT` example:
 
@@ -61,7 +62,7 @@ and an `INSERT` example:
 }
 ```
 
-# Domain model of the Employee entity
+## Domain model of the Employee entity
 
 ```kotlin
 @Entity
@@ -90,17 +91,9 @@ val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 }
 ```
 
-# What remains to be done
+## Basic model usage
 
-- building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
-- API cleaning
-- Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
-- Integrate the model filters with the `JPA`/`Hibernate` framework
-- the domain object model should be generated according to the original POJO objects in feature
-
-## Usage:
-
-Presentation of basic skills with entity model:
+Here are some more examples of basic usage of this domain model:
 
 ```kotlin
 val employees = MyDatabase.employees // Employee metamodel
@@ -161,7 +154,20 @@ An example implementation of this demo project (released: 2022-11-26)
 
 ![Class diagram](docs/Demo.png)
 
+
+
+# What remains to be done
+
+- building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
+- API cleaning
+- Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
+- Integrate the model filters with the some ORM framework ([Ujorm](https://ujorm.org/www/) ?)
+- the domain object model should be generated according to the original POJO objects in feature
+
+# Links
+
 For more information see links to source code of API tests:
 
 * [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/core/CoreTest.kt)
-* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/orm/OrmTest.kt) .
+* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/orm/OrmTest.kt) 
+* Inspired by the [Ujorm framework](https://ujorm.org/www/).
