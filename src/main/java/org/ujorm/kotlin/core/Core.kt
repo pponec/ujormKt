@@ -117,9 +117,11 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     operator fun invoke(entityAlias: String): PropertyNullable<D, V> = entityAlias(entityAlias)
 
     /** Ascending sort request */
-    fun asc() : SortingProperty<D, V> = SortingProperty(this, true)
+    fun ascx() : SortingProperty<D, V> = ASCENDING(true)
     /** Descending sort request */
-    fun desc() : SortingProperty<D, V> = SortingProperty(this, false)
+    fun descx() : SortingProperty<D, V> = ASCENDING(false)
+    /** Sorting direction determined by a parameter. */
+    infix fun ASCENDING(ascending: Boolean) = SortingProperty(this, ascending)
 
     /** Get a value from the entity */
     operator fun get(entity: D): V?

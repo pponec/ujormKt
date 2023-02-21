@@ -23,7 +23,7 @@ internal class OrmTest {
             employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "D"))
-            .orderBy((employees.department + departments.created).desc())
+            .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
 
         expect(employeRows).toHaveSize(1)
@@ -52,7 +52,7 @@ internal class OrmTest {
 
         // Get ordered employee list:
         val employeeList = Database.where(employees.id GE 3)
-            .orderBy(employees.id.asc())
+            .orderBy(employees.id ASCENDING true)
             .limit(3)
             .offset(4)
             .toList()
@@ -68,7 +68,7 @@ internal class OrmTest {
             employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "A"))
-            .orderBy((employees.department + departments.created).desc())
+            .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
 
         expect(employeRows).toHaveSize(3)
@@ -83,7 +83,9 @@ internal class OrmTest {
             employees.supervisor + employees.name, // Optional relation by the left outer join
         )
             .where(employees.department + departments.name EQ "accounting")
-            .orderBy((employees.supervisor + employees.name).asc(), employees.name.desc())
+            .orderBy(
+                employees.supervisor + employees.name ASCENDING true,
+                employees.name ASCENDING false)
             .toList()
 
         expect(employeesByOuterJoin).toHaveSize(3)
