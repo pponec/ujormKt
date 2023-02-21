@@ -1,7 +1,7 @@
 package org.ujorm.kotlin.orm.entity
 
 import org.ujorm.kotlin.anotation.Entity
-import org.ujorm.kotlin.core.entity.Entities
+import org.ujorm.kotlin.core.entity.MyDatabase
 import org.ujorm.kotlin.core.impl.EntityModel
 import java.time.LocalDate
 
@@ -26,8 +26,7 @@ open class Employees : EntityModel<Employee>(Employee::class) {
     val supervisor = propertyNullable { it.supervisor }
 }
 
-
 /** Initialize, register and close the entity model. */
 val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Employees().close<Employees>())
+    MyDatabase.add(Employees().close<Employees>())
 }

@@ -61,6 +61,35 @@ and an `INSERT` example:
 }
 ```
 
+# Domain model of the Employee entity
+
+```kotlin
+@Entity
+interface Employee {
+    var id: Int
+    var name: String
+    var senior: Boolean
+    var contractDay: LocalDate
+    var department: Department
+    var supervisor: Employee?
+}
+
+/** Model of the entity can be a generated class in the feature */
+open class Employees : EntityModel<Employee>(Employee::class) {
+    val id = property { it.id }
+    val name = property { it.name }
+    val senior = property { it.senior }
+    val contractDay = property { it.contractDay }
+    val department = property { it.department }
+    val supervisor = propertyNullable { it.supervisor }
+}
+
+/** Initialize, register and close the entity model. */
+val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    MyDatabase.add(Employees().close<Employees>())
+}
+```
+
 # What remains to be done
 
 - building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
@@ -74,8 +103,8 @@ and an `INSERT` example:
 Presentation of basic skills with entity model:
 
 ```kotlin
-val employees = Entities.employees // Employee metamodel
-val departments = Entities.departments // Department metamodel
+val employees = MyDatabase.employees // Employee metamodel
+val departments = MyDatabase.departments // Department metamodel
 val employee: Employee = employees.new { // Create new employee object
     id = 11
     name = "John"
@@ -120,35 +149,6 @@ expect(crn2.toString()).toEqual("""Employee: id GT 1""")
 expect(crn3.toString()).toEqual("""Employee: department.id LT 99""")
 expect(crn4.toString()).toEqual("""Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
 expect(crn5.toString()).toEqual("""Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
-```
-
-Building domain entity model:
-
-```kotlin
-@Entity
-interface Employee {
-    var id: Int
-    var name: String
-    var senior: Boolean
-    var contractDay: LocalDate
-    var department: Department
-    var supervisor: Employee?
-}
-
-/** Model of the entity can be a generated class in the feature */
-class Employees : EntityModel<Employee>(Employee::class) {
-    val id = property { it.id }
-    val name = property { it.name }
-    val senior = property { it.senior }
-    val contractDay = property { it.contractDay }
-    val department = property { it.department }
-    val supervisor = propertyNullable { it.supervisor }
-}
-
-/** Initialize, register and close the entity model. */
-val Entities.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Employees().close<Employees>())
-}
 ```
 
 ## Class diagram
