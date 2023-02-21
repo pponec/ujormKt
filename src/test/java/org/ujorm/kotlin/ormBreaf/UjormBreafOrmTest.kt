@@ -34,7 +34,7 @@ internal class UjormBreafOrmTest {
         // Get ordered employee list:
         val employeeList = Database
             .where(employees.id GE 3)
-            .orderBy(employees.id.asc())
+            .orderBy(employees.id ASCENDING true)
             .limit(3)
             .offset(4)
             .toList()
@@ -49,7 +49,7 @@ internal class UjormBreafOrmTest {
                 employees.department + departments.created,
             )
             .where((employees.name EQ "John") OR (employees.name EQ "Lucy"))
-            .orderBy((employees.department + departments.created).desc())
+            .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
         expect(employeesWithSelectedItems).toHaveSize(3)
         expect(employeesWithSelectedItems.first().department.created)
@@ -63,7 +63,9 @@ internal class UjormBreafOrmTest {
                 employees.supervisor + employees.name, // Optional supervisor's name
             )
             .where((employees.name EQ "John") OR (employees.name EQ "Lucy"))
-            .orderBy((employees.supervisor + employees.name).asc(), employees.name.asc())
+            .orderBy(
+                employees.supervisor + employees.name ASCENDING true,
+                employees.name ASCENDING true)
             .toList()
         expect(employeesByOuterJoin).toHaveSize(3)
         expect(employeesByOuterJoin.first().supervisor?.name).toEqual("Black")
