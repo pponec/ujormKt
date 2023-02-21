@@ -29,6 +29,6 @@ class DepartmentInitializer : EntityInitializer<Department> {
 }
 
 /** Initialize, register and close the entity model. */
-val Entities.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    Entities.add(Departments().close<Departments>())
+val MyDatabase.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+    MyDatabase.add(Departments().close<Departments>())
 }
