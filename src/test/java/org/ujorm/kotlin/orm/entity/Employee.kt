@@ -28,6 +28,6 @@ open class Employees : EntityModel<Employee>(Employee::class) {
 
 
 /** Initialize, register and close the entity model. */
-val Database.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Entities.add(Employees().close<Employees>())
 }

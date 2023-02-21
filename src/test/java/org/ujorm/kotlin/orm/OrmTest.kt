@@ -13,9 +13,9 @@ internal class OrmTest {
     @Test
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
-        val employees: Employees = Database.employees // Employee metamodel
-        val departments: Departments = Database.departments // Employee metamodel
-        val employeRows: List<Employee> = Database.select(
+        val employees: Employees = MyDatabase.employees // Employee metamodel
+        val departments: Departments = MyDatabase.departments // Employee metamodel
+        val employeRows: List<Employee> = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
@@ -34,24 +34,24 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun simpleSelect_byInnerJoins() {
-        val employees = Database.employees
-        val departments = Database.departments
+        val employees = MyDatabase.employees
+        val departments = MyDatabase.departments
 
         // Hello, selected employee!
-        val employeeResult = Database.select(employees)
+        val employeeResult = MyDatabase.select(employees)
             .where(employees.id EQ 1)
             .toSingleObject()
         expect(employeeResult.id).toEqual(1)
         expect(employeeResult.name).toEqual("Joe")
 
         // Shorter notation:
-        val theSameEmployee = Database.where(employees.id EQ 1)
+        val theSameEmployee = MyDatabase.where(employees.id EQ 1)
             .toSingleObject()
         expect(theSameEmployee.id).toEqual(1)
         expect(employeeResult.name).toEqual("Joe")
 
         // Get ordered employee list:
-        val employeeList = Database.where(employees.id GE 3)
+        val employeeList = MyDatabase.where(employees.id GE 3)
             .orderBy(employees.id ASCENDING true)
             .limit(3)
             .offset(4)
@@ -60,7 +60,7 @@ internal class OrmTest {
         expect(employeeList).toHaveSize(3)
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
-        val employeRows = Database.select(
+        val employeRows = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
@@ -76,7 +76,7 @@ internal class OrmTest {
             .toEqual(LocalDate.of(2022, 12, 24))
 
         // Ordered list with relations:
-        val employeesByOuterJoin = Database.select(
+        val employeesByOuterJoin = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
@@ -95,30 +95,30 @@ internal class OrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun insertRows() {
-        val development: Department = Database.departments.new {
+        val development: Department = MyDatabase.departments.new {
             name = "Development"
             created = LocalDate.of(2020, 10, 1)
         }
-        val lucy: Employee = Database.employees.new {
+        val lucy: Employee = MyDatabase.employees.new {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1, 1)
             supervisor = null
             department = development
         }
-        val joe: Employee = Database.employees.new {
+        val joe: Employee = MyDatabase.employees.new {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2, 1)
             supervisor = lucy
             department = development
         }
-        Database.save(development, lucy, joe)
+        MyDatabase.save(development, lucy, joe)
     }
 
     @Test
     @Disabled("Select native query to a map)")
     internal fun nativeQueryToMaps() {
-        val employees = Database.employees //.entityAlias("e")
-        val departments = Database.departments // .entityAlias("d")
+        val employees = MyDatabase.employees //.entityAlias("e")
+        val departments = MyDatabase.departments // .entityAlias("d")
 
         // Metamodel of the result:
         val db = object : TempModel() {
@@ -128,7 +128,7 @@ internal class OrmTest {
         }
 
         // Result object list:
-        val result = Database.selectToMaps()
+        val result = MyDatabase.selectToMaps()
             .item(employees.id, "+", 10).to(db.id)
             .item(departments.name).to(db.name)
             .where(employees.department + departments.id, "=", departments.id)
