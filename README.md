@@ -9,11 +9,11 @@ Topical areas of use are:
 - modelling conditions for ORM
 
 The ultimate goal of this project is to provide a programming interface (in Kotlin) 
-for building a database query model using [DSL](https://en.wiktionary.org/wiki/DSL) ready API, which allows type-safe compilation of SQL queries at compile time.
+for building a database query model using [DSL](https://en.wiktionary.org/wiki/DSL) ready API, which allows type-safe building of the SQL queries at compile time.
 A unique feature is the possibility of **chaining** the properties of the related entities and the simple rules for metamodel building.
 An entity here is an interface that does not depend on any parent.
-At runtime, a virtual implementation is created from the interface that is based on storing values in the `Array` objects. 
-Compared to storing data in the `Map`, this is a more memory-efficient and probably faster solution.
+At runtime, a virtual implementation is created from the interface that is based on storing values in the object array. 
+Compared to storing data in the `Map` object, this is a more memory-efficient and probably faster solution.
 
 See the target `SELECT` example:
 
