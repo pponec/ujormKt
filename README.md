@@ -20,7 +20,7 @@ See the target `SELECT` example:
 fun comprehensiveDatabaseSelect() {
     val employees: Employees = MyDatabase.employees // Employee metamodel
     val departments: Departments = MyDatabase.departments // Employee metamodel
-    val employeRows: List<Employee> = Database.select(
+    val employeRows: List<Employee> = MyDatabase.select(
         employees.id,
         employees.name,
         employees.department + departments.name, // Required relation by the inner join
@@ -45,19 +45,19 @@ and an `INSERT` example:
         name = "Development"
         created = LocalDate.of(2020, 10, 1)
     }
-    val lucy: Employee = Database.employees.new {
+    val lucy: Employee = MyDatabase.employees.new {
         name = "lucy"
         contractDay = LocalDate.of(2022, 1, 1)
         supervisor = null
         department = development
     }
-    val joe: Employee = Database.employees.new {
+    val joe: Employee = MyDatabase.employees.new {
         name = "Joe"
         contractDay = LocalDate.of(2022, 2, 1)
         supervisor = lucy
         department = development
     }
-    Database.save(development, lucy, joe)
+    MyDatabase.save(development, lucy, joe)
 }
 ```
 
