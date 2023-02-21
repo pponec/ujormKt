@@ -25,6 +25,6 @@ open class Departments : EntityModel<Department>(Department::class) {
 }
 
 /** Initialize, register and close the entity model. */
-val Database.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+val MyDatabase.departments by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     Entities.add(Departments().close<Departments>())
 }

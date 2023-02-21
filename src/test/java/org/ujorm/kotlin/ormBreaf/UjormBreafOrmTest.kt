@@ -2,7 +2,7 @@ package org.ujorm.kotlin.ormBreaf
 
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.orm.entity.Database
+import org.ujorm.kotlin.orm.entity.MyDatabase
 import org.ujorm.kotlin.orm.entity.*
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
@@ -13,11 +13,11 @@ internal class UjormBreafOrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun simpleSelect_byInnerJoins() {
-        val employees = Database.employees
-        val departments = Database.departments
+        val employees = MyDatabase.employees
+        val departments = MyDatabase.departments
 
         // Hello employee!
-        val employeeResult = Database
+        val employeeResult = MyDatabase
             .select(employees)
             .where(employees.id EQ 1)
             .toSingleObject()
@@ -25,14 +25,14 @@ internal class UjormBreafOrmTest {
         expect(employeeResult.name).toEqual("Joe")
 
         // Shorter notation:
-        val theSameEmployee = Database
+        val theSameEmployee = MyDatabase
             .where(employees.id EQ 1)
             .toSingleObject()
         expect(theSameEmployee.id).toEqual(1)
         expect(employeeResult.name).toEqual("Joe")
 
         // Get ordered employee list:
-        val employeeList = Database
+        val employeeList = MyDatabase
             .where(employees.id GE 3)
             .orderBy(employees.id ASCENDING true)
             .limit(3)
@@ -42,7 +42,7 @@ internal class UjormBreafOrmTest {
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
         // Ordered list with relation - by inner join:
-        val employeesWithSelectedItems = Database
+        val employeesWithSelectedItems = MyDatabase
             .select(
                 employees.id,
                 employees.name,
@@ -56,7 +56,7 @@ internal class UjormBreafOrmTest {
             .toEqual(LocalDate.of(2022, 12, 24))
 
         // Ordered list with relation - by outer join:
-        val employeesByOuterJoin = Database
+        val employeesByOuterJoin = MyDatabase
             .select(
                 employees.id,
                 employees.name,
