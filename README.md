@@ -169,6 +169,7 @@ An example implementation of this demo project (released: 2022-11-26)
 - Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
 - Integrate the model filters with the some ORM framework ([Ujorm](https://ujorm.org/www/) ?)
 - the domain object model should be generated according to the original POJO objects in feature
+- integration with some ORM
 
 # Links
 
