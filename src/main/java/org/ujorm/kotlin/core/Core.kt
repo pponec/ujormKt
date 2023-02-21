@@ -120,6 +120,8 @@ interface PropertyNullable<D : Any, V : Any> : CharSequence {
     fun ascx() : SortingProperty<D, V> = ASCENDING(true)
     /** Descending sort request */
     fun descx() : SortingProperty<D, V> = ASCENDING(false)
+    /** Shortcut for the method [ASCENDING]. */
+    infix fun ASC(ascending: Boolean) = ASCENDING(ascending)
     /** Sorting direction determined by a parameter. */
     infix fun ASCENDING(ascending: Boolean) = SortingProperty(this, ascending)
 
