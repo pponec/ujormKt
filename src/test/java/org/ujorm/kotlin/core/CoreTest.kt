@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Pavel Ponec, https://github.com/pponec
+ * Copyright 2021-2023 Pavel Ponec, https://github.com/pponec
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,26 +38,26 @@ internal class CoreTest {
         val lucy: Employee = employees.new {
             id = 2
             name = "Lucy"
-            senior = true
+            higherEducation = true
             contractDay = LocalDate.of(2022, 1, 1)
-            supervisor = null
+            superior = null
             department = development
         }
         val joe: Employee = employees.new {
             id = 3
             name = "Joe"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.of(2022, 2, 1)
-            supervisor = lucy
+            superior = lucy
             department = development
         }
 
         expect(development.id).toEqual(1)
         expect(joe.name).toEqual("Joe")
-        expect(joe.senior).toEqual(false)
+        expect(joe.higherEducation).toEqual(false)
         expect(joe.department.name).toEqual("development")
-        expect(joe.supervisor?.name).toEqual("Lucy")
-        expect(joe.supervisor?.department?.name).toEqual("development")
+        expect(joe.superior?.name).toEqual("Lucy")
+        expect(joe.superior?.department?.name).toEqual("development")
 
         expect(development.toString()).toEqual("Department{id=1" +
                 ", name=\"development\"" +
@@ -65,16 +65,16 @@ internal class CoreTest {
                 ", members=?}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
                 ", name=\"Lucy\"" +
-                ", senior=true" +
+                ", higherEducation=true" +
                 ", contractDay=2022-01-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
-                ", supervisor=null}")
+                ", superior=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
                 ", name=\"Joe\"" +
-                ", senior=false" +
+                ", higherEducation=false" +
                 ", contractDay=2022-02-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
-                ", supervisor=Employee{id=2, name=\"Lucy\", senior=t...}}")
+                ", superior=Employee{id=2, name=\"Lucy\", higherEd...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */
@@ -85,7 +85,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
@@ -93,24 +93,27 @@ internal class CoreTest {
         // Read and Write values by property descriptors:
         val id: Int = employee[employees.id]
         val name: String = employee[employees.name]
-        val senior: Boolean = employee[employees.senior]
+        val higherEducation: Boolean = employee[employees.higherEducation]
         val contractDay: LocalDate = employee[employees.contractDay]
         val department: Department = employee[employees.department]
-        val supervisor: Employee? = employee[employees.supervisor]
+        val superior: Employee? = employee[employees.superior]
+        val departmentName: String = employee[employees.department + departments.name]
         employee[employees.id] = id
         employee[employees.name] = name
-        employee[employees.senior] = senior
+        employee[employees.higherEducation] = higherEducation
         employee[employees.contractDay] = contractDay
         employee[employees.department] = department
-        employee[employees.supervisor] = supervisor
+        employee[employees.superior] = superior
+        employee[employees.department + departments.name] = departmentName
 
-        // Composed properties:
+        // More composed properties:
         employee[employees.department + departments.id] = 3
         employee[employees.department + departments.name] = "C"
         expect(employee.department.id).toEqual(3)
         expect(employee.department.name).toEqual("C")
         expect(employee[employees.department + departments.id]).toEqual(3)
         expect(employee[employees.department + departments.name]).toEqual("C")
+        employee[employees.department + departments.name] = departmentName
 
         // Create relation instance(s): // TODO:
         val employee2 = employees.new()
@@ -126,7 +129,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
@@ -155,21 +158,21 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
 
         val id: Int = employees.id[employee]
         val name: String = employees.name[employee] // Get a name of the employee
-        val supervisor: Employee? = employees.supervisor[employee]
+        val superior: Employee? = employees.superior[employee]
 
         expect(name).toEqual("John") // employee name
         expect(id).toEqual(11) // employee id
-        expect(supervisor).toEqual(null) // employee supervisor
+        expect(superior).toEqual(null) // employee superior
 
         employees.name[employee] = "James" // Set a name to the user
-        employees.supervisor[employee] = null
+        employees.superior[employee] = null
         expect(employees.id.name()).toEqual("id") // property id
         expect(employees.id.toString()).toEqual("Employee.id") // property id
         expect(employees.id.info()).toEqual("Employee.id") // property id
@@ -179,10 +182,10 @@ internal class CoreTest {
         expect(properties.size).toEqual(6) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
         expect(properties[1].name()).toEqual("name") // property name
-        expect(properties[2].name()).toEqual("senior") // property name
+        expect(properties[2].name()).toEqual("higherEducation") // property name
         expect(properties[3].name()).toEqual("contractDay")// ContractDay
         expect(properties[4].name()).toEqual("department") // property department
-        expect(properties[5].name()).toEqual("supervisor") // property supervisor
+        expect(properties[5].name()).toEqual("superior") // property superior
 
         // Value type
         expect(employees.id.data().valueClass).toEqual(Int::class)
@@ -218,8 +221,8 @@ internal class CoreTest {
 
         // Method creates new Department entity:
         entities.utils().setValueWithRelations(employee, 99,
-            employees.supervisor + employees.department + departments.id);
-        expect(employee[employees.supervisor + employees.department + departments.id]).toEqual(99)
+            employees.superior + employees.department + departments.id);
+        expect(employee[employees.superior + employees.department + departments.id]).toEqual(99)
     }
 
     /** Create new object by a constructor (for immutable objects) */
