@@ -75,7 +75,6 @@ and an `INSERT` for example:
 interface Employee {
     var id: Int
     var name: String
-    var senior: Boolean
     var contractDay: LocalDate
     var department: Department
     var supervisor: Employee?
@@ -85,7 +84,6 @@ interface Employee {
 open class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val senior = property { it.senior }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
     val supervisor = propertyNullable { it.supervisor }
@@ -109,7 +107,6 @@ val departments = MyDatabase.departments // Department metamodel
 val employee: Employee = employees.new { // Create new employee object
     id = 11
     name = "John"
-    senior = false
     contractDay = LocalDate.now()
     department = createDepartment(2, "D")
 }
@@ -117,14 +114,12 @@ val employee: Employee = employees.new { // Create new employee object
 // Read and Write values by property descriptors:
 val id: Int = employee[employees.id]
 val name: String = employee[employees.name]
-val senior: Boolean = employee[employees.senior]
 val contractDay: LocalDate = employee[employees.contractDay]
 val department: Department = employee[employees.department]
 val supervisor: Employee? = employee[employees.supervisor]
 val departmentName: String = employee[employees.department + departments.name]
 employee[employees.id] = id
 employee[employees.name] = name
-employee[employees.senior] = senior
 employee[employees.contractDay] = contractDay
 employee[employees.department] = department
 employee[employees.supervisor] = supervisor
