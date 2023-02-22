@@ -121,12 +121,14 @@ val senior: Boolean = employee[employees.senior]
 val contractDay: LocalDate = employee[employees.contractDay]
 val department: Department = employee[employees.department]
 val supervisor: Employee? = employee[employees.supervisor]
+val departmentName: String = employee[employees.department + departments.name]
 employee[employees.id] = id
 employee[employees.name] = name
 employee[employees.senior] = senior
 employee[employees.contractDay] = contractDay
 employee[employees.department] = department
 employee[employees.supervisor] = supervisor
+employee[employees.department + departments.name] = departmentName
 
 // Composed properties:
 employee[employees.department + departments.id] = 3
