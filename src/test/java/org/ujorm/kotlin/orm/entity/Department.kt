@@ -2,7 +2,6 @@ package org.ujorm.kotlin.orm.entity
 
 import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.anotation.OneToMany
-import org.ujorm.kotlin.core.entity.MyDatabase
 import org.ujorm.kotlin.core.impl.EntityModel
 import java.time.LocalDate
 

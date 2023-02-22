@@ -103,6 +103,7 @@ internal class CoreTest {
         employee[employees.contractDay] = contractDay
         employee[employees.department] = department
         employee[employees.supervisor] = supervisor
+        val departmentName: String = employee[employees.department + departments.name]
 
         // Composed properties:
         employee[employees.department + departments.id] = 3
@@ -111,6 +112,7 @@ internal class CoreTest {
         expect(employee.department.name).toEqual("C")
         expect(employee[employees.department + departments.id]).toEqual(3)
         expect(employee[employees.department + departments.name]).toEqual("C")
+        employee[employees.department + departments.name] = departmentName
 
         // Create relation instance(s): // TODO:
         val employee2 = employees.new()
