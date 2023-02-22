@@ -99,7 +99,9 @@ val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 
 ## Basic model usage
 
-Here are some more examples of basic usage of this domain model:
+New objects are created using the factory method, which provides the interface a necessary implementation.
+The values of domain object attributes can be accessed using the interface API, but also through the property descriptors.
+Here are some more examples of basic usage of this domain model.
 
 ```kotlin
 val employees = MyDatabase.employees // Employee metamodel
