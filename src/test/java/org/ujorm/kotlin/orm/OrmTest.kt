@@ -19,7 +19,7 @@ internal class OrmTest {
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.superior + employees.name, // Optional relation by the left outer join
             employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "D"))
@@ -64,7 +64,7 @@ internal class OrmTest {
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.superior + employees.name, // Optional relation by the left outer join
             employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "A"))
@@ -80,16 +80,16 @@ internal class OrmTest {
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.superior + employees.name, // Optional relation by the left outer join
         )
             .where(employees.department + departments.name EQ "accounting")
             .orderBy(
-                employees.supervisor + employees.name ASCENDING true,
+                employees.superior + employees.name ASCENDING true,
                 employees.name ASCENDING false)
             .toList()
 
         expect(employeesByOuterJoin).toHaveSize(3)
-        expect(employeesByOuterJoin.first().supervisor?.name).toEqual("Black")
+        expect(employeesByOuterJoin.first().superior?.name).toEqual("Black")
     }
 
     @Test
@@ -102,13 +102,13 @@ internal class OrmTest {
         val lucy: Employee = MyDatabase.employees.new {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1, 1)
-            supervisor = null
+            superior = null
             department = development
         }
         val joe: Employee = MyDatabase.employees.new {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2, 1)
-            supervisor = lucy
+            superior = lucy
             department = development
         }
         MyDatabase.save(development, lucy, joe)

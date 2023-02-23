@@ -17,7 +17,7 @@ Compared to storing data in the `Map` object, this is a more memory-efficient an
 
 ## Examples
 
-Let's have a simple domain model of employees and their departments, where every employee can have a supervisor.
+Let's have a simple domain model of employees and their departments, where every employee can have a superior.
 
 ![Class diagram](docs/DomainClassDiagram.png)
 
@@ -31,7 +31,7 @@ fun comprehensiveDatabaseSelect() {
         employees.id,
         employees.name,
         employees.department + departments.name, // Required relation by the inner join
-        employees.supervisor + employees.name, // Optional relation by the left outer join
+        employees.superior + employees.name, // Optional relation by the left outer join
         employees.department + departments.created,
     ).where((employees.department + departments.id LE 1) 
         AND (employees.department + departments.name STARTS "D"))
@@ -55,13 +55,13 @@ and an `INSERT` for example:
     val lucy: Employee = MyDatabase.employees.new {
         name = "lucy"
         contractDay = LocalDate.of(2022, 1, 1)
-        supervisor = null
+        superior = null
         department = development
     }
     val joe: Employee = MyDatabase.employees.new {
         name = "Joe"
         contractDay = LocalDate.of(2022, 2, 1)
-        supervisor = lucy
+        superior = lucy
         department = development
     }
     MyDatabase.save(development, lucy, joe)
@@ -77,7 +77,7 @@ interface Employee {
     var name: String
     var contractDay: LocalDate
     var department: Department
-    var supervisor: Employee?
+    var superior: Employee?
 }
 
 /** Model of the entity can be a generated class in the feature */
@@ -86,7 +86,7 @@ open class Employees : EntityModel<Employee>(Employee::class) {
     val name = property { it.name }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
-    val supervisor = propertyNullable { it.supervisor }
+    val superior = propertyNullable { it.superior }
 }
 
 /** Initialize, register and close the entity model. */
@@ -116,13 +116,13 @@ val id: Int = employee[employees.id]
 val name: String = employee[employees.name]
 val contractDay: LocalDate = employee[employees.contractDay]
 val department: Department = employee[employees.department]
-val supervisor: Employee? = employee[employees.supervisor]
+val superior: Employee? = employee[employees.superior]
 val departmentName: String = employee[employees.department + departments.name]
 employee[employees.id] = id
 employee[employees.name] = name
 employee[employees.contractDay] = contractDay
 employee[employees.department] = department
-employee[employees.supervisor] = supervisor
+employee[employees.superior] = superior
 employee[employees.department + departments.name] = departmentName
 
 // Composed properties:

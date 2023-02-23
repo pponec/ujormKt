@@ -14,7 +14,7 @@ interface Employee : PropertyAccessor<Employee> {
     var senior: Boolean
     var contractDay: LocalDate
     var department: Department
-    var supervisor: Employee?
+    var superior: Employee?
 }
 
 /** Model of the entity can be a generated class in the feature */
@@ -24,7 +24,7 @@ class Employees : EntityModel<Employee>(Employee::class) {
     val senior = property { it.senior }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
-    val supervisor = propertyNullable { it.supervisor }
+    val superior = propertyNullable { it.superior }
 
     // Optional composed properties:
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
