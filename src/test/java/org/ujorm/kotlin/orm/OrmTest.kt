@@ -20,10 +20,12 @@ internal class OrmTest {
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
             employees.superior + employees.name, // Optional relation by the left outer join
-            employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "D"))
-            .orderBy(employees.department + departments.created ASCENDING false)
+            .orderBy(
+                employees.department + departments.name ASCENDING false,
+                employees.name ASCENDING true
+            )
             .toList()
 
         expect(employeRows).toHaveSize(1)
