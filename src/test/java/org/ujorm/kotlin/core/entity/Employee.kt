@@ -8,7 +8,7 @@ import org.ujorm.kotlin.core.impl.EntityModel
 /** A user entity
  * (with an optional interface to access property values by a property descriptor). */
 @Entity
-interface Employee {
+interface Employee : PropertyAccessor<Employee> {
     var id: Int
     var name: String
     var senior: Boolean
