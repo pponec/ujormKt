@@ -97,15 +97,16 @@ internal class CoreTest {
         val contractDay: LocalDate = employee[employees.contractDay]
         val department: Department = employee[employees.department]
         val superior: Employee? = employee[employees.superior]
+        val departmentName: String = employee[employees.department + departments.name]
         employee[employees.id] = id
         employee[employees.name] = name
         employee[employees.senior] = senior
         employee[employees.contractDay] = contractDay
         employee[employees.department] = department
         employee[employees.superior] = superior
-        val departmentName: String = employee[employees.department + departments.name]
+        employee[employees.department + departments.name] = departmentName
 
-        // Composed properties:
+        // More composed properties:
         employee[employees.department + departments.id] = 3
         employee[employees.department + departments.name] = "C"
         expect(employee.department.id).toEqual(3)

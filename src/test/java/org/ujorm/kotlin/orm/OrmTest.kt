@@ -18,8 +18,8 @@ internal class OrmTest {
         val employeRows: List<Employee> = MyDatabase.select(
             employees.id,
             employees.name,
-            employees.department + departments.name, // Required relation by the inner join
-            employees.superior + employees.name, // Optional relation by the left outer join
+            employees.department + departments.name, // DB relation by the inner join
+            employees.superior + employees.name, // DB relation by the left outer join
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "D"))
             .orderBy(
