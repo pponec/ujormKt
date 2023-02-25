@@ -27,7 +27,7 @@ Then the database query (`SELECT`) can look like this:
 fun comprehensiveDatabaseSelect() {
     val employees: Employees = MyDatabase.employees // Employee metamodel
     val departments: Departments = MyDatabase.departments // Employee metamodel
-    val employeRows: List<Employee> = MyDatabase.select(
+    val result: List<Employee> = MyDatabase.select(
         employees.id,
         employees.name,
         employees.department + departments.name, // Required relation by the inner join
@@ -38,8 +38,8 @@ fun comprehensiveDatabaseSelect() {
         .orderBy(employees.department + departments.created ASCENDING false)
         .toList()
 
-    expect(employeRows).toHaveSize(1)
-    expect(employeRows.first().department.name)
+    expect(result).toHaveSize(1)
+    expect(result.first().department.name)
         .toEqual("Development")
 }
 ```
