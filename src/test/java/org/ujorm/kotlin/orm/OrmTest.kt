@@ -15,19 +15,21 @@ internal class OrmTest {
     internal fun comprehensiveDatabaseSelect() {
         val employees: Employees = MyDatabase.employees // Employee metamodel
         val departments: Departments = MyDatabase.departments // Employee metamodel
-        val employeRows: List<Employee> = MyDatabase.select(
+        val result: List<Employee> = MyDatabase.select(
             employees.id,
             employees.name,
-            employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
-            employees.department + departments.created,
+            employees.department + departments.name, // DB relation by the inner join
+            employees.superior + employees.name, // DB relation by the left outer join
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "D"))
-            .orderBy(employees.department + departments.created ASCENDING false)
+            .orderBy(
+                employees.department + departments.name ASCENDING false,
+                employees.name ASCENDING true
+            )
             .toList()
 
-        expect(employeRows).toHaveSize(1)
-        expect(employeRows.first().department.name)
+        expect(result).toHaveSize(1)
+        expect(result.first().department.name)
             .toEqual("Development")
     }
 
@@ -60,36 +62,36 @@ internal class OrmTest {
         expect(employeeList).toHaveSize(3)
         expect(employeeList.first().department.name).toEqual("Office") // By a lazy loading
 
-        val employeRows = MyDatabase.select(
+        val result = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.superior + employees.name, // Optional relation by the left outer join
             employees.department + departments.created,
         ).where((employees.department + departments.id LE 1)
                     AND (employees.department + departments.name STARTS "A"))
             .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
 
-        expect(employeRows).toHaveSize(3)
-        expect(employeRows.first().department.created)
+        expect(result).toHaveSize(3)
+        expect(result.first().department.created)
             .toEqual(LocalDate.of(2022, 12, 24))
 
         // Ordered list with relations:
-        val employeesByOuterJoin = MyDatabase.select(
+        val resultByOuterJoin = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // Required relation by the inner join
-            employees.supervisor + employees.name, // Optional relation by the left outer join
+            employees.superior + employees.name, // Optional relation by the left outer join
         )
             .where(employees.department + departments.name EQ "accounting")
             .orderBy(
-                employees.supervisor + employees.name ASCENDING true,
+                employees.superior + employees.name ASCENDING true,
                 employees.name ASCENDING false)
             .toList()
 
-        expect(employeesByOuterJoin).toHaveSize(3)
-        expect(employeesByOuterJoin.first().supervisor?.name).toEqual("Black")
+        expect(resultByOuterJoin).toHaveSize(3)
+        expect(resultByOuterJoin.first().superior?.name).toEqual("Black")
     }
 
     @Test
@@ -102,13 +104,13 @@ internal class OrmTest {
         val lucy: Employee = MyDatabase.employees.new {
             name = "lucy"
             contractDay = LocalDate.of(2022, 1, 1)
-            supervisor = null
+            superior = null
             department = development
         }
         val joe: Employee = MyDatabase.employees.new {
             name = "Joe"
             contractDay = LocalDate.of(2022, 2, 1)
-            supervisor = lucy
+            superior = lucy
             department = development
         }
         MyDatabase.save(development, lucy, joe)

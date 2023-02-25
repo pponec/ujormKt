@@ -17,7 +17,7 @@ Compared to storing data in the `Map` object, this is a more memory-efficient an
 
 ## Examples
 
-Let's have a simple domain model of employees and their departments, where every employee can have a supervisor.
+Let's have a simple domain model of employees and their departments, where every employee can have a superior.
 
 ![Class diagram](docs/DomainClassDiagram.png)
 
@@ -27,19 +27,19 @@ Then the database query (`SELECT`) can look like this:
 fun comprehensiveDatabaseSelect() {
     val employees: Employees = MyDatabase.employees // Employee metamodel
     val departments: Departments = MyDatabase.departments // Employee metamodel
-    val employeRows: List<Employee> = MyDatabase.select(
+    val result: List<Employee> = MyDatabase.select(
         employees.id,
         employees.name,
         employees.department + departments.name, // Required relation by the inner join
-        employees.supervisor + employees.name, // Optional relation by the left outer join
+        employees.superior + employees.name, // Optional relation by the left outer join
         employees.department + departments.created,
     ).where((employees.department + departments.id LE 1) 
         AND (employees.department + departments.name STARTS "D"))
         .orderBy(employees.department + departments.created ASCENDING false)
         .toList()
 
-    expect(employeRows).toHaveSize(1)
-    expect(employeRows.first().department.name)
+    expect(result).toHaveSize(1)
+    expect(result.first().department.name)
         .toEqual("Development")
 }
 ```
@@ -55,13 +55,13 @@ and an `INSERT` for example:
     val lucy: Employee = MyDatabase.employees.new {
         name = "lucy"
         contractDay = LocalDate.of(2022, 1, 1)
-        supervisor = null
+        superior = null
         department = development
     }
     val joe: Employee = MyDatabase.employees.new {
         name = "Joe"
         contractDay = LocalDate.of(2022, 2, 1)
-        supervisor = lucy
+        superior = lucy
         department = development
     }
     MyDatabase.save(development, lucy, joe)
@@ -75,20 +75,18 @@ and an `INSERT` for example:
 interface Employee {
     var id: Int
     var name: String
-    var senior: Boolean
     var contractDay: LocalDate
     var department: Department
-    var supervisor: Employee?
+    var superior: Employee?
 }
 
 /** Model of the entity can be a generated class in the feature */
 open class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val senior = property { it.senior }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
-    val supervisor = propertyNullable { it.supervisor }
+    val superior = propertyNullable { it.superior }
 }
 
 /** Initialize, register and close the entity model. */
@@ -99,7 +97,9 @@ val MyDatabase.employees by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 
 ## Basic model usage
 
-Here are some more examples of basic usage of this domain model:
+New objects are created using the factory method, which provides the interface a necessary implementation.
+The values of domain object attributes can be accessed using the interface API, but also through the property descriptors.
+Here are some more examples of basic usage of this domain model.
 
 ```kotlin
 val employees = MyDatabase.employees // Employee metamodel
@@ -107,7 +107,6 @@ val departments = MyDatabase.departments // Department metamodel
 val employee: Employee = employees.new { // Create new employee object
     id = 11
     name = "John"
-    senior = false
     contractDay = LocalDate.now()
     department = createDepartment(2, "D")
 }
@@ -115,16 +114,16 @@ val employee: Employee = employees.new { // Create new employee object
 // Read and Write values by property descriptors:
 val id: Int = employee[employees.id]
 val name: String = employee[employees.name]
-val senior: Boolean = employee[employees.senior]
 val contractDay: LocalDate = employee[employees.contractDay]
 val department: Department = employee[employees.department]
-val supervisor: Employee? = employee[employees.supervisor]
+val superior: Employee? = employee[employees.superior]
+val departmentName: String = employee[employees.department + departments.name]
 employee[employees.id] = id
 employee[employees.name] = name
-employee[employees.senior] = senior
 employee[employees.contractDay] = contractDay
 employee[employees.department] = department
-employee[employees.supervisor] = supervisor
+employee[employees.superior] = superior
+employee[employees.department + departments.name] = departmentName
 
 // Composed properties:
 employee[employees.department + departments.id] = 3

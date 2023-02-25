@@ -60,15 +60,15 @@ internal class UjormBreafOrmTest {
             .select(
                 employees.id,
                 employees.name,
-                employees.supervisor + employees.name, // Optional supervisor's name
+                employees.superior + employees.name, // Optional superior's name
             )
             .where((employees.name EQ "John") OR (employees.name EQ "Lucy"))
             .orderBy(
-                employees.supervisor + employees.name ASCENDING true,
+                employees.superior + employees.name ASCENDING true,
                 employees.name ASCENDING true)
             .toList()
         expect(employeesByOuterJoin).toHaveSize(3)
-        expect(employeesByOuterJoin.first().supervisor?.name).toEqual("Black")
+        expect(employeesByOuterJoin.first().superior?.name).toEqual("Black")
     }
 
     @Test

@@ -11,20 +11,20 @@ import org.ujorm.kotlin.core.impl.EntityModel
 interface Employee : PropertyAccessor<Employee> {
     var id: Int
     var name: String
-    var senior: Boolean
+    var higherEducation: Boolean
     var contractDay: LocalDate
     var department: Department
-    var supervisor: Employee?
+    var superior: Employee?
 }
 
 /** Model of the entity can be a generated class in the feature */
 class Employees : EntityModel<Employee>(Employee::class) {
     val id = property { it.id }
     val name = property { it.name }
-    val senior = property { it.senior }
+    val higherEducation = property { it.higherEducation }
     val contractDay = property { it.contractDay }
     val department = property { it.department }
-    val supervisor = propertyNullable { it.supervisor }
+    val superior = propertyNullable { it.superior }
 
     // Optional composed properties:
     val departmentName by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {

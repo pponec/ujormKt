@@ -3,11 +3,12 @@ package org.ujorm.kotlin.core.entity
 import java.time.LocalDate
 import org.ujorm.kotlin.anotation.Entity
 import org.ujorm.kotlin.core.EntityInitializer
+import org.ujorm.kotlin.core.PropertyAccessor
 import org.ujorm.kotlin.core.impl.EntityModel
 
 /** A Department entity */
 @Entity(init = DepartmentInitializer::class )
-interface Department {
+interface Department : PropertyAccessor<Department> {
     var id: Int
     var name: String
     var created: LocalDate
