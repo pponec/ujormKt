@@ -22,9 +22,9 @@ internal class PropertyMapTest {
         val name = map.get(employees.name)
         expect(name).toEqual("Test")
 
-        map[employees.senior] = true
-        val senior = map.get(employees.senior)
-        expect(senior).toEqual(true)
+        map[employees.higherEducation] = true
+        val higherEducation = map.get(employees.higherEducation)
+        expect(higherEducation).toEqual(true)
 
         map[employees.superior] = null
         val superior = map.get(employees.superior)

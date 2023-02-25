@@ -38,7 +38,7 @@ internal class CoreTest {
         val lucy: Employee = employees.new {
             id = 2
             name = "Lucy"
-            senior = true
+            higherEducation = true
             contractDay = LocalDate.of(2022, 1, 1)
             superior = null
             department = development
@@ -46,7 +46,7 @@ internal class CoreTest {
         val joe: Employee = employees.new {
             id = 3
             name = "Joe"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.of(2022, 2, 1)
             superior = lucy
             department = development
@@ -54,7 +54,7 @@ internal class CoreTest {
 
         expect(development.id).toEqual(1)
         expect(joe.name).toEqual("Joe")
-        expect(joe.senior).toEqual(false)
+        expect(joe.higherEducation).toEqual(false)
         expect(joe.department.name).toEqual("development")
         expect(joe.superior?.name).toEqual("Lucy")
         expect(joe.superior?.department?.name).toEqual("development")
@@ -65,16 +65,16 @@ internal class CoreTest {
                 ", members=?}")
         expect(lucy.toString()).toEqual("Employee{id=2" +
                 ", name=\"Lucy\"" +
-                ", senior=true" +
+                ", higherEducation=true" +
                 ", contractDay=2022-01-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
                 ", superior=null}")
         expect(joe.toString()).toEqual("Employee{id=3" +
                 ", name=\"Joe\"" +
-                ", senior=false" +
+                ", higherEducation=false" +
                 ", contractDay=2022-02-01" +
                 ", department=Department{id=1, name=\"development\",...}" +
-                ", superior=Employee{id=2, name=\"Lucy\", senior=t...}}")
+                ", superior=Employee{id=2, name=\"Lucy\", higherEd...}}")
     }
 
     /** Test writing and reading to the object using the metamodel. */
@@ -85,7 +85,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
@@ -93,14 +93,14 @@ internal class CoreTest {
         // Read and Write values by property descriptors:
         val id: Int = employee[employees.id]
         val name: String = employee[employees.name]
-        val senior: Boolean = employee[employees.senior]
+        val higherEducation: Boolean = employee[employees.higherEducation]
         val contractDay: LocalDate = employee[employees.contractDay]
         val department: Department = employee[employees.department]
         val superior: Employee? = employee[employees.superior]
         val departmentName: String = employee[employees.department + departments.name]
         employee[employees.id] = id
         employee[employees.name] = name
-        employee[employees.senior] = senior
+        employee[employees.higherEducation] = higherEducation
         employee[employees.contractDay] = contractDay
         employee[employees.department] = department
         employee[employees.superior] = superior
@@ -129,7 +129,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
@@ -158,7 +158,7 @@ internal class CoreTest {
         val employee: Employee = employees.new { // Create new employee object
             id = 11
             name = "John"
-            senior = false
+            higherEducation = false
             contractDay = LocalDate.now()
             department = createDepartment(2, "D")
         }
@@ -182,7 +182,7 @@ internal class CoreTest {
         expect(properties.size).toEqual(6) // Count of properties
         expect(properties[0].name()).toEqual("id") // property id
         expect(properties[1].name()).toEqual("name") // property name
-        expect(properties[2].name()).toEqual("senior") // property name
+        expect(properties[2].name()).toEqual("higherEducation") // property name
         expect(properties[3].name()).toEqual("contractDay")// ContractDay
         expect(properties[4].name()).toEqual("department") // property department
         expect(properties[5].name()).toEqual("superior") // property superior
