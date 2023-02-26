@@ -115,10 +115,15 @@ internal class CoreTest {
         expect(employee[employees.department + departments.name]).toEqual("C")
         employee[employees.department + departments.name] = departmentName
 
-        // Create relation instance(s): // TODO:
-        val employee2 = employees.new()
+        // Set value including all related entities:
+        employee.superior = null // reset a superior
         val departmentNameProperty = employees.department + departments.name
-//      employee2[departmentNameProperty] = "Test"
+        MyDatabase.utils().setValueWithRelations(employee, "X", departmentNameProperty)
+        expect(employee.department.name).to("X")
+
+        // Find metamodel by the entity class
+        var employesModel = MyDatabase.utils().findEntityModel(Employee::class)
+        expect(employesModel).toBeTheInstance(MyDatabase.employees)
     }
 
     /** Test conditions */
