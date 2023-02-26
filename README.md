@@ -160,15 +160,13 @@ An example implementation of this demo project (released: 2022-11-26)
 ![Class diagram](docs/Demo.png)
 
 
-
 # What remains to be done
 
-- building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
+- Building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
 - API cleaning
 - Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
+- The domain object model should be generated according to the original POJO objects in feature
 - Integrate the model filters with the some ORM framework ([Ujorm](https://ujorm.org/www/) ?)
-- the domain object model should be generated according to the original POJO objects in feature
-- integration with some ORM
 
 # Links
 
