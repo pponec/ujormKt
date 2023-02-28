@@ -84,6 +84,15 @@
             <scope>test</scope>
         </dependency>
 
+
+        <!--- Ktorm -->
+
+        <dependency>
+            <groupId>org.ktorm</groupId>
+            <artifactId>ktorm-core</artifactId>
+            <version>3.6.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
