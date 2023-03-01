@@ -1,11 +1,10 @@
-package org.ujorm.kotlin.core.performance.ktorm
+package org.ujorm.kotlin.core.performance
 
 import net.ponec.demo.ktorm.entity.Department2
 import net.ponec.demo.ktorm.entity.Employee2
 import net.ponec.demo.ktorm.entity.Employees2
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.core.entity.*
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

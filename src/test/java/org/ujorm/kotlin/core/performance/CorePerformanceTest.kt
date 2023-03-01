@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 internal class CorePerformanceTest {
 
-    val count = 10 // 10_000_000;
+    val count = 10_000_000;
 
     @Test
     fun createEntities() {
