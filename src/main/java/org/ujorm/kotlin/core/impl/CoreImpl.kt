@@ -122,7 +122,7 @@ open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun set(entity: D, value: V?) =
-        (entity as AbstractEntity<D>).`~~`().set(this, value)
+        (entity as AbstractEntity<D>).`~~`().set(metadata, value)
 
     final override fun data() = metadata
 
@@ -219,6 +219,21 @@ class EntityProviderUtils {
     fun <D: Any, V: Any> setValueWithRelations(domain: D, value: V, property: PropertyNullable<D, V>) {
         val chainedProperty = ChainedProperty<D, V>(property, this);
         chainedProperty[domain] = value
+    }
+
+    /** Clone entity to the new object */
+    fun  <D: Any> clone(entity: D): D {
+        val source = entity as AbstractEntity<D>
+        val src = source.`~~`()
+        val model = src.model
+        val result = model.new() as AbstractEntity<D>
+        val dst = result.`~~`()
+
+        model.utils().properties.forEach{
+            val property = it.metadata as PropertyMetadata<D, Any>
+            dst.set(property, src.get(property));
+        }
+        return result as D
     }
 }
 

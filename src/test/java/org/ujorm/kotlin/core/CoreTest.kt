@@ -305,6 +305,30 @@ internal class CoreTest {
         expect(target.department).toEqual(source.department)
         expect(target).toEqual(source)
     }
+
+
+    /** Clone an object to a new one */
+    @Test
+    fun cloneObject() {
+        MyDatabase.close<MyDatabase>()
+        val employees = MyDatabase.employees // Employee metamodel
+        val source: Employee = employees.new { // Create new employee object
+            id = 11
+            name = "John"
+            higherEducation = false
+            contractDay = LocalDate.now()
+            department = createDepartment(2, "D")
+        }
+
+        val target: Employee = MyDatabase.utils().clone(source)
+
+        expect(target.id).toEqual(source.id)
+        expect(target.name).toEqual(source.name)
+        expect(target.higherEducation).toEqual(source.higherEducation)
+        expect(target.contractDay).toEqual(source.contractDay)
+        expect(target.department).toEqual(source.department)
+        expect(target).toEqual(source)
+    }
 }
 
 /** Helper method to create new department */
