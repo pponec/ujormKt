@@ -280,6 +280,31 @@ internal class CoreTest {
         expect(department1).notToEqual(department3)
         expect(department2).notToEqual(department3)
     }
+
+    /** Copying one object to another */
+    @Test
+    fun copyObject() {
+        val employees = MyDatabase.employees // Employee metamodel
+        val target: Employee = employees.new()
+        val source: Employee = employees.new { // Create new employee object
+            id = 11
+            name = "John"
+            higherEducation = false
+            contractDay = LocalDate.now()
+            department = createDepartment(2, "D")
+        }
+
+        employees.utils().properties.forEach{
+            target[it] = source[it]
+        }
+
+        expect(target.id).toEqual(source.id)
+        expect(target.name).toEqual(source.name)
+        expect(target.higherEducation).toEqual(source.higherEducation)
+        expect(target.contractDay).toEqual(source.contractDay)
+        expect(target.department).toEqual(source.department)
+        expect(target).toEqual(source)
+    }
 }
 
 /** Helper method to create new department */
