@@ -27,8 +27,8 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
-/** API to provie nullable values */
-interface PropertyNullableAccesor<D : Any, V : Any> {
+/** API to provide nullable values */
+interface PropertyNullableAccessor<D : Any, V : Any> {
     /** Get Nullable value */
     fun getNullable(entity: D): V?
 
@@ -107,7 +107,7 @@ open class ListPropertyMetadataImpl<D : Any, V : Any> : PropertyMetadataImpl<D, 
 /** An implementation of the direct property descriptor for nullable values */
 open class PropertyNullableImpl<D : Any, V : Any> internal constructor(
     internal val metadata: PropertyMetadataImpl<D, V>,
-) : PropertyNullable<D, V>, PropertyNullableAccesor<D, V> {
+) : PropertyNullable<D, V>, PropertyNullableAccessor<D, V> {
 
     private val hashCode : Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Objects.hash(metadata.entityClass, entityAlias(), name())
@@ -178,8 +178,13 @@ class EntityProviderUtils {
 
     private var entityMap : Map<KClass<*>, EntityModel<*>> = emptyMap()
 
-    /** Add an entity and close */
-    fun <D : Any, E : EntityModel<D>> add(entity : E) : E {
+    /** Add all entities and close the it */
+    fun <E : EntityModel<*>> addAll(vararg entities : E)  {
+        entities.forEach { add(it) }
+    }
+
+    /** Add an entity and close it */
+    internal fun <E : EntityModel<*>> add(entity : E) : E {
         check(!closed) { "The object is locked" }
         entityModels.add(entity.close())
         return entity
@@ -248,7 +253,7 @@ abstract class AbstractEntityProvider {
 
     /** Close the metamodel and get the utility object. */
     fun utils() : EntityProviderUtils {
-        if (!utils.closed) {
+        if (!utils.closed && !utils.entityModels().isEmpty()) {
             utils.close(this)
         }
         return utils
@@ -439,7 +444,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     }
 
     /** Check the value and return the one. */
-    protected fun hasLength(value : String, name : String = "name") : String {
+    private fun hasLength(value : String, name : String = "name") : String {
         require(!value.isBlank()) { "$name is required" }
         return value
     }
@@ -501,6 +506,7 @@ abstract class EntityModel<D : Any>(entityClass: KClass<D>) {
     fun createArray(): Array<Any?> = arrayOfNulls(propertyBuilder.size)
 
     /** Create new instance of the domain object */
+    @JvmName("newObject")
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalAccessException::class, IllegalArgumentException::class, InvocationTargetException::class)
     fun new(): D {
@@ -629,7 +635,7 @@ class ComposedPropertyMetadata<D : Any, M : Any, V : Any>(
 /** Composed nullable property implementation */
 open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
     PropertyNullable<D, V>,
-    PropertyNullableAccesor<D, V>
+    PropertyNullableAccessor<D, V>
 {
     protected val metadata: ComposedPropertyMetadata<D, M, V>
 
@@ -652,15 +658,15 @@ open class ComposedPropertyNullableImpl<D : Any, M : Any, V : Any> :
     override fun get(entity: D): V? = getNullable(entity)
 
     override fun getNullable(entity: D): V? {
-        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccesor<D, M>)
+        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccessor<D, M>)
             .getNullable(entity)
-        return if (middleObject != null) (metadata.secondaryProperty as PropertyNullableAccesor<M, V>)
+        return if (middleObject != null) (metadata.secondaryProperty as PropertyNullableAccessor<M, V>)
             .getNullable(middleObject)
         else null
     }
 
     override fun set(entity: D, value: V?) {
-        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccesor<D, M>).getNullable(entity)
+        val middleObject : M? = (metadata.primaryProperty as PropertyNullableAccessor<D, M>).getNullable(entity)
         if (middleObject != null) {
             metadata.secondaryProperty.set(middleObject, value)
         } else {
@@ -700,7 +706,7 @@ class ComposedPropertyImpl<D : Any, M : Any, V : Any> : Property<D, V>, Composed
     }
 }
 
-/** This property implementation allows writing valuees to entity -  including creation of missing relations. */
+/** This property implementation allows writing values to entity -  including creation of missing relations. */
 class ChainedProperty<D : Any, V : Any> {
     private val utils: EntityProviderUtils
     private val properties: Array<PropertyNullableImpl<Any, Any>?>

@@ -16,7 +16,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <kotlin.version>1.7.20</kotlin.version>
+        <kotlin.version>1.7.22</kotlin.version>
     </properties>
 
     <dependencies>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>ch.tutteli.atrium</groupId>
             <artifactId>atrium-fluent-en_GB</artifactId>
-            <version>0.17.0</version>
+            <version>0.18.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.ktorm</groupId>
             <artifactId>ktorm-core</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
 
