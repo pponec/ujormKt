@@ -310,7 +310,6 @@ internal class CoreTest {
     /** Clone an object to a new one */
     @Test
     fun cloneObject() {
-        MyDatabase.close<MyDatabase>()
         val employees = MyDatabase.employees // Employee metamodel
         val source: Employee = employees.new { // Create new employee object
             id = 11

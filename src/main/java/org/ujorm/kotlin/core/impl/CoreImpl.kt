@@ -168,7 +168,10 @@ open class PropertyImpl<D : Any, V : Any> : Property<D, V>, PropertyNullableImpl
 
 /** Object maps Entity class to an Entity model. */
 class EntityProviderUtils {
-    private var locked: Boolean = false
+
+    @Volatile
+    var closed: Boolean = false
+        private set
 
     /** Get all entity models */
     private var entityModels: MutableList<EntityModel<*>> = mutableListOf()
@@ -177,16 +180,17 @@ class EntityProviderUtils {
 
     /** Add an entity and close */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E {
-        check(!locked) { "The object is locked" }
+        check(!closed) { "The object is locked" }
         entityModels.add(entity.close())
         return entity
     }
 
     fun entityModels() : List<EntityModel<*>> = entityModels
 
-    /** Lock the model if it hasn't already. */
+    /** Close the model for further changes. */
+    @Synchronized
     fun close(entities : AbstractEntityProvider) {
-        if (locked) return
+        if (closed) return
 
         if (entityModels.isEmpty()) {
             Reflections(EntityModel::class).findMemberExtensionObjectOfPackage(entities::class.java.packageName, entities)
@@ -203,7 +207,7 @@ class EntityProviderUtils {
         }
         entityMap = map
         entityModels = Collections.unmodifiableList(entityModels) as MutableList<EntityModel<*>>
-        locked = true
+        closed = true
     }
 
     /** Find an entity model acording entity class */
@@ -242,7 +246,13 @@ abstract class AbstractEntityProvider {
 
     private val utils = EntityProviderUtils()
 
-    fun utils() = utils
+    /** Close the metamodel and get the utility object. */
+    fun utils() : EntityProviderUtils {
+        if (!utils.closed) {
+            utils.close(this)
+        }
+        return utils;
+    }
 
     /** Register a new entity */
     fun <D : Any, E : EntityModel<D>> add(entity : E) : E = utils.add(entity)
