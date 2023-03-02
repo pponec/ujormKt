@@ -23,7 +23,7 @@ interface AbstractEntity<D : Any> {
      * The method name must not match the name of any method of the real entity.
      */
     // @Suppress("INAPPLICABLE_JVM_NAME")
-    // @JvmName("___$") // For Java compatibility (?)
+    // @JvmName("___") // For Java compatibility (?)
     fun `~~`(): RawEntity<D>
 }
 
