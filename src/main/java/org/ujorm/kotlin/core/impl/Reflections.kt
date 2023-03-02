@@ -42,7 +42,7 @@ class Reflections<T : Any>(
     fun findEntityModels(clazz : Class<*>, entityProvider : Any) : List<T> {
         return clazz.methods
             .filter { it.parameterCount == 1 }
-            .filter { Modifier.isStatic(it.getModifiers()) }
+            .filter { Modifier.isStatic(it.modifiers) }
             .filter { targetClass.java.isAssignableFrom(it.returnType) }
             .map { it.invoke(null, entityProvider) as T }
     }

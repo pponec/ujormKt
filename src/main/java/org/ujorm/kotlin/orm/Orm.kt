@@ -120,18 +120,18 @@ open class Query<D : Any> {
 open class NativeQuery {
     fun item(vararg expr: Any): Column {
         TODO("Not yet implemented")
-        return Column(this);
+        return Column(this)
     }
 
     @Deprecated("Remove it")
     fun <V : Any> item(map: Pair<PropertyNullable<RawEntity<DbRecord>, V>, Any>, vararg sql: Any): NativeQuery {
         TODO("Not yet implemented")
-        return this;
+        return this
     }
 
     fun join(vararg expr: CharSequence): Column {
         TODO("Not yet implemented")
-        return Column(this);
+        return Column(this)
     }
 
     fun <V : Any> where(
@@ -158,13 +158,12 @@ open class Column(
 ) {
     fun <V : Any> to(property: PropertyNullable<RawEntity<DbRecord>, V>): NativeQuery {
         TODO("Not yet implemented")
-        return nativeQuery;
+        return nativeQuery
     }
 }
 
 /** Database session */
 interface Session {
-
 }
 
 /** Property Map */

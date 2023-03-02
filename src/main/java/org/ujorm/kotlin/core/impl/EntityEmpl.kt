@@ -84,7 +84,7 @@ class RawEntity<D : Any> : InvocationHandler {
 
     /** Get nullable value by a direct access. */
     @Deprecated("Use the method with argument type of PropertyMetadata rather.")
-    inline internal operator fun <V : Any> get(property: PropertyNullableImpl<D, V>) : V? =
+    internal inline operator fun <V : Any> get(property: PropertyNullableImpl<D, V>) : V? =
         get(property.data())
 
     /** Get nullable value by a direct access. */

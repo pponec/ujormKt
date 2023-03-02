@@ -221,7 +221,7 @@ class EntityProviderUtils {
 
     /** Set a new value to any entity by the composed relation, where missing relation is created. */
     fun <D: Any, V: Any> setValueWithRelations(domain: D, value: V, property: PropertyNullable<D, V>) {
-        val chainedProperty = ChainedProperty<D, V>(property, this);
+        val chainedProperty = ChainedProperty<D, V>(property, this)
         chainedProperty[domain] = value
     }
 
@@ -235,7 +235,7 @@ class EntityProviderUtils {
 
         model.utils().properties.forEach{
             val property = it.metadata as PropertyMetadata<D, Any>
-            dst.set(property, src.get(property));
+            dst.set(property, src.get(property))
         }
         return result as D
     }
@@ -251,7 +251,7 @@ abstract class AbstractEntityProvider {
         if (!utils.closed) {
             utils.close(this)
         }
-        return utils;
+        return utils
     }
 
     /** Register a new entity */
