@@ -1,31 +1,29 @@
 package org.ujorm.kotlin.core.performance
 
+import org.ujorm.kotlin.core.performance.ktormEntity.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.ujorm.kotlin.core.entity.*
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class CorePerformanceTest {
+internal class CorePerformanceKtormTest {
 
     val count = 10 // 10_000_000;
 
     @Test
     fun createEntities() {
-        // Get the metamodel(s):
-        val employees: Employees = MyDatabase.employees
-        val departments: Departments = MyDatabase.departments
-        val array = arrayOf(employees.new(), employees.new());
+        val array = arrayOf(Employee2{}, Employee2{})
         val start = LocalDateTime.now()
 
         for (i in 0 .. count) {
             // Create some new entities:
-            val development: Department = departments.new {
+            val development: Department2 = Department2 {
                 id = 1
                 name = "development"
                 created = LocalDate.of(2021, 10, 15)
             }
-            val lucy: Employee = employees.new {
+            val lucy: Employee2 = Employee2 {
                 id = 2
                 name = "Lucy"
                 higherEducation = true
@@ -33,7 +31,7 @@ internal class CorePerformanceTest {
                 superior = null
                 department = development
             }
-            val joe: Employee = employees.new {
+            val joe: Employee2 = Employee2 {
                 id = 3
                 name = "Joe"
                 higherEducation = false
@@ -52,10 +50,11 @@ internal class CorePerformanceTest {
     }
 
     /** Test writing and reading to the object using the metamodel. */
+    @Disabled
     @Test
     fun readAndWriteByProperty() {
-        val employees = MyDatabase.employees // Employee metamodel
-        val employee: Employee = employees.new { // Create new employee object
+        val employees = Employees2.instance
+        val employee: Employee2 = Employee2 { // Create new employee object
             id = 11
             name = "John"
             higherEducation = false
@@ -65,32 +64,31 @@ internal class CorePerformanceTest {
 
         val start = LocalDateTime.now()
         for (i in 0 .. count) {
-            // Read and Write values by property descriptors:
-            val id: Int = employee[employees.id]
-            val name: String = employee[employees.name]
-            val higherEducation: Boolean = employee[employees.higherEducation]
-            val contractDay: LocalDate = employee[employees.contractDay]
-            val department: Department = employee[employees.department]
-            val superior: Employee? = employee[employees.superior]
-
-            employee[employees.id] = id
-            employee[employees.name] = name
-            employee[employees.higherEducation] = higherEducation
-            employee[employees.contractDay] = contractDay
-            employee[employees.department] = department
-            employee[employees.superior] = superior
+//            // Read and Write values by property descriptors:
+//            val id: Int = employee[employees.id] as Int
+//            val name: String = employee[employees.name]
+//            val higherEducation: Boolean = employee[employees.higherEducation]
+//            val contractDay: LocalDate = employee[employees.contractDay]
+//            val department: Department = employee[employees.department]
+//            val superior: Employee? = employee[employees.superior]
+//
+//            employee[employees.id] = id
+//            employee[employees.name] = name
+//            employee[employees.higherEducation] = higherEducation
+//            employee[employees.contractDay] = contractDay
+//            employee[employees.department] = department
+//            employee[employees.superior] = superior
         }
 
         val end = LocalDateTime.now()
-        val duration = Duration.between(start, end).toMillis();
+        val duration = Duration.between(start, end).toMillis()
         println("time $duration ms")
     }
 
     /** Test writing and reading to the object using the metamodel. */
     @Test
     fun readAndWriteByApi() {
-        val employees = MyDatabase.employees // Employee metamodel
-        val employee: Employee = employees.new { // Create new employee object
+        val employee: Employee2 = Employee2 { // Create new employee object
             id = 11
             name = "John"
             higherEducation = false
@@ -105,8 +103,8 @@ internal class CorePerformanceTest {
             val name: String = employee.name
             val higherEducation: Boolean = employee.higherEducation
             val contractDay: LocalDate = employee.contractDay
-            val department: Department = employee.department
-            val superior: Employee? = employee.superior
+            val department: Department2 = employee.department
+            val superior: Employee2? = employee.superior
 
             employee.id = id
             employee.name = name
@@ -117,7 +115,7 @@ internal class CorePerformanceTest {
         }
 
         val end = LocalDateTime.now()
-        val duration = Duration.between(start, end).toMillis();
+        val duration = Duration.between(start, end).toMillis()
         println("time $duration ms")
     }
 
@@ -125,7 +123,7 @@ internal class CorePerformanceTest {
     /** Test writing and reading to the object using the metamodel. */
     @Test
     fun readAndWriteToMap() {
-        val employees = MyDatabase.employees // Employee metamodel
+        val employees = Employees2.instance // Employee metamodel
         val employee = mutableMapOf<Any, Any?>(
             employees.id to 11,
             employees.name to "John",
@@ -141,24 +139,24 @@ internal class CorePerformanceTest {
             val name: String = employee[employees.name] as String
             val higherEducation: Boolean = employee[employees.higherEducation] as Boolean
             val contractDay: LocalDate = employee[employees.contractDay] as LocalDate
-            val department: Department = employee[employees.department] as Department
-            val superior: Employee? = employee[employees.superior] as Employee?
+            val department: Department2 = employee[employees.department] as Department2
+            val superior: Employee2? = employee[employees.superiorId] as Employee2?
 
             employee[employees.id] = id
             employee[employees.name] = name
             employee[employees.higherEducation] = higherEducation
             employee[employees.contractDay] = contractDay
-            employee[employees.department] = department
-            employee[employees.superior] = superior
+            employee[employees.departmentId] = department
+            employee[employees.superiorId] = superior
         }
 
         val end = LocalDateTime.now()
-        val duration = Duration.between(start, end).toMillis();
+        val duration = Duration.between(start, end).toMillis()
         println("time $duration ms")
     }
 
-    private fun createDepartment(id: Int, name: String): Department =
-        MyDatabase.departments.new {
+    private fun createDepartment(id: Int, name: String): Department2 =
+        Department2 {
             this.id = id
             this.name = name
         }

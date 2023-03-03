@@ -36,8 +36,8 @@
 
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
+            <artifactId>kotlin-test-junit</artifactId>
+            <version>1.7.10</version>
             <scope>test</scope>
         </dependency>
 
@@ -83,19 +83,11 @@
             <version>1.13.2</version>
             <scope>test</scope>
         </dependency>
-
-
-        <!--- Ktorm -->
-
-        <dependency>
-            <groupId>org.ktorm</groupId>
-            <artifactId>ktorm-core</artifactId>
-            <version>3.6.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

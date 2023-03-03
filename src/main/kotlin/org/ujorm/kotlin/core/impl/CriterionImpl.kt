@@ -16,17 +16,7 @@
 package org.ujorm.kotlin.core.impl
 
 import org.ujorm.kotlin.core.*
-import org.ujorm.kotlin.core.impl.Constants.CLOSED_MESSAGE
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Proxy
-import java.util.*
-import java.util.stream.Stream
 import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.full.memberProperties
 
 class BinaryCriterion<D : Any> : Criterion<D, BinaryOperator, Criterion<D, Operator, Any?>> {
     val left: Criterion<D, Operator, Any?>

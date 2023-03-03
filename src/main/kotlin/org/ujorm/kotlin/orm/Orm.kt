@@ -19,7 +19,6 @@ import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.core.impl.*
 import java.util.*
 import java.util.stream.Stream
-import kotlin.reflect.KClass
 
 abstract class AbstractDatabase : AbstractEntityProvider() {
 

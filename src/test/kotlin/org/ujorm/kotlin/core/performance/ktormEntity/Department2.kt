@@ -1,4 +1,4 @@
-package net.ponec.demo.ktorm.entity
+package org.ujorm.kotlin.core.performance.ktormEntity
 
 
 import org.ktorm.database.Database

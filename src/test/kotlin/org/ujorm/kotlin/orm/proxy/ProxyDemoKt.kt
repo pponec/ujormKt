@@ -43,7 +43,7 @@ class ProxyDemoKt {
         override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any {
             val argument = if (args.size > 0) args[0] else ""
             println("Before the proxy: %s(\"%s\")".format(argument, method.name))
-            var result = method.invoke(original, *args)
+            val result = method.invoke(original, *args)
             println("After the proxy: ")
             return result
         }
