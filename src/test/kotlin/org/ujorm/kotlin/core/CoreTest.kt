@@ -90,7 +90,7 @@ internal class CoreTest {
             department = createDepartment(2, "D")
         }
 
-        // Read and Write values by property descriptors:
+        // Read values by property descriptors:
         val id: Int = employee[employees.id]
         val name: String = employee[employees.name]
         val higherEducation: Boolean = employee[employees.higherEducation]
@@ -98,6 +98,8 @@ internal class CoreTest {
         val department: Department = employee[employees.department]
         val superior: Employee? = employee[employees.superior]
         val departmentName: String = employee[employees.department + departments.name]
+
+        // Write values by property descriptors:
         employee[employees.id] = id
         employee[employees.name] = name
         employee[employees.higherEducation] = higherEducation
