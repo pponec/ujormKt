@@ -14,13 +14,14 @@ internal class OrmTest {
     @Disabled("A comprehensive data selection")
     internal fun comprehensiveDatabaseSelect() {
         val employees: Employees = MyDatabase.employees // Employee metamodel
-        val departments: Departments = MyDatabase.departments // Employee metamodel
+        val departments: Departments = MyDatabase.departments // Department metamodel
+
         val result: List<Employee> = MyDatabase.select(
             employees.id,
             employees.name,
             employees.department + departments.name, // DB relation by the inner join
             employees.superior + employees.name, // DB relation by the left outer join
-        ).where((employees.department + departments.id LE 1)
+        ).where((employees.department + departments.id GE 1)
                     AND (employees.department + departments.name STARTS "D"))
             .orderBy(
                 employees.department + departments.name ASCENDING false,
@@ -68,7 +69,7 @@ internal class OrmTest {
             employees.department + departments.name, // Required relation by the inner join
             employees.superior + employees.name, // Optional relation by the left outer join
             employees.department + departments.created,
-        ).where((employees.department + departments.id LE 1)
+        ).where((employees.department + departments.id GE 1)
                     AND (employees.department + departments.name STARTS "A"))
             .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
@@ -143,7 +144,6 @@ internal class OrmTest {
             println("Db record: id = $id, name = $name, created = $created")
         }
     }
-
 }
 
 
