@@ -172,6 +172,6 @@ An example implementation of this demo project (released: 2022-11-26)
 
 For more information see links to source code of API tests:
 
-* [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/core/CoreTest.kt)
-* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/orm/OrmTest.kt) 
+* [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/core/CoreTest.kt)
+* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/orm/OrmTest.kt) 
 * Inspired by the [Ujorm framework](https://ujorm.org/www/).
