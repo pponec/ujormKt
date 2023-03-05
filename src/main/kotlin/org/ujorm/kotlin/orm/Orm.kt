@@ -19,16 +19,15 @@ import org.ujorm.kotlin.core.*
 import org.ujorm.kotlin.core.impl.*
 import java.util.*
 import java.util.stream.Stream
-import kotlin.reflect.KClass
 
 abstract class AbstractDatabase : AbstractEntityProvider() {
 
     fun <D : Any> select(table: EntityModel<D>): Query<D> {
-        TODO()
+        TODO("Not yet implemented")
     }
 
     fun <D : Any> select(vararg properies: PropertyNullable<D, *>): Query<D> {
-        TODO()
+        TODO("Not yet implemented")
     }
 
     fun <D : Any> where(criterion: Criterion<D, *, *>): Query<D> {
@@ -51,13 +50,13 @@ abstract class AbstractDatabase : AbstractEntityProvider() {
     }
 
     protected fun saveRawEntity(entity: RawEntity<*>) {
-        TODO()
+        TODO("Not yet implemented")
     }
 
     // --- Native query
 
     fun selectToMaps(): NativeQuery {
-        TODO()
+        TODO("Not yet implemented")
     }
 
 }
@@ -120,18 +119,18 @@ open class Query<D : Any> {
 open class NativeQuery {
     fun item(vararg expr: Any): Column {
         TODO("Not yet implemented")
-        return Column(this);
+        return Column(this)
     }
 
     @Deprecated("Remove it")
     fun <V : Any> item(map: Pair<PropertyNullable<RawEntity<DbRecord>, V>, Any>, vararg sql: Any): NativeQuery {
         TODO("Not yet implemented")
-        return this;
+        return this
     }
 
     fun join(vararg expr: CharSequence): Column {
         TODO("Not yet implemented")
-        return Column(this);
+        return Column(this)
     }
 
     fun <V : Any> where(
@@ -158,13 +157,12 @@ open class Column(
 ) {
     fun <V : Any> to(property: PropertyNullable<RawEntity<DbRecord>, V>): NativeQuery {
         TODO("Not yet implemented")
-        return nativeQuery;
+        return nativeQuery
     }
 }
 
 /** Database session */
 interface Session {
-
 }
 
 /** Property Map */

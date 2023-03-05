@@ -74,7 +74,7 @@ internal class UjormBreafOrmTest {
     @Test
     @Disabled("Only a first draft of API is implemented")
     internal fun extendedSelect() {
-       TODO()
+        TODO("Not yet implemented")
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.*
  * or see: https://xperti.io/blogs/java-dynamic-proxies-introduction/
  */
 class RawEntity<D : Any> : InvocationHandler {
-    private val model: EntityModel<D>
+    internal val model: EntityModel<D>
     private val values: Array<Any?>
     private var changes: BitSet? = null
     var session: Session? = null
@@ -54,7 +54,7 @@ class RawEntity<D : Any> : InvocationHandler {
                     if (args.isNullOrEmpty()) {
                         return get(property)
                     } else {
-                        set(property, args.first())
+                        set(property.data(), args.first())
                         return Unit
                     }
                 } else {
@@ -84,20 +84,20 @@ class RawEntity<D : Any> : InvocationHandler {
 
     /** Get nullable value by a direct access. */
     @Deprecated("Use the method with argument type of PropertyMetadata rather.")
-    inline internal operator fun <V : Any> get(property: PropertyNullableImpl<D, V>) : V? =
+    internal operator fun <V : Any> get(property: PropertyNullableImpl<D, V>) : V? =
         get(property.data())
 
     /** Get nullable value by a direct access. */
-    internal operator fun <V : Any> get(propertyData: PropertyMetadata<D, V>) : V? =
+    operator fun <V : Any> get(propertyData: PropertyMetadata<D, V>) : V? =
         values[propertyData.indexToInt()] as V?
 
     /** Set a nullable value */
-    operator fun <V : Any> set(property: PropertyNullable<D, V>, value: V?) {
+    operator fun <V : Any> set(propertyData: PropertyMetadata<D, V>, value: V?) {
         if (session != null) {
             if (changes == null) changes = BitSet(model.utils().size)
             changes!!.set(1)
         }
-        values[property.data().indexToInt()] = value
+        values[propertyData.indexToInt()] = value
     }
 
     fun <V : Any> isChanged(property: PropertyNullable<D, V>) =

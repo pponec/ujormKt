@@ -115,10 +115,15 @@ internal class CoreTest {
         expect(employee[employees.department + departments.name]).toEqual("C")
         employee[employees.department + departments.name] = departmentName
 
-        // Create relation instance(s): // TODO:
-        val employee2 = employees.new()
+        // Set value including all related entities:
+        employee.superior = null // reset a superior
         val departmentNameProperty = employees.department + departments.name
-//      employee2[departmentNameProperty] = "Test"
+        MyDatabase.utils().setValueWithRelations(employee, "X", departmentNameProperty)
+        expect(employee.department.name).to("X")
+
+        // Find metamodel by the entity class
+        val employesModel = MyDatabase.utils().findEntityModel(Employee::class)
+        expect(employesModel).toBeTheInstance(MyDatabase.employees)
     }
 
     /** Test conditions */
@@ -212,16 +217,16 @@ internal class CoreTest {
 
         // Method creates new  Department entity:
         entities.utils().setValueWithRelations(employee, 88,
-            employees.department + departments.id);
+            employees.department + departments.id)
         expect(employee[employees.department + departments.id]).toEqual(88)
 
         entities.utils().setValueWithRelations(employee, "Advertising",
-            employees.department + departments.name);
+            employees.department + departments.name)
         expect(employee[employees.department + departments.name]).toEqual("Advertising")
 
         // Method creates new Department entity:
         entities.utils().setValueWithRelations(employee, 99,
-            employees.superior + employees.department + departments.id);
+            employees.superior + employees.department + departments.id)
         expect(employee[employees.superior + employees.department + departments.id]).toEqual(99)
     }
 
@@ -241,13 +246,13 @@ internal class CoreTest {
         expect(aliasEmployees.id.info()).toEqual("Employee(e).id")
         expect(aliasEmployees.department.info()).toEqual("Employee(e).department")
 
-        var idAliasHash = aliasEmployees.id.hashCode()
-        var idHash = MyDatabase.employees.id.hashCode()
-        var nameAliasHash = aliasEmployees.name.hashCode()
-        var idAliasName = aliasEmployees.id.name()
-        var idName = aliasEmployees.id.name()
-        var idAlias2 = aliasEmployees.id.entityAlias("e") // Alias for a single property
-        var idAlias3 = aliasEmployees.id("e") // Shortcut for new alias
+        val idAliasHash = aliasEmployees.id.hashCode()
+        val idHash = MyDatabase.employees.id.hashCode()
+        val nameAliasHash = aliasEmployees.name.hashCode()
+        val idAliasName = aliasEmployees.id.name()
+        val idName = aliasEmployees.id.name()
+        val idAlias2 = aliasEmployees.id.entityAlias("e") // Alias for a single property
+        val idAlias3 = aliasEmployees.id("e") // Shortcut for new alias
 
         expect(idAliasName).toEqual(idName)
         expect(idAliasHash).notToEqual(idHash) // Different hash codes
@@ -274,6 +279,54 @@ internal class CoreTest {
         expect(department1).toEqual(department2)
         expect(department1).notToEqual(department3)
         expect(department2).notToEqual(department3)
+    }
+
+    /** Copying one object to another */
+    @Test
+    fun copyObject() {
+        val employees = MyDatabase.employees // Employee metamodel
+        val target: Employee = employees.new()
+        val source: Employee = employees.new { // Create new employee object
+            id = 11
+            name = "John"
+            higherEducation = false
+            contractDay = LocalDate.now()
+            department = createDepartment(2, "D")
+        }
+
+        employees.utils().properties.forEach{
+            target[it] = source[it]
+        }
+
+        expect(target.id).toEqual(source.id)
+        expect(target.name).toEqual(source.name)
+        expect(target.higherEducation).toEqual(source.higherEducation)
+        expect(target.contractDay).toEqual(source.contractDay)
+        expect(target.department).toEqual(source.department)
+        expect(target).toEqual(source)
+    }
+
+
+    /** Clone an object to a new one */
+    @Test
+    fun cloneObject() {
+        val employees = MyDatabase.employees // Employee metamodel
+        val source: Employee = employees.new { // Create new employee object
+            id = 11
+            name = "John"
+            higherEducation = false
+            contractDay = LocalDate.now()
+            department = createDepartment(2, "D")
+        }
+
+        val target: Employee = MyDatabase.utils().clone(source)
+
+        expect(target.id).toEqual(source.id)
+        expect(target.name).toEqual(source.name)
+        expect(target.higherEducation).toEqual(source.higherEducation)
+        expect(target.contractDay).toEqual(source.contractDay)
+        expect(target.department).toEqual(source.department)
+        expect(target).toEqual(source)
     }
 }
 

@@ -160,20 +160,18 @@ An example implementation of this demo project (released: 2022-11-26)
 ![Class diagram](docs/Demo.png)
 
 
-
 # What remains to be done
 
-- building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
+- Building remote attribute models (via relationships) is not supported yet (including reading and writing values of POJO)
 - API cleaning
 - Serialize a `Criterion` object into `JSON` format and parsing the result back to the object.
+- The domain object model should be generated according to the original POJO objects in feature
 - Integrate the model filters with the some ORM framework ([Ujorm](https://ujorm.org/www/) ?)
-- the domain object model should be generated according to the original POJO objects in feature
-- integration with some ORM
 
 # Links
 
 For more information see links to source code of API tests:
 
-* [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/core/CoreTest.kt)
-* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/java/org/ujorm/kotlin/orm/OrmTest.kt) 
+* [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/core/CoreTest.kt)
+* [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/orm/OrmTest.kt) 
 * Inspired by the [Ujorm framework](https://ujorm.org/www/).

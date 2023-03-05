@@ -8,15 +8,15 @@
     <artifactId>coreKt</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>MiniWebTest2</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
+    <name>UjormKt</name>
+    <url>https://github.com/pponec/ujormKt</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <kotlin.version>1.7.20</kotlin.version>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <kotlin.version>1.7.22</kotlin.version>
     </properties>
 
     <dependencies>
@@ -36,8 +36,8 @@
 
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
+            <artifactId>kotlin-test-junit</artifactId>
+            <version>1.7.10</version>
             <scope>test</scope>
         </dependency>
 
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>ch.tutteli.atrium</groupId>
             <artifactId>atrium-fluent-en_GB</artifactId>
-            <version>0.17.0</version>
+            <version>0.18.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.ktorm</groupId>
             <artifactId>ktorm-core</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -83,10 +83,11 @@
             <version>1.13.2</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
