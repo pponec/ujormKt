@@ -54,7 +54,7 @@ and an `INSERT` for example:
         created = LocalDate.of(2020, 10, 1)
     }
     val lucy: Employee = MyDatabase.employees.new {
-        name = "lucy"
+        name = "Lucy"
         contractDay = LocalDate.of(2022, 1, 1)
         superior = null
         department = development

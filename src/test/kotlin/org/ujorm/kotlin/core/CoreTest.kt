@@ -21,6 +21,7 @@ import java.time.LocalDate
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.*
 
+@Suppress("UnusedEquals")
 internal class CoreTest {
 
     @Test
@@ -148,13 +149,18 @@ internal class CoreTest {
         val crn4 = crn1 OR (crn2 AND crn3)
         val crn5 = crn1.not() OR (crn2 AND crn3)
 
-        expect(crn1(employee)).equals(false) // Invalid employee
         expect(crn4(employee)).equals(true)  // Valid employee
-        expect(crn1.toString()).toEqual("""Employee: name EQ "Lucy"""")
-        expect(crn2.toString()).toEqual("""Employee: id GT 1""")
-        expect(crn3.toString()).toEqual("""Employee: department.id LT 99""")
-        expect(crn4.toString()).toEqual("""Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
-        expect(crn5.toString()).toEqual("""Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
+        expect(crn5(employee)).equals(false) // Invalid employee
+        expect(crn1.toString())
+            .toEqual("""Employee: name EQ "Lucy"""")
+        expect(crn2.toString())
+            .toEqual("""Employee: id GT 1""")
+        expect(crn3.toString())
+            .toEqual("""Employee: department.id LT 99""")
+        expect(crn4.toString())
+            .toEqual("""Employee: (name EQ "Lucy") OR (id GT 1) AND (department.id LT 99)""")
+        expect(crn5.toString())
+            .toEqual("""Employee: (NOT (name EQ "Lucy")) OR (id GT 1) AND (department.id LT 99)""")
     }
 
     /** Sample of usage */
