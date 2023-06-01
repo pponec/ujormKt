@@ -21,8 +21,8 @@ internal class OrmTest {
             employees.name,
             employees.department + departments.name, // DB relation by the inner join
             employees.superior + employees.name, // DB relation by the left outer join
-        ).where((employees.department + departments.id GE 1)
-                    AND (employees.department + departments.name STARTS "D"))
+        ).where(employees.department + departments.id GE 1
+                   AND (employees.department + departments.name STARTS "D"))
             .orderBy(
                 employees.department + departments.name ASCENDING false,
                 employees.name ASCENDING true
@@ -69,8 +69,8 @@ internal class OrmTest {
             employees.department + departments.name, // Required relation by the inner join
             employees.superior + employees.name, // Optional relation by the left outer join
             employees.department + departments.created,
-        ).where((employees.department + departments.id GE 1)
-                    AND (employees.department + departments.name STARTS "A"))
+        ).where(employees.department + departments.id GE 1
+                   AND (employees.department + departments.name STARTS "A"))
             .orderBy(employees.department + departments.created ASCENDING false)
             .toList()
 
