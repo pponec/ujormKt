@@ -173,6 +173,7 @@ An example implementation of this demo project (released: 2022-11-26)
 
 For more information see links to source code of API tests:
 
+* [Link to a detailed article on DZone.](https://dzone.com/articles/new-orm-framework-for-kotlin)
 * [Basic skills with entity model](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/core/CoreTest.kt)
 * [ORM API desing](https://github.com/pponec/ujormKt/blob/main/src/test/kotlin/org/ujorm/kotlin/orm/OrmTest.kt) 
 * Inspired by the [Ujorm framework](https://ujorm.org/www/).
