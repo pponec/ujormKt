@@ -4,7 +4,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.toEqual
 import ch.tutteli.atrium.api.verbs.expect
 import org.junit.jupiter.api.Test
 
-internal class HtmlTest {
+internal class TestHtmlOriginal {
 
     @Test
     fun buildHtmlPage() {
@@ -86,7 +86,6 @@ class Body {
             builder.append(text)
         }
         builder.append('\n')
-
     }
 
     override fun toString(): String {
