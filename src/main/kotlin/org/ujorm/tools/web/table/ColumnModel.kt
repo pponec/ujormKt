@@ -13,173 +13,143 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.table;
+package org.ujorm.tools.web.table
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.msg.MsgFormatter;
-import org.ujorm.tools.web.ao.Column;
-import org.ujorm.tools.web.ao.HttpParameter;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.msg.MsgFormatter
+import org.ujorm.tools.web.ao.Column
+import org.ujorm.tools.web.ao.HttpParameter
+import java.io.IOException
+import java.util.function.Function
+import java.util.regex.Pattern
+import kotlin.math.abs
 
 /**
  * Table column model
  *
  * @author Pavel Ponec
  */
-public class ColumnModel<D, V> {
+class ColumnModel<D, V>(
+    val index: Int,
+    column: Function<D, V?>,
+    title: CharSequence,
+    val param: HttpParameter?
+) {
+    val column: Function<D, V>
+    val title: CharSequence
 
-    private static final NullPointerException x = null;
+    /** Is the column sortable?  */
+    var isSortable: Boolean = false
+        private set
+    private var direction = Direction.NONE
 
-    /** Number pattern */
-    private static final Pattern NUMBER = Pattern.compile("-?\\d+");
-
-    private final int index;
-    @NotNull
-    private final Function<D, V> column;
-    @NotNull
-    private final CharSequence title;
-    @Nullable
-    private final HttpParameter param;
-    /** Is the column sortable? */
-    private boolean sortable = false;
-    @NotNull
-    private Direction direction = Direction.NONE;
-
-    public ColumnModel(@NotNull Direction direction, int index) {
-        this(index, x -> null, "", null);
-        setSortable(direction);
+    constructor(direction: Direction, index: Int) : this(
+        index,
+        Function<D, V?> { x: D -> null }, "", null
+    ) {
+        setSortable(direction)
     }
 
-    public ColumnModel(final int index,
-                       @NotNull final Function<D, V> column,
-                       @NotNull final CharSequence title,
-                       @Nullable final HttpParameter param) {
-        this.index = index;
-        this.column = Assert.notNull(column, "column");
-        this.title = Assert.notNull(title, "title");
-        this.param = param;
+    init {
+        this.column = Assert.notNull(column, "column")
+        this.title = Assert.notNull(title, "title")
     }
 
-    public int getIndex() {
-        return index;
+    fun getParam(defaultValue: HttpParameter): HttpParameter {
+        return param ?: defaultValue
     }
 
-    @NotNull
-    public Function<D, V> getColumn() {
-        return column;
+    fun getDirection(): Direction {
+        return direction
     }
 
-    @NotNull
-    public CharSequence getTitle() {
-        return title;
+    val isFiltered: Boolean
+        get() = param != null
+
+    fun setSortable(direction: Direction) {
+        this.isSortable = true
+        setDirection(direction)
     }
 
-    @Nullable
-    public HttpParameter getParam() {
-        return param;
-    }
-
-    @NotNull
-    public HttpParameter getParam(@NotNull final HttpParameter defaultValue) {
-        return param != null ? param : defaultValue;
-    }
-
-    public boolean isSortable() {
-        return sortable;
-    }
-
-    @NotNull
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public boolean isFiltered() {
-        return param != null;
-    }
-
-    public final void setSortable(@NotNull final Direction direction) {
-        this.sortable = true;
-        setDirection(direction);
-    }
-
-    public final void setDirection(@NotNull final Direction direction) {
-        this.direction = Assert.notNull(direction, "direction");
+    fun setDirection(direction: Direction) {
+        this.direction = Assert.notNull(direction, "direction")
     }
 
     /**
      * Write the content to an appendable text stream
      */
-    public String toCode(final boolean opposite) {
+    fun toCode(opposite: Boolean): String {
         try {
-            return toCode(opposite, new StringBuilder(4)).toString();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            return toCode(opposite, StringBuilder(4)).toString()
+        } catch (e: IOException) {
+            throw IllegalStateException(e)
         }
     }
 
     /**
      * Write the content to an appendable text stream where the default direction is an ASCENDING.
      */
-    public Appendable toCode(final boolean opposite, @NotNull final Appendable writer) throws IOException {
-        final int coeff = (Direction.ASC.safeEquals(direction) == opposite) ? -1 : 1;
-        writer.append(String.valueOf(coeff * (index + 1)));
-        return writer;
+    @Throws(IOException::class)
+    fun toCode(opposite: Boolean, writer: Appendable): Appendable {
+        val coeff = if ((Direction.ASC.safeEquals(direction) == opposite)) -1 else 1
+        writer.append((coeff * (index + 1)).toString())
+        return writer
     }
 
-    /** Get comparator of a sortable column */
-    @NotNull
-    public Comparator<D> getComparator(@Nullable final Function<D,?> defaultFce) {
-        return getComparator(Comparator.comparing((Function)defaultFce));
+    /** Get comparator of a sortable column  */
+    fun getComparator(defaultFce: Function<D, *>?): Comparator<D> {
+        return getComparator(Comparator.comparing<Any, Comparable<*>>(defaultFce as Function<*, *>?))
     }
 
-    /** Get comparator of a sortable column */
-    @NotNull
-    public Comparator<D> getComparator(@NotNull final Comparator<D> defaultCompar) {
-        if (sortable && isIncludeColumnType()) {
-            final Comparator<D> compar = Comparator.comparing((Function) column);
-            switch (direction) {
-                case ASC:
-                    return compar;
-                case DESC:
-                    return compar.reversed();
+    /** Get comparator of a sortable column  */
+    fun getComparator(defaultCompar: Comparator<D>): Comparator<D> {
+        if (isSortable && isIncludeColumnType) {
+            val compar: Comparator<D> = Comparator.comparing<Any, Comparable<*>>(column as Function<*, *>)
+            when (direction) {
+                Direction.ASC -> return compar
+                Direction.DESC -> return compar.reversed()
             }
         }
-        return defaultCompar;
+        return defaultCompar
     }
 
-    /** Including is more common choice */
-    protected boolean isIncludeColumnType() {
-        if (true) {
-            return true;
+    protected val isIncludeColumnType: Boolean
+        /** Including is more common choice  */
+        get() = if (true) {
+            true
         } else {
-            return !(column instanceof Column);
+            column !is Column<*>
+        }
+
+    override fun toString(): String {
+        return MsgFormatter.format("[{}]:{}:{}", index, title, if (isSortable) direction.name else "-")
+    }
+
+    companion object {
+        private val x: NullPointerException? = null
+
+        /** Number pattern  */
+        private val NUMBER: Pattern = Pattern.compile("-?\\d+")
+
+        fun ofCode(paramValue: String): ColumnModel<*, *> {
+            if (NUMBER.matcher(paramValue).matches()) {
+                val intCode = paramValue.toInt()
+                val direction: Direction = Direction.Companion.of(intCode > 0)
+                return ColumnModel<Any, Any>(
+                    direction,
+                    (abs(intCode.toDouble()) - 1).toInt()
+                )
+            } else {
+                return ColumnModel<Any, Any>(Direction.NONE, -1)
+            }
+        }
+
+        /** Create a stub column  */
+        fun <D, V> ofStub(): ColumnModel<D, V?> {
+            return ColumnModel(
+                -1,
+                { x: D -> null }, "", null
+            )
         }
     }
-
-    @Override
-    public String toString() {
-        return MsgFormatter.format("[{}]:{}:{}", index, title, sortable ? direction.name() : "-");
-    }
-
-    @NotNull
-    public static ColumnModel ofCode(@NotNull final String paramValue) {
-        if (NUMBER.matcher(paramValue).matches()) {
-            final int intCode = Integer.parseInt(paramValue);
-            final Direction direction = Direction.of(intCode > 0);
-            return new ColumnModel<>(direction, Math.abs(intCode) - 1);
-        } else {
-            return new ColumnModel<>(Direction.NONE, -1);
-        }
-    }
-
-    /** Create a stub column */
-    public static <D, V> ColumnModel<D, V> ofStub() {
-        return new ColumnModel<D,V>(-1, x -> null, "", null);
-    }
-
 }

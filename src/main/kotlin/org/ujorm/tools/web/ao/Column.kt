@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import java.util.function.Function;
-import org.jetbrains.annotations.NotNull;
-import org.ujorm.tools.web.Element;
+import org.ujorm.tools.web.Element
+import java.util.function.Function
 
 /**
  * Table column value writer
  * @param <T> Domain Object
  * @author Pavel Ponec
- */
+</T> */
 @FunctionalInterface
-public interface Column<T> extends Function<T, Object> {
-
+interface Column<T> : Function<T, Any> {
     /**
-     *  The method can be implemented for sortable columns
+     * The method can be implemented for sortable columns
      * @param t A domaim objject
-     * @return Returns a constatn {@code "?"}, for a Sortable columns must return a serializable object.
+     * @return Returns a constatn `"?"`, for a Sortable columns must return a serializable object.
      */
-    @Override
-    default Object apply(@NotNull T t) {
-        return "?";
+    override fun apply(t: T): Any {
+        return "?"
     }
 
     /** Write a custom content of the table cell
@@ -42,6 +39,5 @@ public interface Column<T> extends Function<T, Object> {
      * @param parent An element of the table detail.
      * @param value Value to write.
      */
-    void write(@NotNull Element parent, T value);
-
+    fun write(parent: Element, value: T)
 }

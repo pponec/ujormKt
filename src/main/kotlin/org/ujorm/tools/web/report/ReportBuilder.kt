@@ -13,34 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.report;
+package org.ujorm.tools.web.report
 
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import org.ujorm.tools.web.request.RContext;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.web.Element;
-import org.ujorm.tools.web.Html;
-import org.ujorm.tools.web.HtmlElement;
-import org.ujorm.tools.web.ajax.JavaScriptWriter;
-import org.ujorm.tools.web.ajax.ReqestDispatcher;
-import org.ujorm.tools.web.ao.Column;
-import org.ujorm.tools.web.ao.HttpParameter;
-import org.ujorm.tools.web.ao.Injector;
-import org.ujorm.tools.web.json.JsonBuilder;
-import org.ujorm.tools.web.table.ColumnModel;
-import org.ujorm.tools.web.table.Direction;
-import org.ujorm.tools.web.table.GridBuilder;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.web.Element
+import org.ujorm.tools.web.Html
+import org.ujorm.tools.web.HtmlElement
+import org.ujorm.tools.web.ajax.JavaScriptWriter
+import org.ujorm.tools.web.ajax.ReqestDispatcher
+import org.ujorm.tools.web.ao.Column
+import org.ujorm.tools.web.ao.HttpParameter
+import org.ujorm.tools.web.ao.Injector
+import org.ujorm.tools.web.json.JsonBuilder
+import org.ujorm.tools.web.request.RContext
+import org.ujorm.tools.web.table.ColumnModel
+import org.ujorm.tools.web.table.Direction
+import org.ujorm.tools.web.table.GridBuilder
+import org.ujorm.tools.xml.config.HtmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.io.IOException
+import java.util.function.Function
+import java.util.function.Supplier
+import java.util.logging.Level
+import java.util.logging.Logger
+import java.util.stream.Stream
 
 /**
  * A HTML page builder for table based report with an AJAX support.
@@ -48,317 +45,308 @@ import org.ujorm.tools.xml.config.HtmlConfig;
  * <h3>Usage</h3>
  *
  * <pre class="pre">
- *  ReportBuilder.of("Hotel Report")
- *          .add(Hotel::getName, "Hotel", NAME)
- *          .add(Hotel::getCity, "City", CITY)
- *          .add(Hotel::getStreet, "Street")
- *          .build(ServletRequest, ServletResponse, resource);
- * </pre>
+ * ReportBuilder.of("Hotel Report")
+ * .add(Hotel::getName, "Hotel", NAME)
+ * .add(Hotel::getCity, "City", CITY)
+ * .add(Hotel::getStreet, "Street")
+ * .build(ServletRequest, ServletResponse, resource);
+</pre> *
  *
  * @author Pavel Ponec
  */
-public class ReportBuilder<D> {
+class ReportBuilder<D> @JvmOverloads constructor(
+    /** Table builder config  */
+    protected val config: ReportBuilderConfig<*>,
+    /** Grid builder  */
+    protected val gridBuilder: GridBuilder<D> = GridBuilder(
+        config
+    )
+) {
+    /** AJAX request param  */
+    protected var ajaxRequestParam: HttpParameter = JavaScriptWriter.Companion.DEFAULT_AJAX_REQUEST_PARAM
 
-    /** Logger */
-    private static final Logger LOGGER = Logger.getLogger(ReportBuilder.class.getName());
-    /** An undefined parameter */
-    private static final HttpParameter UNDEFINED_PARAM = HttpParameter.of("UNDEFINED_PARAM");
+    /** Extension is empty by default  */
+    protected var htmlHeader: Injector = Injector { e: Element? -> }
 
-    /** Grid builder */
-    @NotNull
-    protected final GridBuilder<D> gridBuilder;
-    /** Table builder config */
-    protected final ReportBuilderConfig config;
-    /** AJAX request param */
-    @NotNull
-    protected HttpParameter ajaxRequestParam = JavaScriptWriter.DEFAULT_AJAX_REQUEST_PARAM;
-    /** Extension is empty by default */
-    @NotNull
-    protected Injector htmlHeader = e -> {};
-    /** Print a config title by default */
-    @NotNull
-    protected Injector header = e -> e.addHeading(ReportBuilder.this.config.getConfig().title);
-    /** Print an empty text by default */
-    @NotNull
-    protected Injector footer = e -> e.addText("");
-    /** Form injector */
-    @NotNull
-    protected Injector formAdditions = footer;
-    /** Javascript writer */
-    @NotNull
-    protected Supplier<Injector> javascritWriter = () -> new JavaScriptWriter()
-            .setAjax(ReportBuilder.this.ajaxEnabled)
-            .setSubtitleSelector("." + ReportBuilder.this.config.getSubtitleCss());
-    /** is An AJAX enabled? */
-    protected boolean ajaxEnabled = true;
-    /** Call an autosubmit on first load */
-    protected boolean autoSubmmitOnLoad = false;
-    /** Sorted column index */
-    private int sortedColumn = -1;
-
-    public ReportBuilder(@NotNull CharSequence title) {
-        this((HtmlConfig) HtmlConfig.ofDefault().setTitle(title).setNiceFormat());
+    /** Print a config title by default  */
+    protected var header: Injector = Injector { e: Element ->
+        e.addHeading(
+            config.config.title
+        )
     }
 
-    public ReportBuilder(@NotNull HtmlConfig config) {
-        this(ReportBuilderConfig.of(config));
+    /** Print an empty text by default  */
+    protected var footer: Injector = Injector { e: Element -> e.addText("") }
+
+    /** Form injector  */
+    protected var formAdditions: Injector = footer
+
+    /** Javascript writer  */
+    protected var javascritWriter: Supplier<Injector> = Supplier {
+        JavaScriptWriter()
+            .setAjax(this@ReportBuilder.ajaxEnabled)
+            .setSubtitleSelector("." + config.subtitleCss)
     }
 
-    public ReportBuilder(@NotNull ReportBuilderConfig config) {
-        this(config, new GridBuilder<>(config));
+    /** is An AJAX enabled?  */
+    protected var ajaxEnabled: Boolean = true
+
+    /** Call an autosubmit on first load  */
+    protected var autoSubmmitOnLoad: Boolean = false
+
+    /** Sorted column index  */
+    private var sortedColumn = -1
+
+    constructor(title: CharSequence) : this(
+        HtmlConfig.ofDefault().setTitle(title).setNiceFormat<DefaultXmlConfig>() as HtmlConfig
+    )
+
+    constructor(config: HtmlConfig) : this(ReportBuilderConfig.Companion.of(config))
+
+    fun <V> add(column: Function<D?, V?>?): ReportBuilder<D> {
+        gridBuilder.add(column)
+        return this
     }
 
-    public ReportBuilder(@NotNull ReportBuilderConfig config, @NotNull GridBuilder<D> builder) {
-        this.gridBuilder = builder;
-        this.config = config;
+    fun <V> add(column: Function<D?, V?>?, title: CharSequence?): ReportBuilder<D> {
+        gridBuilder.add(column, title)
+        return this
     }
 
-    @NotNull
-    public <V> ReportBuilder<D> add(Function<D,V> column) {
-        gridBuilder.add(column);
-        return this;
+    fun <V> add(column: Function<D?, V?>?, title: Injector?): ReportBuilder<D> {
+        gridBuilder.add(column, title!!)
+        return this
     }
 
-    @NotNull
-    public <V> ReportBuilder<D> add(Function<D,V> column, CharSequence title) {
-        gridBuilder.add(column, title);
-        return this;
+    fun <V> add(column: Function<D?, V?>?, title: CharSequence?, param: HttpParameter?): ReportBuilder<D> {
+        gridBuilder.add(column, title, param)
+        return this
     }
 
-    @NotNull
-    public <V> ReportBuilder<D> add(Function<D,V> column, Injector title) {
-        gridBuilder.add(column, title);
-        return this;
+    fun <V> add(column: Function<D?, V?>?, title: Injector?, param: HttpParameter?): ReportBuilder<D> {
+        gridBuilder.add(column, title!!, param)
+        return this
     }
 
-    @NotNull
-    public <V> ReportBuilder<D> add(Function<D,V> column, CharSequence title, @Nullable HttpParameter param) {
-        gridBuilder.add(column, title, param);
-        return this;
+    fun addColumn(column: Column<D?>, title: CharSequence): ReportBuilder<D> {
+        gridBuilder.add(column, title)
+        return this
     }
 
-    @NotNull
-    public <V> ReportBuilder<D> add(Function<D,V> column, Injector title, @Nullable HttpParameter param) {
-        gridBuilder.add(column, title, param);
-        return this;
+    fun addColumn(column: Column<D?>, title: Injector): ReportBuilder<D> {
+        gridBuilder.add(column, title)
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> addColumn(@NotNull final Column<D> column, @NotNull final CharSequence title) {
-        gridBuilder.add(column, title);
-        return this;
+    /** Add new column for a row counting  */
+    fun addOrder(title: CharSequence): ReportBuilder<D> {
+        gridBuilder.addOrder(title)
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> addColumn(@NotNull final Column<D> column, @NotNull final Injector title) {
-        gridBuilder.add(column, title);
-        return this;
+    /** Get column model by index  */
+    fun getColumn(index: Int): ColumnModel<D?, *>? {
+        return gridBuilder.getColumn(index)
     }
 
-    /** Add new column for a row counting */
-    @NotNull
-    public ReportBuilder<D> addOrder(@NotNull final CharSequence title) {
-        gridBuilder.addOrder(title);
-        return this;
-    }
-
-    /** Get column model by index */
-    public ColumnModel<D,?> getColumn(int index) {
-        return gridBuilder.getColumn(index);
-    }
-
-    /** Returns a count of columns */
-    public int getColumnSize() {
-        return gridBuilder.getColumnSize();
-    }
+    val columnSize: Int
+        /** Returns a count of columns  */
+        get() = gridBuilder.columnSize
 
     /**
      * Add a sortable indicator to the last column model
      * @return
      */
-    @NotNull
-    public <V> ReportBuilder<D> sortable() {
-        gridBuilder.sortable();
-        return this;
+    fun <V> sortable(): ReportBuilder<D> {
+        gridBuilder.sortable<Any>()
+        return this
     }
+
     /**
      * Add a sortable indicator to the last column model
      * @param ascending Ascending or descending direction of the sort
      * @return
      */
-    @NotNull
-    public <V> ReportBuilder<D> sortable(@Nullable final boolean ascending) {
-        gridBuilder.sortable(ascending);
-        return this;
+    fun <V> sortable(ascending: Boolean): ReportBuilder<D> {
+        gridBuilder.sortable<Any>(ascending)
+        return this
     }
 
     /**
      * Add a sortable indicator to the last column model
-     * @param direction The {@code null} value shows an unused sorting action.
+     * @param direction The `null` value shows an unused sorting action.
      * @return
      */
-    @NotNull
-    public <V> ReportBuilder<D> sortable(@NotNull final Direction direction) {
-        gridBuilder.sortable(direction);
-        return this;
+    fun <V> sortable(direction: Direction): ReportBuilder<D> {
+        gridBuilder.sortable<Any>(direction)
+        return this
     }
 
-    /** Get sorted column or a stub if the sorted column not found */
-    @NotNull
-    public ColumnModel<D,?> getSortedColumn() {
-        return gridBuilder.getSortedColumn();
+    /** Get sorted column or a stub if the sorted column not found  */
+    fun getSortedColumn(): ColumnModel<D?, *> {
+        return gridBuilder.sortedColumn
     }
 
-    @NotNull
-    public ReportBuilder<D> setAjaxRequestParam(@NotNull HttpParameter ajaxRequestParam) {
-        this.ajaxRequestParam = Assert.notNull(ajaxRequestParam, "ajaxRequestParam");
-        return this;
+    fun setAjaxRequestParam(ajaxRequestParam: HttpParameter): ReportBuilder<D> {
+        this.ajaxRequestParam = Assert.notNull(ajaxRequestParam, "ajaxRequestParam")
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> setHtmlHeader(@NotNull Injector htmlHeader) {
-        this.htmlHeader = Assert.notNull(htmlHeader, "htmlHeader");
-        return this;
+    fun setHtmlHeader(htmlHeader: Injector): ReportBuilder<D> {
+        this.htmlHeader = Assert.notNull(htmlHeader, "htmlHeader")
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> setHeader(@NotNull Injector header) {
-        this.header = Assert.notNull(header, "header");
-        return this;
+    fun setHeader(header: Injector): ReportBuilder<D> {
+        this.header = Assert.notNull(header, "header")
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> setFooter(@NotNull Injector footer) {
-        this.footer = Assert.notNull(footer, "footer");
-        return this;
+    fun setFooter(footer: Injector): ReportBuilder<D> {
+        this.footer = Assert.notNull(footer, "footer")
+        return this
     }
 
-    @NotNull
-    public ReportBuilder<D> setFormItem(@NotNull Injector formItem) {
-        this.formAdditions = Assert.notNull(formItem, "formAdditions");
-        return this;
+    fun setFormItem(formItem: Injector): ReportBuilder<D> {
+        this.formAdditions = Assert.notNull(formItem, "formAdditions")
+        return this
     }
 
-    /** Enable of disable an AJAX feature, default value si {@code true} */
-    public ReportBuilder<D> setAjaxEnabled(boolean ajaxEnabled) {
-        this.ajaxEnabled = ajaxEnabled;
-        return this;
+    /** Enable of disable an AJAX feature, default value si `true`  */
+    fun setAjaxEnabled(ajaxEnabled: Boolean): ReportBuilder<D> {
+        this.ajaxEnabled = ajaxEnabled
+        return this
     }
 
-    public ReportBuilder<D> setJavascritWriter(@NotNull Supplier<Injector> javascritWriter) {
-        this.javascritWriter = Assert.notNull(javascritWriter, "javascritWriter");
-        return this;
+    fun setJavascritWriter(javascritWriter: Supplier<Injector>): ReportBuilder<D> {
+        this.javascritWriter = Assert.notNull(javascritWriter, "javascritWriter")
+        return this
     }
 
-    public ReportBuilder<D> setEmbeddedIcons(boolean embeddedIcons) throws IllegalStateException {
-        if (config instanceof ReportBuilderConfigImpl) {
-            ((ReportBuilderConfigImpl)config).setEmbeddedIcons(embeddedIcons);
+    @Throws(IllegalStateException::class)
+    fun setEmbeddedIcons(embeddedIcons: Boolean): ReportBuilder<D> {
+        if (config is ReportBuilderConfigImpl<*>) {
+            config.setEmbeddedIcons(embeddedIcons)
         } else {
-            throw new IllegalStateException("Configuration must be type of: " + ReportBuilderConfigImpl.class);
+            throw IllegalStateException("Configuration must be type of: " + ReportBuilderConfigImpl::class.java)
         }
-        return this;
+        return this
     }
 
-    /** Build the HTML page including a table */
-    public void build(
-            @NotNull final RContext context,
-            @NotNull final Stream<D> resource) {
-        build(context, tableBuilder -> resource);
-    }
-
-    /** Build the HTML page including a table */
-    public void build(
-            @NotNull final RContext context,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource) {
-        try {
-            setSort(ColumnModel.ofCode(config.getSortRequestParam().of(context)));
-            new ReqestDispatcher(context, config.getConfig())
-                    .onParam(config.getAjaxRequestParam(), jsonBuilder -> doAjax(context, jsonBuilder, resource))
-                    .onDefaultToElement(element -> printHtmlBody(context, element, resource));
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Internal server error", e);
-            throw new IllegalStateException("500"); // TODO.pop
-        }
-    }
-
-    /** Mark a column as sortable */
-    protected void setSort(@NotNull final ColumnModel sort) {
-        this.sortedColumn = sort.getIndex();
-        if (sortedColumn >= 0) {
-            final int[] i = {-1};
-            gridBuilder.getColumns().forEach(cm -> {
-                ++i[0];
-                if (cm.isSortable()) {
-                    cm.setDirection(sort.getIndex() == i[0]
-                            ? sort.getDirection()
-                            : Direction.NONE);
-                }
-            });
-        }
-    }
-
-    protected void printHtmlBody(
-            @NotNull final RContext context,
-            @NotNull final HtmlElement html,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource
+    /** Build the HTML page including a table  */
+    fun build(
+        context: RContext,
+        resource: Stream<D?>
     ) {
-        Assert.notNull(context, "context");
-        Assert.notNull(html, "html");
-        Assert.notNull(resource, "resource");
+        build(
+            context
+        ) { tableBuilder: GridBuilder<D?>? -> resource }
+    }
 
-        if (Check.hasLength(config.getJavascriptLink())) {
-            html.addJavascriptLink(false, config.getJavascriptLink());
+    /** Build the HTML page including a table  */
+    fun build(
+        context: RContext,
+        resource: Function<GridBuilder<D?>?, Stream<D?>?>
+    ) {
+        try {
+            setSort(ColumnModel.Companion.ofCode(config.sortRequestParam.of(context)))
+            ReqestDispatcher(context, config.config)
+                .onParam(
+                    config.ajaxRequestParam
+                ) { jsonBuilder: JsonBuilder -> doAjax(context, jsonBuilder, resource) }
+                .onDefaultToElement { element: HtmlElement? ->
+                    printHtmlBody(
+                        context,
+                        element!!, resource
+                    )
+                }
+        } catch (e: Exception) {
+            LOGGER.log(Level.WARNING, "Internal server error", e)
+            throw IllegalStateException("500") // TODO.pop
         }
-        html.addCssLink(config.getCssLink());
-        config.getCssWriter().accept(html.getHead(), gridBuilder.isSortable());
-        javascritWriter.get().write(html.getHead());
-        htmlHeader.write(html.getHead());
-        try (Element body = html.getBody()) {
-            header.write(body);
-            body.addDiv(config.getSubtitleCss()).addText(ajaxEnabled ? config.getAjaxReadyMessage() : "");
-            try (Element form =  body.addForm()
-                    .setId(config.getFormId())
-                    .setMethod(Html.V_POST).setAction("?")) {
+    }
 
-                gridBuilder.getColumns().forEach(column -> {
-                    if (column.isFiltered()) {
-                        final HttpParameter param = column.getParam(UNDEFINED_PARAM);
-                        form.addTextInp(
+    /** Mark a column as sortable  */
+    protected fun setSort(sort: ColumnModel<*, *>) {
+        this.sortedColumn = sort.index
+        if (sortedColumn >= 0) {
+            val i = intArrayOf(-1)
+            gridBuilder.columns.forEach { cm: ColumnModel<D?, *>? ->
+                ++i[0]
+                if (cm!!.isSortable) {
+                    cm.direction = if (sort.index == i[0])
+                        sort.direction
+                    else
+                        Direction.NONE
+                }
+            }
+        }
+    }
+
+    protected fun printHtmlBody(
+        context: RContext,
+        html: HtmlElement,
+        resource: Function<GridBuilder<D?>?, Stream<D?>?>
+    ) {
+        Assert.notNull(context, "context")
+        Assert.notNull(html, "html")
+        Assert.notNull(resource, "resource")
+
+        if (Check.hasLength(config.javascriptLink)) {
+            html.addJavascriptLink(false, config.javascriptLink)
+        }
+        html.addCssLink(config.cssLink)
+        config.cssWriter.accept(html.head, gridBuilder.isSortable)
+        javascritWriter.get().write(html.head)
+        htmlHeader.write(html.head)
+        html.body.use { body ->
+            header.write(body)
+            body.addDiv(config.subtitleCss).addText(if (ajaxEnabled) config.ajaxReadyMessage else "")
+            body.addForm()
+                .setId(config.formId)
+                .setMethod(Html.Companion.V_POST).setAction("?").use { form ->
+                    gridBuilder.columns.forEach { column: ColumnModel<D?, *>? ->
+                        if (column!!.isFiltered) {
+                            val param = column.getParam(UNDEFINED_PARAM)
+                            form.addTextInp(
                                 param,
                                 param.of(context),
-                                column.getTitle(),
-                                config.getControlCss(),
-                                column.getParam(UNDEFINED_PARAM));
+                                column.title,
+                                config.controlCss,
+                                column.getParam(UNDEFINED_PARAM)
+                            )
+                        }
                     }
-                });
-                // Hidden submit button is important if a javascript is disabled:
-                form.addInput().setType(Html.V_SUBMIT).setAttribute(Html.V_HIDDEN);
-                if (gridBuilder.isSortable()) {
-                    printSortedField(form.addSpan().setId(config.getSortRequestParam()), context);
+                    // Hidden submit button is important if a javascript is disabled:
+                    form.addInput().setType(Html.Companion.V_SUBMIT).setAttribute(Html.Companion.V_HIDDEN)
+                    if (gridBuilder.isSortable) {
+                        printSortedField(form.addSpan().setId(config.sortRequestParam), context)
+                    }
+                    formAdditions.write(form)
+                    // Add the table:
+                    val tableCss = config.tableCssClass
+                    printTableBody(form.addTable(*tableCss.toTypedArray<CharSequence?>()), context, resource)
                 }
-                formAdditions.write(form);
-                // Add the table:
-                final List<CharSequence> tableCss = config.getTableCssClass();
-                printTableBody(form.addTable(tableCss.toArray(new CharSequence[tableCss.size()])), context, resource);
-            }
-            footer.write(body);
+            footer.write(body)
         }
     }
 
-    /** The hidden field contains an index of the last sorted column */
-    protected void printSortedField(Element parent, final RContext context) {
-        final int index = config.getSortRequestParam().of(context, -1);
-        parent.addInput().setAttribute(Html.A_TYPE, Html.V_HIDDEN)
-                .setNameValue(config.getSortRequestParam(), index);
+    /** The hidden field contains an index of the last sorted column  */
+    protected fun printSortedField(parent: Element, context: RContext) {
+        val index = config.sortRequestParam.of(context, -1)
+        parent.addInput().setAttribute(Html.Companion.A_TYPE, Html.Companion.V_HIDDEN)
+            .setNameValue(config.sortRequestParam, index)
     }
 
-    protected void printTableBody(
-            @NotNull final Element table,
-            @NotNull final RContext context,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource
+    protected fun printTableBody(
+        table: Element,
+        context: RContext,
+        resource: Function<GridBuilder<D?>?, Stream<D?>?>
     ) {
-        final ColumnModel sortedColumn = ColumnModel.ofCode(config.getSortRequestParam().of(context));
-        this.gridBuilder.build(table, sortedColumn, resource);
+        val sortedColumn: ColumnModel<*, *> = ColumnModel.Companion.ofCode(
+            config.sortRequestParam.of(context)
+        )
+        gridBuilder.build(table, sortedColumn, resource)
     }
 
     /**
@@ -367,33 +355,43 @@ public class ReportBuilder<D> {
      * @param output A JSON writer
      * @throws IOException if an I/O error occurs
      */
-    protected void doAjax(
-            @NotNull final RContext context,
-            @NotNull final JsonBuilder output,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource
-    ) throws IOException {
-        output.writeClass(config.getTableSelector(), e -> printTableBody(e, context, resource));
-        output.writeClass(config.getSubtitleCss(), config.getAjaxReadyMessage());
-        if (gridBuilder.isSortable()) {
-           output.writeId(config.getSortRequestParam(), e -> printSortedField(e, context));
+    @Throws(IOException::class)
+    protected fun doAjax(
+        context: RContext,
+        output: JsonBuilder,
+        resource: Function<GridBuilder<D?>?, Stream<D?>?>
+    ) {
+        output.writeClass(
+            config.tableSelector
+        ) { e: Element -> printTableBody(e, context, resource) }
+        output.writeClass(config.subtitleCss, config.ajaxReadyMessage)
+        if (gridBuilder.isSortable) {
+            output.writeId(
+                config.sortRequestParam
+            ) { e: Element -> printSortedField(e, context) }
         }
     }
 
-    /** URL constants */
-    public static class Url {
-        /** Link to a Bootstrap URL of CDN */
-        protected static final String BOOTSTRAP_CSS = "https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css";
-        /** Link to jQuery of CDN */
-        protected static final String JQUERY_JS = "";
+    /** URL constants  */
+    class Url @JvmOverloads constructor(bootstrapCss: String = BOOTSTRAP_CSS, jQueryJs: String = JQUERY_JS) {
+        val bootstrapCss: String =
+            Assert.hasLength(bootstrapCss, "bootstrapCss")
 
-        final String bootstrapCss;
+        companion object {
+            /** Link to a Bootstrap URL of CDN  */
+            protected const val BOOTSTRAP_CSS: String =
+                "https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
 
-        public Url() {
-            this(BOOTSTRAP_CSS, JQUERY_JS);
+            /** Link to jQuery of CDN  */
+            protected const val JQUERY_JS: String = ""
         }
+    }
 
-        public Url(@NotNull final String bootstrapCss, @NotNull final String jQueryJs) {
-            this.bootstrapCss = Assert.hasLength(bootstrapCss, "bootstrapCss");
-        }
+    companion object {
+        /** Logger  */
+        private val LOGGER: Logger = Logger.getLogger(ReportBuilder::class.java.name)
+
+        /** An undefined parameter  */
+        private val UNDEFINED_PARAM: HttpParameter = HttpParameter.Companion.of("UNDEFINED_PARAM")
     }
 }

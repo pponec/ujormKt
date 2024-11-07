@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import org.ujorm.tools.web.Element;
+import org.ujorm.tools.web.Element
 
 /**
  * An common element writer
  * @author Pavel Ponec
  */
 @FunctionalInterface
-public interface Injector extends CharSequence {
-
-    @Override
-    default int length() {
-        return 1;
+interface Injector : CharSequence {
+    override fun length(): Int {
+        return 1
     }
 
-    @Override
-    default char charAt(int index) {
-        return '?';
+    override fun charAt(index: Int): Char {
+        return '?'
     }
 
-    @Override
-    default CharSequence subSequence(int start, int end) {
-        return "?".subSequence(start, end);
+    override fun subSequence(start: Int, end: Int): CharSequence {
+        return "?".subSequence(start, end)
     }
 
     /**
@@ -44,5 +40,5 @@ public interface Injector extends CharSequence {
      *
      * @param element An element to write
      */
-    void write(Element element);
+    fun write(element: Element)
 }

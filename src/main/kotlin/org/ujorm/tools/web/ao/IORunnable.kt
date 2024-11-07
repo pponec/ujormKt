@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import java.io.IOException;
-
+import java.io.IOException
 
 /**
  * Input/Output Runnable Interface
- * 
+ *
  * @author Pavel Ponec
  */
-@FunctionalInterface
-public interface IORunnable {
-
-    void run() throws IOException;
-    
+fun interface IORunnable {
+    @Throws(IOException::class)
+    fun run()
 }

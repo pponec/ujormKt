@@ -13,71 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ajax;
+package org.ujorm.tools.web.ajax
 
-import java.io.IOException;
-import java.util.logging.Logger;
-import org.jetbrains.annotations.NotNull;
-
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.web.request.RContext;
-import org.ujorm.tools.web.HtmlElement;
-import org.ujorm.tools.web.ao.HttpParameter;
-import org.ujorm.tools.web.json.JsonBuilder;
-import org.ujorm.tools.web.ao.IOConsumer;
-import org.ujorm.tools.web.ao.IOElement;
-import org.ujorm.tools.web.ao.IORunnable;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.web.HtmlElement
+import org.ujorm.tools.web.ao.HttpParameter
+import org.ujorm.tools.web.ao.IOConsumer
+import org.ujorm.tools.web.ao.IOElement
+import org.ujorm.tools.web.ao.IORunnable
+import org.ujorm.tools.web.json.JsonBuilder
+import org.ujorm.tools.web.request.RContext
+import org.ujorm.tools.xml.config.HtmlConfig
+import java.io.IOException
+import java.util.logging.Logger
 
 /**
  * A Reqest Dispatcher
  * @author Pavel Ponec
  */
-public class ReqestDispatcher {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER = Logger.getLogger(ReqestDispatcher.class.getName());
-
-    @NotNull
-    private final RContext context;
-
-    @NotNull
-    private final HtmlConfig htmlConfig;
-
-    private boolean done = false;
+class ReqestDispatcher(
+    private val context: RContext,
+    private val htmlConfig: HtmlConfig
+) {
+    private var done = false
 
     /**
      * Disable client cache
      */
-    private final boolean noCache = true;
+    private val noCache = true
 
-    public ReqestDispatcher(
-            @NotNull RContext context) {
-        this("Info", context);
-    }
+    constructor(context: RContext) : this("Info", context)
 
-    public ReqestDispatcher(
-            @NotNull CharSequence title,
-            @NotNull RContext context) {
-        this(context, HtmlConfig.ofDefault()
-                .setTitle(title)
-                .setNiceFormat());
-    }
+    constructor(
+        title: CharSequence,
+        context: RContext
+    ) : this(
+        context, HtmlConfig.ofDefault()
+            .setTitle(title)
+            .setNiceFormat()
+    )
 
-    public ReqestDispatcher(
-            @NotNull RContext context,
-            @NotNull HtmlConfig htmlConfig
-    ) {
-        this.context = context;
-        this.htmlConfig = htmlConfig;
-    }
-
-    @NotNull
-    public HtmlConfig getAjaxConfig() {
-        return htmlConfig.cloneForAjax();
-    }
+    val ajaxConfig: HtmlConfig
+        get() = htmlConfig.cloneForAjax()
 
     /**
      * Registre new processor.
@@ -86,24 +63,26 @@ public class ReqestDispatcher {
      * @param processor processor
      * @return
      */
-    public ReqestDispatcher onParam(@NotNull final HttpParameter key, @NotNull final IOConsumer<JsonBuilder> processor) throws IOException {
-        Assert.notNull(key, "Parameter {} is required", "key");
+    @Throws(IOException::class)
+    fun onParam(key: HttpParameter, processor: IOConsumer<JsonBuilder?>): ReqestDispatcher {
+        Assert.notNull(key, "Parameter {} is required", "key")
         if (!done && key.of(context, false)) {
-            try (JsonBuilder builder = JsonBuilder.of(context.writer(), getAjaxConfig())) {
-                done = true;
-                processor.accept(builder);
+            JsonBuilder.Companion.of(context.writer(), ajaxConfig).use { builder ->
+                done = true
+                processor.accept(builder)
             }
         }
-        return this;
+        return this
     }
 
     /**
      * The process writes to an element
      */
-    public void onDefaultToElement(@NotNull final IOElement defaultProcessor) throws IOException {
+    @Throws(IOException::class)
+    fun onDefaultToElement(defaultProcessor: IOElement) {
         if (!done) {
-            try (HtmlElement html = HtmlElement.of(context.writer(), htmlConfig)) {
-                defaultProcessor.run(html);
+            HtmlElement.Companion.of(context.writer(), htmlConfig).use { html ->
+                defaultProcessor.run(html)
             }
         }
     }
@@ -111,9 +90,17 @@ public class ReqestDispatcher {
     /**
      * Process the request
      */
-    public void onDefault(@NotNull final IORunnable defaultProcessor) throws IOException {
+    @Throws(IOException::class)
+    fun onDefault(defaultProcessor: IORunnable) {
         if (!done) {
-            defaultProcessor.run();
+            defaultProcessor.run()
         }
+    }
+
+    companion object {
+        /**
+         * Logger
+         */
+        private val LOGGER: Logger = Logger.getLogger(ReqestDispatcher::class.java.name)
     }
 }

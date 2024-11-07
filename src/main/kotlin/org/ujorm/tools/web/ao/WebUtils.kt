@@ -13,41 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import org.jetbrains.annotations.NotNull;
-import org.ujorm.tools.Check;
-import java.util.stream.Stream;
+import java.util.stream.Stream
 
 /**
  * Static method for common use
  *
  * @author Pavel Ponec
  */
-public abstract class WebUtils {
-
-    /** Check if any attribute is typeof the Renderer */
-    public static final <V extends Object> boolean isType(@NotNull final Class type, @NotNull final V... items) {
-        boolean result = false;
-        for (Object item : items) {
+object WebUtils {
+    /** Check if any attribute is typeof the Renderer  */
+    fun <V : Any?> isType(type: Class<*>, vararg items: V): Boolean {
+        var result = false
+        for (item in items) {
             if (type.isInstance(item)) {
-                result = true;
-                break;
+                result = true
+                break
             }
         }
-        return result;
+        return result
     }
 
-    /** Check if any attribute is typeof the Renderer */
-    public static final boolean isType(final Class type, final @NotNull Stream<Object> items) {
-        final boolean[] result = {false};
-        items.filter(t -> !result[0])
-                .forEach(t -> {
-                    if (type.isInstance(t)) {
-                        result[0] = true;
-                    }
-                });
-        return result[0];
+    /** Check if any attribute is typeof the Renderer  */
+    fun isType(type: Class<*>, items: Stream<Any?>): Boolean {
+        val result = booleanArrayOf(false)
+        items.filter { t: Any? -> !result[0] }
+            .forEach { t: Any? ->
+                if (type.isInstance(t)) {
+                    result[0] = true
+                }
+            }
+        return result[0]
     }
-
 }

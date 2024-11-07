@@ -1,52 +1,76 @@
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.io.Reader
+import java.io.Writer
+import java.lang.reflect.InvocationTargetException
 
-import java.io.Reader;
-import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Map;
-
-/** Reflection methods for the Servlet Request & Response classes */
-public final class Reflections {
-
-    public static Reader getServletReader(Object httpServletRequest) {
-        return (Reader) getAttribute(httpServletRequest, "getReader");
+/** Reflection methods for the Servlet Request & Response classes  */
+object Reflections {
+    fun getServletReader(httpServletRequest: Any): Reader {
+        return getAttribute(httpServletRequest, "getReader") as Reader
     }
 
-    public static Writer getServletWriter(Object httpServletResponse) {
-        return (Writer) getAttribute(httpServletResponse,  "getWriter");
+    fun getServletWriter(httpServletResponse: Any): Writer {
+        return getAttribute(httpServletResponse, "getWriter") as Writer
     }
 
-    public static Map<String, String[]> getParameterMap(Object httpServletRequest) {
-        return (Map<String, String[]>) getAttribute(httpServletRequest,  "getParameterMap");
+    fun getParameterMap(httpServletRequest: Any): Map<String, Array<String>> {
+        return getAttribute(httpServletRequest, "getParameterMap") as Map<String, Array<String>>
     }
 
-    public static void setCharacterEncoding(
-            @Nullable Object httpServletRequest,
-            @NotNull String charset) {
-        final String methodName = "setCharacterEncoding";
+    fun setCharacterEncoding(
+        httpServletRequest: Any?,
+        charset: String
+    ) {
+        val methodName = "setCharacterEncoding"
         if (httpServletRequest != null) try {
-            final Class<?> requestClass = httpServletRequest.getClass();
-            final Method setCharsetEncoding = requestClass.getMethod(methodName, String.class);;
-            setCharsetEncoding.invoke(httpServletRequest, charset);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            final String msg = String.format("Method does not exists: %s.%s()",
-                    httpServletRequest.getClass().getSimpleName(), methodName);
-            throw new RuntimeException(msg, e);
+            val requestClass: Class<*> = httpServletRequest.javaClass
+            val setCharsetEncoding = requestClass.getMethod(methodName, String::class.java)
+
+            setCharsetEncoding.invoke(httpServletRequest, charset)
+        } catch (e: NoSuchMethodException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                httpServletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
+        } catch (e: InvocationTargetException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                httpServletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
+        } catch (e: IllegalAccessException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                httpServletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
         }
     }
 
-    private static Object getAttribute(Object servletRequest, String methodName) {
+    private fun getAttribute(servletRequest: Any, methodName: String): Any {
         try {
-            final Method getReaderMethod = servletRequest.getClass().getMethod(methodName);
-            return getReaderMethod.invoke(servletRequest);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            final String msg = String.format("Method does not exists: %s.%s()",
-                    servletRequest.getClass().getSimpleName(), methodName);
-            throw new RuntimeException(msg, e);
+            val getReaderMethod = servletRequest.javaClass.getMethod(methodName)
+            return getReaderMethod.invoke(servletRequest)
+        } catch (e: NoSuchMethodException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                servletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
+        } catch (e: InvocationTargetException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                servletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
+        } catch (e: IllegalAccessException) {
+            val msg = String.format(
+                "Method does not exists: %s.%s()",
+                servletRequest.javaClass.simpleName, methodName
+            )
+            throw RuntimeException(msg, e)
         }
     }
 }

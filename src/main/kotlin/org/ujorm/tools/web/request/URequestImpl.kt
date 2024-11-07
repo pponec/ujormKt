@@ -1,49 +1,30 @@
-package org.ujorm.tools.web.request;
+package org.ujorm.tools.web.request
 
-import org.jetbrains.annotations.NotNull;
+import java.io.CharArrayReader
+import java.io.Reader
 
-import java.io.CharArrayReader;
-import java.io.Reader;
-import java.util.Set;
-
-public final class URequestImpl implements URequest{
-    static final String[] emptyTexts = new String[0];
-
-    private final ManyMap map ;
-
-    private final Reader reader;
-
-    public URequestImpl(@NotNull ManyMap map, @NotNull Reader reader ) {
-        this.map = map;
-        this.reader = reader;
+class URequestImpl(private val map: ManyMap, override val reader: Reader) : URequest {
+    override fun getParameters(key: String?): Array<String?> {
+        val result = map[key]
+        return result ?: emptyTexts
     }
 
+    override val parameterNames: Set<String?>
+        get() = map.keySet()
 
-    @NotNull
-    public Reader getReader() {
-        return reader;
+    fun setParameter(name: String, value: String) {
+        map.put(name, value)
     }
 
-    @NotNull
-    public String[] getParameters(final String key) {
-        final String[] result = map.get(key);
-        return result != null ? result : emptyTexts;
-    }
+    companion object {
+        val emptyTexts: Array<String?> = arrayOfNulls(0)
 
-    @Override
-    public @NotNull Set<String> getParameterNames() {
-        return map.keySet();
-    }
+        fun ofMap(map: ManyMap): URequestImpl {
+            return URequestImpl(map, CharArrayReader(CharArray(0)))
+        }
 
-    public void setParameter(@NotNull String name, @NotNull String value) {
-        map.put(name, value);
-    }
-
-    public static URequestImpl ofMap(@NotNull ManyMap map) {
-        return new URequestImpl(map, new CharArrayReader(new char[0]));
-    }
-
-    public static URequestImpl of() {
-        return new URequestImpl(new ManyMap(), new CharArrayReader(new char[0]));
+        fun of(): URequestImpl {
+            return URequestImpl(ManyMap(), CharArrayReader(CharArray(0)))
+        }
     }
 }

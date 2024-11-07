@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import java.io.IOException;
-
-import org.ujorm.tools.web.HtmlElement;
+import org.ujorm.tools.web.HtmlElement
+import java.io.IOException
 
 /**
  *
  * @author Pavel Ponec
  */
-@FunctionalInterface
-public interface IOElement {
-
-    void run(HtmlElement html) throws IOException;
-    
+fun interface IOElement {
+    @Throws(IOException::class)
+    fun run(html: HtmlElement?)
 }

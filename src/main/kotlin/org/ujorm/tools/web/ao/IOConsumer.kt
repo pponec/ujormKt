@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
+package org.ujorm.tools.web.ao
 
-import java.io.IOException;
-
+import java.io.IOException
 
 /**
  *
  * @author Pavel ponec
  */
-public interface IOConsumer<T> {
-
-    void accept(T t) throws IOException;
-
+interface IOConsumer<T> {
+    @Throws(IOException::class)
+    fun accept(t: T)
 }

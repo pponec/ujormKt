@@ -14,37 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.ujorm.tools.web
 
-package org.ujorm.tools.web;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.sql.rowset.spi.XmlWriter;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.web.ao.Column;
-import org.ujorm.tools.web.ao.WebUtils;
-import org.ujorm.tools.xml.ApiElement;
-import org.ujorm.tools.xml.builder.XmlBuilder;
-import org.ujorm.tools.xml.model.XmlModel;
-import org.ujorm.tools.web.ao.HttpParameter;
-import org.ujorm.tools.web.ao.Injector;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.web.ao.Column
+import org.ujorm.tools.web.ao.HttpParameter
+import org.ujorm.tools.web.ao.Injector
+import org.ujorm.tools.web.ao.WebUtils
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.builder.XmlBuilder
+import org.ujorm.tools.xml.model.XmlModel
+import java.io.*
+import java.nio.charset.Charset
+import java.util.*
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.stream.Collectors
+import java.util.stream.Stream
 
 /**
  * A HTML Element implements some methods for frequently used elements and attributes
@@ -52,69 +39,60 @@ import org.ujorm.tools.web.ao.Injector;
  * <h3>Usage</h3>
  *
  * <pre class="pre">
- *    ServletResponse response = new ServletResponse();
- *    try (HtmlElement html = HtmlElement.of(response)) {
- *        try (Element body = html.getBody()) {
- *            body.addHeading("Hello!");
- *        }
- *    }
- *    assertTrue(response.toString().contains("&lt;h1&gt;Hello!&lt;/h1&gt;"));
- * </pre>
+ * ServletResponse response = new ServletResponse();
+ * try (HtmlElement html = HtmlElement.of(response)) {
+ * try (Element body = html.getBody()) {
+ * body.addHeading("Hello!");
+ * }
+ * }
+ * assertTrue(response.toString().contains("&lt;h1&gt;Hello!&lt;/h1&gt;"));
+</pre> *
  *
- * @see HtmlElement#of(org.ujorm.tools.xml.config.HtmlConfig)
+ * @see HtmlElement.of
  */
-public final class Element implements ApiElement<Element>, Html {
+class Element
+/** New element for an API element
+ * @see .of
+ */ internal constructor(
+    /** An original XML element  */
+    val internalElement: ApiElement<*>
+) : ApiElement<Element?>,
+    Html {
+    override val name: String
+        get() = internalElement.name
 
-    /** An original XML element */
-    final ApiElement internalElement;
-
-    /** New element for an API element
-     * @see #of(org.ujorm.tools.xml.ApiElement)
+    /**
+     * Set an attribute
+     * @param name Required element name
+     * @param value The `null` value is silently ignored. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
+     * @return The original element
      */
-    Element(@NotNull final ApiElement original) {
-        this.internalElement = original;
-    }
-
-    @NotNull
-    @Override
-    public String getName() {
-        return internalElement.name;
+    override fun setAttribute(name: String, value: Any?): Element {
+        internalElement.setAttribute(name, value)
+        return this
     }
 
     /**
      * Set an attribute
      * @param name Required element name
-     * @param value The {@code null} value is silently ignored. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.model.XmlModel, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
+     * @param value The `null` value is silently ignored. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
      * @return The original element
      */
-    @NotNull
-    @Override
-    public Element setAttribute(@NotNull final String name, @Nullable final Object value) {
-        internalElement.setAttribute(name, value);
-        return this;
-    }
-
-    /**
-     * Set an attribute
-     * @param name Required element name
-     * @param value The {@code null} value is silently ignored. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.model.XmlModel, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
-     * @return The original element
-     */
-    @NotNull
-    public Element setAttributes(
-            @NotNull final String name,
-            @NotNull final CharSequence separator,
-            @NotNull final Object... value) {
-        final String val = Stream.of(value)
-                .filter(Objects::nonNull)
-                .map(v -> v.toString())
-                .collect(Collectors.joining(separator));
-        internalElement.setAttribute(name, val);
-        return this;
+    fun setAttributes(
+        name: String,
+        separator: CharSequence,
+        vararg value: Any
+    ): Element {
+        val `val` = Stream.of(*value)
+            .filter { obj: Any? -> Objects.nonNull(obj) }
+            .map { v: Any -> v.toString() }
+            .collect(Collectors.joining(separator))
+        internalElement.setAttribute(name, `val`)
+        return this
     }
 
     /**
@@ -122,68 +100,60 @@ public final class Element implements ApiElement<Element>, Html {
      * @param name Required element name
      * @return The original element
      */
-    @NotNull
-    public Element setAttribute(@NotNull final String name) {
-        return setAttribute(name, "");
+    fun setAttribute(name: String): Element {
+        return setAttribute(name, "")
     }
 
     /**
-     * An deprecated shortcut for the method {@link #setAttribute(java.lang.String, java.lang.Object) }.
+     * An deprecated shortcut for the method [.setAttribute].
      * @param name Required element name
-     * @param value The {@code null} value is silently ignored. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.model.XmlModel, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
+     * @param value The `null` value is silently ignored. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
      * @return The original element
      */
-
     /**
-     * A shortcut for the method {@link #setAttribute(java.lang.String, java.lang.Object) }.
+     * A shortcut for the method [.setAttribute].
      * @param name Required element name
-     * @param value The {@code null} value is silently ignored. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.model.XmlModel, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
+     * @param value The `null` value is silently ignored. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
      * @return The original element
      */
-    @NotNull
-    public Element setAttr(@NotNull final String name, @Nullable final Object value) {
-        return setAttribute(name, value);
+    fun setAttr(name: String, value: Any?): Element {
+        return setAttribute(name, value)
     }
 
     /** Add simple text
      * @param data Text item
      * @return A parent element.
-     * @see #addAnchoredText(java.lang.String, java.lang.Object...)
+     * @see .addAnchoredText
      */
-    @NotNull
-    @Override
-    public Element addText(final Object data) throws IllegalStateException {
-        internalElement.addText(data);
-        return this;
+    @Throws(IllegalStateException::class)
+    override fun addText(data: Any?): Element {
+        internalElement.addText(data)
+        return this
     }
 
     /**
-     * Add many texts with <strong>no separator</strong>
+     * Add many texts with **no separator**
      * @param data Text items
      * @return A parent element.
-     * @see #addAnchoredText(java.lang.String, java.lang.Object...)
+     * @see .addAnchoredText
      */
-    @NotNull
-    public Element addText(@NotNull final Object... data) throws IllegalStateException {
-        return addTexts("", data);
+    @Throws(IllegalStateException::class)
+    fun addText(vararg data: Any): Element {
+        return addTexts("", *data)
     }
 
     /**
      * Add a template based text with parameters with hight performance.
      *
-     * @param template A message template with an ENGLISH locale. See {@link String#format(java.lang.String, java.lang.Object...) for more parameters.
-     * @param values A template parameters
-     * @return A parent element.
+     * @param template A message template with an ENGLISH locale. See [for more parameters.][String.format]
      */
-    @NotNull
-    @Override
-    public Element addTextTemplated(CharSequence template, Object... values) {
-        internalElement.addTextTemplated(template, values);
-        return this;
+    override fun addTextTemplated(template: CharSequence?, vararg values: Any): Element {
+        internalElement.addTextTemplated(template, *values)
+        return this
     }
 
     /**
@@ -193,32 +163,35 @@ public final class Element implements ApiElement<Element>, Html {
      * @return The current element
      * @throws IllegalStateException
      */
-    public Element addTexts(
-            @NotNull final CharSequence separator,
-            @NotNull final Object... data)
-            throws IllegalStateException {
-        for (int i = 0, max = data.length; i < max; i++) {
+    @Throws(IllegalStateException::class)
+    fun addTexts(
+        separator: CharSequence,
+        vararg data: Any
+    ): Element {
+        var i = 0
+        val max = data.size
+        while (i < max) {
             if (i > 0) {
-                internalElement.addRawText(separator);
+                internalElement.addRawText(separator)
             }
-            internalElement.addText(data[i]);
+            internalElement.addText(data[i])
+            i++
         }
-        return this;
+        return this
     }
 
-    @NotNull
-    @Override
-    public Element addRawText(@Nullable final Object data) throws IllegalStateException {
-        internalElement.addRawText(data);
-        return this;
+    @Throws(IllegalStateException::class)
+    override fun addRawText(data: Any?): Element {
+        internalElement.addRawText(data)
+        return this
     }
 
-    @NotNull
-    public Element addRawText(@NotNull final Object... data) throws IllegalStateException {
-        for (Object item : data) {
-            internalElement.addRawText(item);
+    @Throws(IllegalStateException::class)
+    fun addRawText(vararg data: Any): Element {
+        for (item in data) {
+            internalElement.addRawText(item)
         }
-        return this;
+        return this
     }
 
     /**
@@ -228,50 +201,50 @@ public final class Element implements ApiElement<Element>, Html {
      * @return The current element
      * @throws IllegalStateException
      */
-    public Element addRawTexts(
-            @NotNull final CharSequence separator,
-            @NotNull final Object... data)
-            throws IllegalStateException {
-        for (int i = 0, max = data.length; i < max; i++) {
+    @Throws(IllegalStateException::class)
+    fun addRawTexts(
+        separator: CharSequence,
+        vararg data: Any
+    ): Element {
+        var i = 0
+        val max = data.size
+        while (i < max) {
             if (i > 0) {
-                internalElement.addRawText(separator);
+                internalElement.addRawText(separator)
             }
-            internalElement.addRawText(data[i]);
+            internalElement.addRawText(data[i])
+            i++
         }
-        return this;
+        return this
     }
 
-    @NotNull
-    @Override
-    public Element addComment(CharSequence comment) throws IllegalStateException {
-        internalElement.addComment(comment);
-        return this;
+    @Throws(IllegalStateException::class)
+    override fun addComment(comment: CharSequence?): Element {
+        internalElement.addComment(comment)
+        return this
     }
 
-    @NotNull
-    @Override
-    public Element addCDATA(CharSequence charData) throws IllegalStateException {
-        internalElement.addCDATA(charData);
-        return this;
+    @Throws(IllegalStateException::class)
+    override fun addCDATA(charData: CharSequence?): Element {
+        internalElement.addCDATA(charData)
+        return this
     }
 
-    @NotNull
-    @Override
-    public void close() throws IllegalStateException {
-        internalElement.close();
+    @Throws(IllegalStateException::class)
+    override fun close() {
+        internalElement.close()
     }
 
     // -------------- Add ELEMENT -----
-
     /**
      * Create new Element
      * @param name The element name
      * @return New instance of the Element
      * @throws IllegalStateException An envelope for IO exceptions
      */
-    @Override @NotNull
-    public Element addElement(@NotNull final String name) throws IllegalStateException {
-            return new Element(internalElement.addElement(name));
+    @Throws(IllegalStateException::class)
+    override fun addElement(name: String): Element {
+        return Element(internalElement.addElement(name)!!)
     }
 
     /**
@@ -280,9 +253,8 @@ public final class Element implements ApiElement<Element>, Html {
      * @param cssClasses Optional CSS classes.
      * @return New instance of the Element
      */
-    @NotNull
-    public Element addElement(@NotNull final String name, @NotNull final CharSequence... cssClasses) {
-        return addElement(name).setClass(cssClasses);
+    fun addElement(name: String, vararg cssClasses: CharSequence): Element {
+        return addElement(name).setClass(*cssClasses)
     }
 
     /**
@@ -292,42 +264,42 @@ public final class Element implements ApiElement<Element>, Html {
      * @param cssClasses CSS classes
      * @return New instance of the Element
      */
-    @NotNull
-    public Element addElementIf(final boolean enabled,
-                                @NotNull final String name,
-                                @NotNull final CharSequence... cssClasses) {
-        return addElement(enabled ? name : XmlBuilder.HIDDEN_NAME).setClass(cssClasses);
+    fun addElementIf(
+        enabled: Boolean,
+        name: String,
+        vararg cssClasses: CharSequence
+    ): Element {
+        return addElement((if (enabled) name else XmlBuilder.HIDDEN_NAME)!!).setClass(*cssClasses)
     }
 
-    /** Add new Table */
-    @NotNull
-    public Element addTable(@NotNull final CharSequence... cssClasses) {
-        return addElement(TABLE, cssClasses);
+    /** Add new Table  */
+    fun addTable(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.TABLE, *cssClasses)
     }
 
-    /** Create a HTML table according to data */
-    @NotNull
-    public Element addTable(
-            @NotNull final Object[][] data,
-            @NotNull final CharSequence... cssClass) {
-        return addTable(Arrays.asList(data), cssClass);
+    /** Create a HTML table according to data  */
+    fun addTable(
+        data: Array<Array<Any?>>,
+        vararg cssClass: CharSequence
+    ): Element {
+        return addTable(Arrays.asList<Array<Any>>(*data), *cssClass)
     }
 
-    /** Create a HTML table according to data */
-    @NotNull
-    public Element addTable(
-            @NotNull final Collection<Object[]> data,
-            @NotNull final CharSequence... cssClass) {
-        final Element result = addTable(cssClass);
-        for (final Object[] rowValue : data) {
+    /** Create a HTML table according to data  */
+    fun addTable(
+        data: Collection<Array<Any>>,
+        vararg cssClass: CharSequence
+    ): Element {
+        val result = addTable(*cssClass)
+        for (rowValue in data) {
             if (rowValue != null) {
-                final Element rowElement = result.addElement(Html.TR);
-                for (final Object value : rowValue) {
-                    rowElement.addElement(Html.TD).addText(value);
+                val rowElement = result.addElement(Html.Companion.TR)
+                for (value in rowValue) {
+                    rowElement.addElement(Html.Companion.TD).addText(value)
                 }
             }
         }
-        return result;
+        return result
     }
 
     /** Create a HTML table according to data
@@ -335,45 +307,46 @@ public final class Element implements ApiElement<Element>, Html {
      * <h3>Usage</h3>
      * <pre>
      * element.addTable(getCars(), cssClasses, titles,
-     *         Car::getId,
-     *         Car::getName,
-     *         Car::getEnabled);
-     * </pre>
+     * Car::getId,
+     * Car::getName,
+     * Car::getEnabled);
+    </pre> *
      */
-    @NotNull
-    public <D,V> Element addTable(
-            @NotNull final Stream<D> domains,
-            @Nullable final CharSequence[] cssClass,
-            @Nullable final Object[] headers,
-            @NotNull final Function<D,V>... attributes) {
-
-        final Element result = addTable(cssClass != null ? cssClass : new String[0]);
-        if (Check.hasLength(headers)) {
-            final Element rowElement = result.addElement(Html.THEAD).addElement(Html.TR);
-            for (Object value : headers) {
-                Element th = rowElement.addElement(Html.TH);
-                if (value instanceof Injector) {
-                    ((Injector)value).write(th);
+    fun <D, V> addTable(
+        domains: Stream<D>,
+        cssClass: Array<CharSequence?>?,
+        headers: Array<Any?>?,
+        vararg attributes: Function<D, V>
+    ): Element {
+        val result: Element = addTable(*cssClass ?: arrayOfNulls<String>(0))
+        if (Check.hasLength<Any>(*headers)) {
+            val rowElement = result.addElement(Html.Companion.THEAD).addElement(Html.Companion.TR)
+            for (value in headers!!) {
+                val th = rowElement.addElement(Html.Companion.TH)
+                if (value is Injector) {
+                    value.write(th)
                 } else {
-                    th.addText(value);
+                    th.addText(value)
                 }
             }
         }
-        try (Element tBody = result.addElement(TBODY)) {
-            final boolean hasRenderer = WebUtils.isType(Column.class, attributes);
-            domains.forEach(value -> {
-                final Element rowElement = tBody.addElement(Html.TR);
-                for (Function<D, V> attribute : attributes) {
-                    final Element td = rowElement.addElement(Html.TD);
-                    if (hasRenderer && attribute instanceof Column) {
-                        ((Column)attribute).write(td, value);
+        result.addElement(Html.Companion.TBODY).use { tBody ->
+            val hasRenderer = WebUtils.isType(
+                Column::class.java, *attributes
+            )
+            domains.forEach { value: D ->
+                val rowElement = tBody.addElement(Html.Companion.TR)
+                for (attribute in attributes) {
+                    val td = rowElement.addElement(Html.Companion.TD)
+                    if (hasRenderer && attribute is Column<*>) {
+                        (attribute as Column<*>).write(td, value)
                     } else {
-                        td.addText(attribute.apply(value));
+                        td.addText(attribute.apply(value))
                     }
                 }
-            });
+            }
         }
-        return result;
+        return result
     }
 
     /**
@@ -384,15 +357,15 @@ public final class Element implements ApiElement<Element>, Html {
      * @return
      * @throws IllegalStateException
      */
-    @NotNull
-    public Element addImage(
-            @NotNull final CharSequence imageLink,
-            @NotNull final CharSequence alt,
-            @NotNull final CharSequence... cssClasses)
-            throws IllegalStateException {
-        return addElement(IMAGE, cssClasses)
-                .setAttribute(A_ALT, alt)
-                .setAttribute(A_SRC, imageLink);
+    @Throws(IllegalStateException::class)
+    fun addImage(
+        imageLink: CharSequence,
+        alt: CharSequence,
+        vararg cssClasses: CharSequence
+    ): Element {
+        return addElement(Html.Companion.IMAGE, *cssClasses)
+            .setAttribute(Html.Companion.A_ALT, alt)
+            .setAttribute(Html.Companion.A_SRC, imageLink)
     }
 
     /**
@@ -403,75 +376,71 @@ public final class Element implements ApiElement<Element>, Html {
      * @return
      * @throws IllegalStateException
      */
-    @NotNull
-    public Element addImage(
-            @NotNull final InputStream imageStream,
-            @NotNull final CharSequence alt,
-            @NotNull final CharSequence... cssClasses)
-            throws IllegalStateException {
-        return addElement(IMAGE, cssClasses)
-                .setAttribute(A_ALT, alt)
-                .setAttribute(A_SRC, createEmbededImage(imageStream, new StringBuilder(1024)));
+    @Throws(IllegalStateException::class)
+    fun addImage(
+        imageStream: InputStream,
+        alt: CharSequence,
+        vararg cssClasses: CharSequence
+    ): Element {
+        return addElement(Html.Companion.IMAGE, *cssClasses)
+            .setAttribute(Html.Companion.A_ALT, alt)
+            .setAttribute(Html.Companion.A_SRC, createEmbededImage(imageStream, StringBuilder(1024)))
     }
 
-    /** Create a content of an embeded image */
-    @NotNull
-    private CharSequence createEmbededImage(
-            @NotNull final InputStream imageStream,
-            @NotNull final StringBuilder result) {
-        final int bufferSize = 3 * 1024;
-        final Base64.Encoder encoder = Base64.getEncoder();
-        try (BufferedInputStream in = new BufferedInputStream(imageStream)) {
-            result.append("data:image/png;base64,");
-            byte[] chunk = new byte[bufferSize];
-            int len = 0;
-            while ((len = in.read(chunk)) == bufferSize) {
-                result.append(encoder.encodeToString(chunk));
+    /** Create a content of an embeded image  */
+    private fun createEmbededImage(
+        imageStream: InputStream,
+        result: StringBuilder
+    ): CharSequence {
+        val bufferSize = 3 * 1024
+        val encoder = Base64.getEncoder()
+        try {
+            BufferedInputStream(imageStream).use { `in` ->
+                result.append("data:image/png;base64,")
+                var chunk = ByteArray(bufferSize)
+                var len = 0
+                while ((`in`.read(chunk).also { len = it }) == bufferSize) {
+                    result.append(encoder.encodeToString(chunk))
+                }
+                if (len > 0) {
+                    chunk = chunk.copyOf(len)
+                    result.append(encoder.encodeToString(chunk))
+                }
             }
-            if (len > 0) {
-                chunk = Arrays.copyOf(chunk, len);
-                result.append(encoder.encodeToString(chunk));
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        } catch (e: IOException) {
+            throw IllegalStateException(e.message, e)
         }
-        return result;
+        return result
     }
 
-    /** Add new body element */
-    @NotNull
-    public Element addBody(@NotNull final CharSequence... cssClasses) {
-        return addElement(BODY, cssClasses);
+    /** Add new body element  */
+    fun addBody(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.BODY, *cssClasses)
     }
 
-    /** Add new title element */
-    @NotNull
-    public Element addTitle(@NotNull final CharSequence... cssClasses) {
-        return addElement(TITLE, cssClasses);
+    /** Add new title element  */
+    fun addTitle(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.TITLE, *cssClasses)
     }
 
-    /** Add new link element */
-    @NotNull
-    public Element addLink(@NotNull final CharSequence... cssClasses) {
-        return addElement(LINK, cssClasses);
+    /** Add new link element  */
+    fun addLink(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.LINK, *cssClasses)
     }
 
-    /** Add new style element */
-    @NotNull
-    public Element addStyle(@NotNull final CharSequence... cssClasses) {
-        return addElement(STYLE, cssClasses);
+    /** Add new style element  */
+    fun addStyle(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.STYLE, *cssClasses)
     }
 
-    /** Add new script element */
-    @NotNull
-    public Element addScript(@NotNull final CharSequence... cssClasses) {
-        return addElement(SCRIPT, cssClasses);
+    /** Add new script element  */
+    fun addScript(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.SCRIPT, *cssClasses)
     }
 
-    /** Add new div element */
-    @NotNull
-    public Element addDiv(@NotNull final CharSequence... cssClasses) {
-        return addElement(DIV, cssClasses);
+    /** Add new div element  */
+    fun addDiv(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.DIV, *cssClasses)
     }
 
     /** Add new fieldset element including a title
@@ -480,175 +449,155 @@ public final class Element implements ApiElement<Element>, Html {
      * @return An instance of FieldSet
      * @see LEGEND
      */
-    @NotNull
-    public Element addFieldset(@Nullable final String title, @NotNull final CharSequence... cssClasses) {
-        final Element result = addElement(FIELDSET, cssClasses);
+    fun addFieldset(title: String?, vararg cssClasses: CharSequence): Element {
+        val result = addElement(Html.Companion.FIELDSET, *cssClasses)
         if (Check.hasLength(title)) {
-            result.addElement(LEGEND).addText(title);
+            result.addElement(Html.Companion.LEGEND).addText(title)
         }
-        return result;
+        return result
     }
 
-    /** Add new pre element */
-    @NotNull
-    public Element addPreformatted(@NotNull final CharSequence... cssClasses) {
-        return addElement(PRE, cssClasses);
+    /** Add new pre element  */
+    fun addPreformatted(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.PRE, *cssClasses)
     }
 
-    /** Add new span element */
-    @NotNull
-    public Element addSpan(@NotNull final CharSequence... cssClasses) {
-        return addElement(SPAN, cssClasses);
+    /** Add new span element  */
+    fun addSpan(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.SPAN, *cssClasses)
     }
 
-    /** Add new paragram element */
-    @NotNull
-    public Element addParagraph(@NotNull final CharSequence... cssClasses) {
-        return addElement(P, cssClasses);
+    /** Add new paragram element  */
+    fun addParagraph(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.P, *cssClasses)
     }
 
-    /** Add new form element */
-    @NotNull
-    public Element addForm(@NotNull final CharSequence... cssClasses) {
-        return addElement(FORM, cssClasses);
+    /** Add new form element  */
+    fun addForm(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.FORM, *cssClasses)
     }
 
-    /** Add a top heading (level one)  */
-    @NotNull
-    public Element addHeading(@NotNull CharSequence title, @NotNull final CharSequence... cssClasses) {
-        return addHeading(1, title, cssClasses);
+    /** Add a top heading (level one)   */
+    fun addHeading(title: CharSequence, vararg cssClasses: CharSequence): Element {
+        return addHeading(1, title, *cssClasses)
     }
 
-    /** Add new heading with the required level where the first level is the one,  */
-    @NotNull
-    public Element addHeading(int level, @NotNull CharSequence title, @NotNull final CharSequence... cssClasses) {
-        Assert.isTrue(level > 0, "Unsupported level {}", level);
-        return addElement(HEADING_PREFIX + level, cssClasses).addText(title);
+    /** Add new heading with the required level where the first level is the one,   */
+    fun addHeading(level: Int, title: CharSequence, vararg cssClasses: CharSequence): Element {
+        Assert.isTrue(level > 0, "Unsupported level {}", level)
+        return addElement(Html.Companion.HEADING_PREFIX + level, *cssClasses).addText(title)
     }
 
-    /** Add new head of table element */
-    @NotNull
-    public Element addTableHead(@NotNull final CharSequence... cssClasses) {
-        return addElement(THEAD, cssClasses);
+    /** Add new head of table element  */
+    fun addTableHead(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.THEAD, *cssClasses)
     }
 
-    /** Add new table row element */
-    @NotNull
-    public Element addTableRow(@NotNull final CharSequence... cssClasses) {
-        return addElement(TR, cssClasses);
+    /** Add new table row element  */
+    fun addTableRow(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.TR, *cssClasses)
     }
 
-    /** Add new detail of table element */
-    @NotNull
-    public Element addTableDetail(@NotNull final CharSequence... cssClasses) {
-        return addElement(TD, cssClasses);
+    /** Add new detail of table element  */
+    fun addTableDetail(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.TD, *cssClasses)
     }
 
-    /** Add new label element */
-    @NotNull
-    public Element addLabel(@NotNull final CharSequence... cssClasses) {
-        return addElement(LABEL, cssClasses);
+    /** Add new label element  */
+    fun addLabel(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.LABEL, *cssClasses)
     }
 
-    /** Add new input element */
-    @NotNull
-    public Element addInput(@NotNull final CharSequence... cssClasses) {
-        return addElement(INPUT, cssClasses);
+    /** Add new input element  */
+    fun addInput(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.INPUT, *cssClasses)
     }
 
-    /** Add new input element type of text */
-    @NotNull
-    public Element addTextInput(@NotNull final CharSequence... cssClasses) {
-        return addInput(cssClasses).setType(V_TEXT);
+    /** Add new input element type of text  */
+    fun addTextInput(vararg cssClasses: CharSequence): Element {
+        return addInput(*cssClasses).setType(Html.Companion.V_TEXT)
     }
 
-    /** Add new input element type of text including attributes: name, value, placeholder and title */
-    @NotNull
-    public <V> Element addTextInp(
-            @NotNull HttpParameter param,
-            @Nullable V value,
-            @NotNull CharSequence title,
-            @NotNull final CharSequence... cssClasses) {
-        return addTextInput(cssClasses)
-                .setName(param)
-                .setValue(value)
-                .setAttribute(Html.A_PLACEHOLDER, title)
-                .setAttribute(Html.A_TITLE, title);
+    /** Add new input element type of text including attributes: name, value, placeholder and title  */
+    fun <V> addTextInp(
+        param: HttpParameter,
+        value: V?,
+        title: CharSequence,
+        vararg cssClasses: CharSequence
+    ): Element {
+        return addTextInput(*cssClasses)
+            .setName(param)
+            .setValue(value)
+            .setAttribute(Html.Companion.A_PLACEHOLDER, title)
+            .setAttribute(Html.Companion.A_TITLE, title)
     }
 
-    /** Add a new password input element */
-    @NotNull
-    public Element addPasswordInput(@NotNull final CharSequence... cssClasses) {
-        return addInput(cssClasses).setType(V_PASSWORD);
+    /** Add a new password input element  */
+    fun addPasswordInput(vararg cssClasses: CharSequence): Element {
+        return addInput(*cssClasses).setType(Html.Companion.V_PASSWORD)
     }
 
-    /** Add a new hidden input element with a name &amp; value */
-    @NotNull
-    public Element addHiddenInput(
-            @Nullable final CharSequence name,
-            @Nullable final Object value) {
-        return addInput().setType(V_HIDDEN).setNameValue(name, value);
+    /** Add a new hidden input element with a name &amp; value  */
+    fun addHiddenInput(
+        name: CharSequence?,
+        value: Any?
+    ): Element {
+        return addInput().setType(Html.Companion.V_HIDDEN).setNameValue(name, value)
     }
 
-    /** Add new text area element */
-    @NotNull
-    public Element addTextArea(@NotNull final CharSequence... cssClasses) {
-        return addElement(TEXT_AREA, cssClasses);
+    /** Add new text area element  */
+    fun addTextArea(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.TEXT_AREA, *cssClasses)
     }
 
     /** Add new select element
-     * @see #addSelectOptions(java.lang.Object, java.util.Map, java.lang.CharSequence...)
+     * @see .addSelectOptions
      */
-    @NotNull
-    public Element addSelect(@NotNull final CharSequence... cssClasses) {
-        return addElement(SELECT, cssClasses);
+    fun addSelect(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.SELECT, *cssClasses)
     }
 
     /** Add options from map to current select element
      * @param value Value of a select element
-     * @param options Consider an instance of the {@link LinkedHashMap} class predictable iteration order of options.
+     * @param options Consider an instance of the [LinkedHashMap] class predictable iteration order of options.
      * @param cssClasses
-     * @return Return {@code this}
-     * @see #addSelect(java.lang.CharSequence...)
+     * @return Return `this`
+     * @see .addSelect
      */
-    @NotNull
-    public Element addSelectOptions(
-            @NotNull Object value,
-            @NotNull final Map<?,?> options,
-            @NotNull final CharSequence... cssClasses) {
-        for (Object key : options.keySet()) {
-            this.addElement(Html.OPTION)
-                    .setAttribute(Html.A_VALUE, key)
-                    .setAttribute(Html.A_SELECTED, Objects.equals(value, key) ? Html.A_SELECTED : null)
-                    .addText(options.get(key));
+    fun addSelectOptions(
+        value: Any,
+        options: Map<*, *>,
+        vararg cssClasses: CharSequence
+    ): Element {
+        for (key in options.keys) {
+            addElement(Html.Companion.OPTION)
+                .setAttribute(Html.Companion.A_VALUE, key)
+                .setAttribute(Html.Companion.A_SELECTED, if (value == key) Html.Companion.A_SELECTED else null)
+                .addText(options[key])
         }
-        return this;
+        return this
     }
 
-    /** Add new option element */
-    @NotNull
-    public Element addOption(@NotNull final CharSequence... cssClasses) {
-        return addElement(OPTION, cssClasses);
+    /** Add new option element  */
+    fun addOption(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.OPTION, *cssClasses)
     }
 
-    /** Add new button element */
-    @NotNull
-    public Element addButton(@NotNull final CharSequence... cssClasses) {
-        return addElement(BUTTON, cssClasses);
+    /** Add new button element  */
+    fun addButton(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.BUTTON, *cssClasses)
     }
 
-    /** Add a submit button */
-    @NotNull
-    public Element addSubmitButton(@NotNull final CharSequence... cssClasses) {
-        final Element result = addButton(cssClasses);
-        return result.setType(V_SUBMIT);
+    /** Add a submit button  */
+    fun addSubmitButton(vararg cssClasses: CharSequence): Element {
+        val result = addButton(*cssClasses)
+        return result.setType(Html.Companion.V_SUBMIT)
     }
 
-    /** Add an anchor element with URL and CSS classes */
-    @NotNull
-    public Element addAnchor(@NotNull final String url, @NotNull final CharSequence... cssClasses) {
-        final Element result = addElement(A, cssClasses);
-        return result.setHref(url);
+    /** Add an anchor element with URL and CSS classes  */
+    fun addAnchor(url: String, vararg cssClasses: CharSequence): Element {
+        val result = addElement(Html.Companion.A, *cssClasses)
+        return result.setHref(url)
     }
 
     /**
@@ -657,196 +606,139 @@ public final class Element implements ApiElement<Element>, Html {
      * @param text
      * @return The original element!
      */
-    @NotNull
-    public Element addLinkedText(@NotNull final String url, @NotNull final Object... text) {
-        addElement(A).setHref(url).addTexts("", text);
-        return this;
+    fun addLinkedText(url: String, vararg text: Any): Element {
+        addElement(Html.Companion.A).setHref(url).addTexts("", *text)
+        return this
     }
 
-    /** Add new unordered list element */
-    @NotNull
-    public Element addUnorderedlist(@NotNull final CharSequence... cssClasses) {
-        return addElement(UL, cssClasses);
+    /** Add new unordered list element  */
+    fun addUnorderedlist(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.UL, *cssClasses)
     }
 
-    /** Add new ordered list element */
-    @NotNull
-    public Element addOrderedList(@NotNull final CharSequence... cssClasses) {
-        return addElement(OL, cssClasses);
+    /** Add new ordered list element  */
+    fun addOrderedList(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.OL, *cssClasses)
     }
 
-    @NotNull
-    public Element addListItem(@NotNull final CharSequence... cssClasses) {
-        return addElement(LI, cssClasses);
+    fun addListItem(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.LI, *cssClasses)
     }
 
     /** Set a CSS class attribute optionally, the empty attribute is ignored.
-     * @param cssClasses Optional CSS classes. The css item is ignored when the value is empty or {@code null}.
+     * @param cssClasses Optional CSS classes. The css item is ignored when the value is empty or `null`.
      * @return The current instanlce
      */
-    @NotNull
-    public Element setClass(@NotNull final CharSequence... cssClasses) {
-        if (Check.hasLength(cssClasses)) {
-            final StringJoiner builder = new StringJoiner(" ");
-            for (CharSequence cssClass : cssClasses) {
+    fun setClass(vararg cssClasses: CharSequence): Element {
+        if (Check.hasLength<CharSequence>(*cssClasses)) {
+            val builder = StringJoiner(" ")
+            for (cssClass in cssClasses) {
                 if (Check.hasLength(cssClass)) {
-                    builder.add(cssClass);
+                    builder.add(cssClass)
                 }
             }
-            final String result = builder.toString();
+            val result = builder.toString()
             if (Check.hasLength(result)) {
-                setAttribute(A_CLASS, result);
+                setAttribute(Html.Companion.A_CLASS, result)
             }
         }
-        return this;
+        return this
     }
 
-    /** Add a line break */
-    @NotNull
-    public Element addBreak(@NotNull final CharSequence... cssClasses) {
-        return addElement(BR, cssClasses);
+    /** Add a line break  */
+    fun addBreak(vararg cssClasses: CharSequence): Element {
+        return addElement(Html.Companion.BR, *cssClasses)
     }
 
-    // ---- Static methods ----
-
-    /** Crate a root element
-     * @param cssLinks Nullable CSS link array
-     */
-    @NotNull
-    public static Element createHtmlRoot(@NotNull final Object title, @Nullable final CharSequence... cssLinks) {
-        return createHtmlRoot(title, null, cssLinks);
+    /** Set an identifier of the element  */
+    fun setId(value: CharSequence?): Element {
+        setAttribute(Html.Companion.A_ID, value)
+        return this
     }
 
-
-    /** Crate a root element
-     * @param title A HTML title
-     * @param charset A charset
-     * @param cssLinks Nullable CSS link array
-     */
-    @NotNull
-    public static Element createHtmlRoot(
-            @NotNull final Object title,
-            @Nullable final Charset charset,
-            @Nullable final CharSequence... cssLinks) {
-        XmlModel result = new XmlModel(HTML);
-        XmlModel head = result.addElement(HEAD);
-        head.addElement(META).setAttribute(A_CHARSET, charset);
-        head.addElement(TITLE).addText(title);
-
-        if (cssLinks != null) {
-            for (CharSequence cssLink : cssLinks) {
-                head.addElement(LINK)
-                        .setAttribute(A_HREF, cssLink)
-                        .setAttribute(A_REL, "stylesheet");
-            }
-        }
-        return new Element(result);
+    /** Set a method of form  */
+    fun setMethod(value: Any?): Element {
+        setAttribute(Html.Companion.A_METHOD, value)
+        return this
     }
 
-    /** Set an identifier of the element */
-    @NotNull
-    public Element setId(@Nullable final CharSequence value) {
-        setAttribute(A_ID, value);
-        return this;
+    /** Set an action type of from  */
+    fun setAction(value: Any?): Element {
+        setAttribute(Html.Companion.A_ACTION, value)
+        return this
     }
 
-    /** Set a method of form */
-    @NotNull
-    public Element setMethod(@Nullable final Object value) {
-        setAttribute(A_METHOD, value);
-        return this;
+    /** Set a type of input element  */
+    fun setType(value: Any?): Element {
+        setAttribute(Html.Companion.A_TYPE, value)
+        return this
     }
 
-    /** Set an action type of from */
-    @NotNull
-    public Element setAction(@Nullable final Object value) {
-        setAttribute(A_ACTION, value);
-        return this;
+    /** Set an name of input element  */
+    fun setName(value: CharSequence?): Element {
+        setAttribute(Html.Companion.A_NAME, value)
+        return this
     }
 
-    /** Set a type of input element */
-    @NotNull
-    public Element setType(@Nullable final Object value) {
-        setAttribute(A_TYPE, value);
-        return this;
+    /** Set an value of input element  */
+    fun setValue(value: Any?): Element {
+        setAttribute(Html.Companion.A_VALUE, value)
+        return this
     }
 
-    /** Set an name of input element */
-    @NotNull
-    public Element setName(@Nullable final CharSequence value) {
-        setAttribute(A_NAME, value);
-        return this;
+    /** Set name &amp; value to the input element  */
+    fun setNameValue(name: CharSequence?, value: Any?): Element {
+        return setName(name).setValue(value)
     }
 
-    /** Set an value of input element */
-    @NotNull
-    public Element setValue(@Nullable final Object value) {
-        setAttribute(A_VALUE, value);
-        return this;
+    /** Set an value of input element  */
+    fun setFor(value: CharSequence?): Element {
+        setAttribute(Html.Companion.A_FOR, value)
+        return this
     }
 
-    /** Set name &amp; value to the input element */
-    @NotNull
-    public Element setNameValue(@Nullable final CharSequence name, @Nullable final Object value) {
-        return setName(name).setValue(value);
+    /** Row count of a text area  */
+    fun setRows(value: Int): Element {
+        setAttribute(Html.Companion.A_ROWS, value)
+        return this
     }
 
-    /** Set an value of input element */
-    @NotNull
-    public Element setFor(@Nullable final CharSequence value) {
-        setAttribute(A_FOR, value);
-        return this;
+    /** Column count of a text area  */
+    fun setCols(value: Any?): Element {
+        setAttribute(Html.Companion.A_COLS, value)
+        return this
     }
 
-    /** Row count of a text area */
-    @NotNull
-    public Element setRows(@Nullable final int value) {
-        setAttribute(A_ROWS, value);
-        return this;
+    /** Column span inside the table  */
+    fun setColSpan(value: Int): Element {
+        setAttribute(Html.Companion.A_COLSPAN, value)
+        return this
     }
 
-    /** Column count of a text area */
-    @NotNull
-    public Element setCols(@Nullable final Object value) {
-        setAttribute(A_COLS, value);
-        return this;
+    /** Row span inside the table  */
+    fun setRowSpan(value: Int): Element {
+        setAttribute(Html.Companion.A_ROWSPAN, value)
+        return this
     }
 
-    /** Column span inside the table */
-    @NotNull
-    public Element setColSpan(@Nullable final int value) {
-        setAttribute(A_COLSPAN, value);
-        return this;
+    /** Set hyperlink reference  */
+    fun setHref(value: CharSequence?): Element {
+        setAttribute(Html.Companion.A_HREF, value)
+        return this
     }
 
-    /** Row span inside the table */
-    @NotNull
-    public Element setRowSpan(@Nullable final int value) {
-        setAttribute(A_ROWSPAN, value);
-        return this;
-    }
-
-    /** Set hyperlink reference */
-    @NotNull
-    public Element setHref(@Nullable final CharSequence value) {
-        setAttribute(A_HREF, value);
-        return this;
-    }
-
-    /** Set a placeholder name */
-    @NotNull
-    public Element setHint(@Nullable final CharSequence value) {
-        setAttribute(A_PLACEHOLDER, value);
-        return this;
+    /** Set a placeholder name  */
+    fun setHint(value: CharSequence?): Element {
+        setAttribute(Html.Companion.A_PLACEHOLDER, value)
+        return this
     }
 
     /** Apply body of element by a lambda expression.
      *
-     * @deprecated Use the method {@link #next(Consumer)} rather.
      */
-    @NotNull
-    public ExceptionProvider then(@NotNull final Consumer<Element> builder) {
-        return next(builder);
+    @Deprecated("Use the method {@link #next(Consumer)} rather.")
+    fun then(builder: Consumer<Element?>): ExceptionProvider {
+        return next(builder)
     }
 
     /** Add nested elements to the element.
@@ -854,39 +746,72 @@ public final class Element implements ApiElement<Element>, Html {
      * <h3>Usage</h3>
      *
      * <pre class="pre">
-     *  HtmlElement.of(config, writer).addBody()
-     *      .next(body -> {
-     *         body.addHeading(config.getTitle());
-     *      })
-     *      .catche(e -> {
-     *          logger.log(Level.SEVERE, "An error", e);
-     *      });
-     * </pre>
+     * HtmlElement.of(config, writer).addBody()
+     * .next(body -> {
+     * body.addHeading(config.getTitle());
+     * })
+     * .catche(e -> {
+     * logger.log(Level.SEVERE, "An error", e);
+     * });
+    </pre> *
      */
-    @NotNull
-    public ExceptionProvider next(@NotNull final Consumer<Element> builder) {
+    fun next(builder: Consumer<Element?>): ExceptionProvider {
         try {
-            builder.accept(this);
-            return ExceptionProvider.of();
-        } catch (Throwable e) {
-            return ExceptionProvider.of(e);
+            builder.accept(this)
+            return ExceptionProvider.Companion.of()
+        } catch (e: Throwable) {
+            return ExceptionProvider.Companion.of(e)
         } finally {
-            close();
+            close()
         }
     }
 
-    /** String value */
-    @Override
-    @NotNull
-    public String toString() {
-        return internalElement.toString();
+    /** String value  */
+    override fun toString(): String {
+        return internalElement.toString()
     }
 
-    /** New element for an API element */
-    @NotNull
-    public static Element of(@NotNull final ApiElement original) {
-        return (original instanceof Element)
-            ? (Element) original
-            : new Element(original);
+    companion object {
+        // ---- Static methods ----
+        /** Crate a root element
+         * @param cssLinks Nullable CSS link array
+         */
+        fun createHtmlRoot(title: Any, vararg cssLinks: CharSequence?): Element {
+            return createHtmlRoot(title, null, *cssLinks)
+        }
+
+
+        /** Crate a root element
+         * @param title A HTML title
+         * @param charset A charset
+         * @param cssLinks Nullable CSS link array
+         */
+        fun createHtmlRoot(
+            title: Any,
+            charset: Charset?,
+            vararg cssLinks: CharSequence?
+        ): Element {
+            val result = XmlModel(Html.Companion.HTML)
+            val head: XmlModel = result.addElement(Html.Companion.HEAD)
+            head.addElement(Html.Companion.META).setAttribute(Html.Companion.A_CHARSET, charset)
+            head.addElement(Html.Companion.TITLE).addText(title)
+
+            if (cssLinks != null) {
+                for (cssLink in cssLinks) {
+                    head.addElement(Html.Companion.LINK)
+                        .setAttribute(Html.Companion.A_HREF, cssLink)
+                        .setAttribute(Html.Companion.A_REL, "stylesheet")
+                }
+            }
+            return Element(result)
+        }
+
+        /** New element for an API element  */
+        fun of(original: ApiElement<*>): Element {
+            return if ((original is Element))
+                original
+            else
+                Element(original)
+        }
     }
 }

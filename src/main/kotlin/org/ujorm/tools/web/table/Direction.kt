@@ -13,34 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.table;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+package org.ujorm.tools.web.table
 
 /**
  * Sort direction
  * @author Pavel Ponec
  */
-public enum Direction {
-    
-    /** Ascending sort */
+enum class Direction {
+    /** Ascending sort  */
     ASC,
-    /** Desending sort */
+
+    /** Desending sort  */
     DESC,
-    /** No sorting */
+
+    /** No sorting  */
     NONE;
 
-    /** Safe equals */
-    public boolean safeEquals(@Nullable final Direction direction) {
-        return equals(direction);
+    /** Safe equals  */
+    fun safeEquals(direction: Direction?): Boolean {
+        return equals(direction)
     }
-    
-    @NotNull
-    public static final Direction of(@Nullable Boolean ascending) {
-        if (ascending == null) {
-            return NONE;
+
+    companion object {
+        fun of(ascending: Boolean?): Direction {
+            if (ascending == null) {
+                return NONE
+            }
+            return if (ascending) ASC else DESC
         }
-        return ascending ? ASC : DESC;
     }
 }

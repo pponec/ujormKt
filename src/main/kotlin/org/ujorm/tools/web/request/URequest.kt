@@ -1,63 +1,48 @@
-package org.ujorm.tools.web.request;
+package org.ujorm.tools.web.request
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.web.ao.Reflections;
+import org.ujorm.tools.web.ao.Reflections
+import java.io.*
 
-import java.io.Reader;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+interface URequest {
+    /** Request Reader  */
+    val reader: Reader
 
-public interface URequest {
+    /** Parameter provider  */
+    fun getParameters(key: String?): Array<String?>
 
-    /** Request Reader */
-    Reader getReader();
+    /** Parameter provider  */
+    val parameterNames: Set<String?>
 
-    /** Parameter provider */
-    @NotNull
-    String[] getParameters(final String key);
+    companion object {
+        /** Convert the HttpServletRequest to the URequest  */
+        fun ofRequest(httpServletRequest: Any?): URequest {
+            Reflections.setCharacterEncoding(httpServletRequest, RContext.Companion.CHARSET.name())
+            return object : URequest {
+                var paramMap: Map<String?, Array<String?>?>? = null
 
-    /** Parameter provider */
-    @NotNull
-    Set<String> getParameterNames();
+                override val reader: Reader
+                    get() = Reflections.getServletReader(httpServletRequest!!)
 
-    /** Convert the HttpServletRequest to the URequest */
-    static URequest ofRequest(@Nullable final Object httpServletRequest) {
-        Reflections.setCharacterEncoding(httpServletRequest, RContext.CHARSET.name());
-        return new URequest() {
-            Map<String, String[]> paramMap = null;
+                override fun getParameters(key: String?): Array<String?> {
+                    if (httpServletRequest != null) {
+                        val paramMap = getMap(httpServletRequest)
+                        val result = paramMap[key]
+                        return result ?: URequestImpl.Companion.emptyTexts
+                    } else {
+                        return URequestImpl.Companion.emptyTexts
+                    }
+                }
 
-            @Override
-            public Reader getReader() {
-                return Reflections.getServletReader(httpServletRequest);
-            }
+                override val parameterNames: Set<String?>
+                    get() = getMap(httpServletRequest!!).keys
 
-            @Override
-            public String[] getParameters(String key) {
-                if (httpServletRequest != null) {
-                    final Map<String, String[]> paramMap = getMap(httpServletRequest);
-                    final String[] result = paramMap.get(key);
-                    return result != null ? result : URequestImpl.emptyTexts;
-
-                } else {
-                    return URequestImpl.emptyTexts;
+                fun getMap(httpServletRequest: Any): Map<String?, Array<String?>?> {
+                    if (paramMap == null) {
+                        paramMap = Reflections.getParameterMap(httpServletRequest)
+                    }
+                    return paramMap ?: emptyMap<String, Array<String>>()
                 }
             }
-
-            @Override @NotNull
-            public Set<String> getParameterNames() {
-                return getMap(httpServletRequest).keySet();
-            }
-
-            @NotNull
-            private Map<String, String[]> getMap(@NotNull Object httpServletRequest) {
-                if (paramMap == null) {
-                    paramMap = Reflections.getParameterMap(httpServletRequest);
-                }
-                return paramMap != null ? paramMap : Collections.emptyMap();
-            }
-        };
+        }
     }
-
 }

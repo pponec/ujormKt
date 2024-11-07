@@ -13,64 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web;
+package org.ujorm.tools.web
 
-import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
+import org.ujorm.tools.Assert
+import java.util.function.Consumer
 
 /**
  *
  * @author Pavel Ponec
  */
-public final class ExceptionProvider {
-
-    /** Provider with no exception */
-    @NotNull
-    private static final ExceptionProvider EMPTY = new ExceptionProvider(null);
-
-    @Nullable
-    private final Throwable e;
-
-    private ExceptionProvider(@Nullable final Throwable e) {
-        this.e = e;
-    }
-
+class ExceptionProvider private constructor(private val e: Throwable?) {
     /**
      * Apply consumer if the exception is a required type (or not null).
      */
-    public void catchEx(@NotNull final Consumer<Throwable> exceptionConsumer) {
-        catchEx(Throwable.class, exceptionConsumer);
+    fun catchEx(exceptionConsumer: Consumer<Throwable>) {
+        catchEx(Throwable::class.java, exceptionConsumer)
     }
 
     /**
      * Apply consumer if the exception is not null.
      */
-    public <T extends Throwable> void catchEx(@NotNull final Class<T> exceptionClass, @NotNull final Consumer<T> exceptionConsumer) {
+    fun <T : Throwable?> catchEx(exceptionClass: Class<T>, exceptionConsumer: Consumer<T>) {
         if (e != null) {
             if (exceptionClass.isInstance(e)) {
-                exceptionConsumer.accept((T) e);
-            } else if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else if (e instanceof Error) {
-                throw (Error) e;
+                exceptionConsumer.accept(e as T)
+            } else if (e is RuntimeException) {
+                throw e
+            } else if (e is Error) {
+                throw e
             } else {
-                throw new IllegalStateException(e);
+                throw IllegalStateException(e)
             }
         }
     }
 
-    /** A factory method */
-    @NotNull
-    public static ExceptionProvider of(@NotNull final Throwable e) {
-        return new ExceptionProvider(Assert.notNull(e, "Exception is required"));
-    }
+    companion object {
+        /** Provider with no exception  */
+        private val EMPTY = ExceptionProvider(null)
 
-    /** A factory method */
-    @NotNull
-    public static ExceptionProvider of() {
-        return EMPTY;
-    }
+        /** A factory method  */
+        fun of(e: Throwable): ExceptionProvider {
+            return ExceptionProvider(Assert.notNull(e, "Exception is required"))
+        }
 
+        /** A factory method  */
+        fun of(): ExceptionProvider {
+            return EMPTY
+        }
+    }
 }

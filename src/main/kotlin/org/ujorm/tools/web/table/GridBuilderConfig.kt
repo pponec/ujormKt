@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.table;
+package org.ujorm.tools.web.table
 
-import org.ujorm.tools.web.report.*;
-import java.io.InputStream;
-import java.time.Duration;
-import java.util.List;
-import java.util.function.BiConsumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.web.Element;
-import org.ujorm.tools.web.ao.HttpParameter;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.web.Element
+import org.ujorm.tools.web.ao.HttpParameter
+import org.ujorm.tools.web.report.ReportBuilderConfigImpl
+import org.ujorm.tools.xml.config.HtmlConfig
+import java.io.InputStream
+import java.time.Duration
+import java.util.function.BiConsumer
 
 /**
  * A HTML page builder for table based an AJAX.
@@ -32,96 +29,85 @@ import org.ujorm.tools.xml.config.HtmlConfig;
  * <h3>Usage<h3>
  *
  * <pre class="pre">
- *  TableBuilder.of("Hotel Report")
- *          .add(Hotel::getName, "Hotel", NAME)
- *          .add(Hotel::getCity, "City", CITY)
- *          .add(Hotel::getStreet, "Street")
- *          .build(ServletRequest, ServletResponse, resource);
- * </pre>
+ * TableBuilder.of("Hotel Report")
+ * .add(Hotel::getName, "Hotel", NAME)
+ * .add(Hotel::getCity, "City", CITY)
+ * .add(Hotel::getStreet, "Street")
+ * .build(ServletRequest, ServletResponse, resource);
+</pre> *
  *
  * @author Pavel Ponec
- */
-public interface GridBuilderConfig<D> {
+</h3></h3> */
+interface GridBuilderConfig<D> {
+    val config: HtmlConfig
 
-    @NotNull HtmlConfig getConfig();
+    val cssLink: String
 
-    @NotNull String getCssLink();
+    /** Link to an external Javascript library where a no-library returns an empty String  */
+    val javascriptLink: String
 
-    /** Link to an external Javascript library where a no-library returns an empty String */
-    @NotNull String getJavascriptLink();
+    val idleDelay: Duration
 
-    @NotNull Duration getIdleDelay();
+    val ajaxRequestParam: HttpParameter
 
-    @NotNull HttpParameter getAjaxRequestParam();
+    val sortRequestParam: HttpParameter
 
-    @NotNull HttpParameter getSortRequestParam();
+    val ajaxReadyMessage: CharSequence
 
-    @NotNull CharSequence getAjaxReadyMessage();
+    val formId: String
 
-    @NotNull String getFormId();
+    val controlCss: String
 
-    @NotNull String getControlCss();
+    val subtitleCss: String
 
-    @NotNull String getSubtitleCss();
+    val tableSelector: CharSequence
 
-    @NotNull CharSequence getTableSelector();
+    val tableCssClass: List<CharSequence?>
 
-    @NotNull List<CharSequence> getTableCssClass();
+    val sortable: CharSequence
 
-    @NotNull CharSequence getSortable();
+    val sortableAsc: CharSequence
 
-    @NotNull CharSequence getSortableAsc();
+    val sortableDesc: CharSequence
 
-    @NotNull CharSequence getSortableDesc();
+    val sortableBoth: CharSequence
 
-    @NotNull CharSequence getSortableBoth();
+    /** Use inner icons for sortable images  */
+    val isEmbeddedIcons: Boolean
 
-    /** Use inner icons for sortable images */
-    boolean isEmbeddedIcons();
+    /** Inline CSS writer where the first method is an Element and the seconnd one is a sortable   */
+    val cssWriter: BiConsumer<Element?, Boolean?>
 
-    /** Inline CSS writer where the first method is an Element and the seconnd one is a sortable  */
-    BiConsumer<Element, Boolean> getCssWriter();
-
-    /** Get a CSS direction style */
-    @NotNull
-    default CharSequence getSortableDirection(@NotNull final Direction direction) {
-        switch (direction) {
-            case ASC:
-                return getSortableAsc();
-            case DESC:
-                return getSortableDesc();
-            case NONE:
-                return getSortableBoth();
-            default:
-                throw new IllegalArgumentException("Unsupported " + direction);
+    /** Get a CSS direction style  */
+    fun getSortableDirection(direction: Direction): CharSequence {
+        return when (direction) {
+            Direction.ASC -> sortableAsc
+            Direction.DESC -> sortableDesc
+            Direction.NONE -> sortableBoth
+            else -> throw IllegalArgumentException("Unsupported $direction")
         }
     }
 
-    /** Get a CSS direction style */
-    @Nullable
-    default InputStream getInnerSortableImageToStream(@NotNull final Direction direction) {
-        return getClass().getResourceAsStream(getInnerSortableImage(direction));
+    /** Get a CSS direction style  */
+    fun getInnerSortableImageToStream(direction: Direction): InputStream? {
+        return javaClass.getResourceAsStream(getInnerSortableImage(direction))
     }
 
-    /** Get a CSS direction style */
-    @NotNull
-    default String getInnerSortableImage(@NotNull final Direction direction) {
-        final String baseDir = "/META-INF/resources/org/ujorm/images/v1/order";
-        switch (direction) {
-            case ASC:
-                return String.join("/", baseDir, "up.png");
-            case DESC:
-                return String.join("/", baseDir, "down.png");
-            case NONE:
-                return String.join("/", baseDir, "both.png");
-            default:
-                throw new IllegalArgumentException("Unsupported " + direction);
+    /** Get a CSS direction style  */
+    fun getInnerSortableImage(direction: Direction): String {
+        val baseDir = "/META-INF/resources/org/ujorm/images/v1/order"
+        return when (direction) {
+            Direction.ASC -> java.lang.String.join("/", baseDir, "up.png")
+            Direction.DESC -> java.lang.String.join("/", baseDir, "down.png")
+            Direction.NONE -> java.lang.String.join("/", baseDir, "both.png")
+            else -> throw IllegalArgumentException("Unsupported $direction")
         }
     }
 
-    /** Returns a default implementation */
-    @NotNull
-    static GridBuilderConfig of(@NotNull final HtmlConfig config) {
-        return new ReportBuilderConfigImpl(config);
+    companion object {
+        /** Returns a default implementation  */
+        fun of(config: HtmlConfig): GridBuilderConfig<*> {
+            return ReportBuilderConfigImpl<Any?>(config)
+        }
     }
 }

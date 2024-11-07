@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.json;
+package org.ujorm.tools.web.json
 
-import java.io.IOException;
-import org.jetbrains.annotations.NotNull;
-import org.ujorm.tools.web.Element;
+import org.ujorm.tools.web.Element
+import java.io.IOException
 
 /**
  * Value provider
  *
  * @author Pavel Ponec
  */
-@FunctionalInterface
-public interface ValueProvider {
-
-    /** Write a HTML code to the element */
-    void accept(@NotNull Element element) throws IOException;
-
+fun interface ValueProvider {
+    /** Write a HTML code to the element  */
+    @Throws(IOException::class)
+    fun accept(element: Element)
 }

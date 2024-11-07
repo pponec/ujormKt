@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.ao;
-
-import org.jetbrains.annotations.NotNull;
+package org.ujorm.tools.web.ao
 
 /**
  * An interface for bulding HTML parameters by an Enumerator.
@@ -26,47 +24,29 @@ import org.jetbrains.annotations.NotNull;
  * String value = Param.TEXT(ServletRequest, "my default value"); } enum Param implements HttpParam { REGEXP, TEXT;
  *
  * @Override public String toString() { return name().toLowerCase(); } }
- * </pre>
+</pre> *
  *
  * @author Pavel Ponec
  */
-public final class DefaultHttpParam implements HttpParameter {
-
-    @NotNull
-    private final String name;
-    @NotNull
-    private final String defaultValue;
-
-    DefaultHttpParam(@NotNull String name, @NotNull String defaultValue) {
-        this.name = name;
-        this.defaultValue = defaultValue;
+class DefaultHttpParam internal constructor(private val name: String, private val defaultValue: String) :
+    HttpParameter {
+    override fun defaultValue(): String {
+        return defaultValue
     }
 
-    @NotNull
-    @Override
-    public String defaultValue() {
-        return defaultValue;
+    override fun toString(): String {
+        return name
     }
 
-    @NotNull
-    @Override
-    public String toString() {
-        return name;
+    override fun subSequence(start: Int, end: Int): CharSequence {
+        return name.subSequence(start, end)
     }
 
-    @Override
-    public CharSequence subSequence(int start, int end) {
-        return name.subSequence(start, end);
+    override fun length(): Int {
+        return name.length
     }
 
-    @Override
-    public int length() {
-        return name.length();
+    override fun charAt(index: Int): Char {
+        return name[index]
     }
-
-    @Override
-    public char charAt(int index) {
-        return name.charAt(index);
-    }
-
 }

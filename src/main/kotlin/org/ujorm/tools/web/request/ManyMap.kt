@@ -1,45 +1,46 @@
-package org.ujorm.tools.web.request;
+package org.ujorm.tools.web.request
+
+import java.io.Reader
 
 
-import java.io.Reader;
-import java.util.*;
+class ManyMap {
+    /** Internal map to store keys and their associated lists of values  */
+    private val map: MutableMap<String, MutableList<String>> = HashMap()
 
-public class ManyMap {
-    /** Internal map to store keys and their associated lists of values */
-    private final Map<String, List<String>> map = new HashMap<>();
-
-    /** Method to add a value to the specified key */
-    public void put(String key, String... values) {
-        for (String value: values) {
-            map.computeIfAbsent(key, k -> new ArrayList<>(2)).add(value);
+    /** Method to add a value to the specified key  */
+    fun put(key: String, vararg values: String) {
+        for (value in values) {
+            map.computeIfAbsent(key) { k: String? -> ArrayList(2) }.add(value)
         }
     }
 
     /** Method to retrieve the list of values for a specified key
-     * If the key is not found, return an empty list */
-    public List<String> getList(String key) {
-        return map.getOrDefault(key, Collections.emptyList());
+     * If the key is not found, return an empty list  */
+    fun getList(key: String?): List<String> {
+        return map.getOrDefault(key, emptyList())
     }
 
     /** Method to retrieve the list of values for a specified key
-     * If the key is not found, return an empty list */
-    public String[] get(String key) {
-        return getList(key).toArray(new String[0]);
+     * If the key is not found, return an empty list  */
+    fun get(key: String?): Array<String> {
+        return getList(key).toTypedArray<String>()
     }
 
-    /** Returns a key set */
-    public Set<String> keySet() {
-        return map.keySet();
+    /** Returns a key set  */
+    fun keySet(): Set<String> {
+        return map.keys
     }
 
-    /** Create new Servlet request */
-    public URequest toRequest(Reader reader) {
-        return new URequestImpl(this, reader);
+    /** Create new Servlet request  */
+    fun toRequest(reader: Reader): URequest {
+        return URequestImpl(this, reader)
     }
 
-    public static final ManyMap of(Map<String, String> map) {
-        ManyMap result = new ManyMap();
-        map.forEach((key, value) -> result.put(key, value));
-        return result;
+    companion object {
+        fun of(map: Map<String?, String?>): ManyMap {
+            val result = ManyMap()
+            map.forEach { (key: String?, value: String?) -> result.put(key!!, value!!) }
+            return result
+        }
     }
 }

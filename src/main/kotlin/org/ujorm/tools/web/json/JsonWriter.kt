@@ -13,84 +13,86 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.json;
+package org.ujorm.tools.web.json
 
-import java.io.IOException;
-import org.jetbrains.annotations.NotNull;
-import org.ujorm.tools.Assert;
+import org.ujorm.tools.Assert
+import java.io.IOException
 
 /**
  * Simple JSON writer for object type of key-value.
  *
  * @author Pavel Ponec
  */
-public final class JsonWriter implements Appendable {
+class JsonWriter internal constructor(writer: Appendable) : Appendable {
+    private val writer =
+        Assert.notNull(writer, "writer")
 
-    private static final char BACKSLASH = '\\';
-    static final char DOUBLE_QUOTE = '"';
-
-    private final Appendable writer;
-
-    JsonWriter(@NotNull final Appendable writer) {
-        this.writer = Assert.notNull(writer, "writer");
+    @Throws(IOException::class)
+    override fun append(csq: CharSequence): Appendable {
+        return append(csq, 0, csq.length)
     }
 
-    @Override
-    public Appendable append(CharSequence csq) throws IOException {
-        return append(csq, 0, csq.length());
-    }
-
-    @Override
-    public Appendable append(
-            @NotNull final CharSequence csq,
-            final int start,
-            final int end)
-            throws IOException {
-        for (int i = start; i < end; i++) {
-            append(csq.charAt(i));
+    @Throws(IOException::class)
+    override fun append(
+        csq: CharSequence,
+        start: Int,
+        end: Int
+    ): Appendable {
+        for (i in start until end) {
+            append(csq[i])
         }
-        return this;
+        return this
     }
 
-    @Override
-    public Appendable append(final char c) throws IOException {
-            switch (c) {
-                case BACKSLASH:
-                    writer.append(BACKSLASH);
-                    writer.append(BACKSLASH);
-                    break;
-                case DOUBLE_QUOTE:
-                    writer.append(BACKSLASH);
-                    writer.append(DOUBLE_QUOTE);
-                    break;
-                case '\b':
-                    writer.append(BACKSLASH);
-                    writer.append('b');
-                    break;
-                case '\f':
-                    writer.append(BACKSLASH);
-                    writer.append('f');
-                    break;
-                case '\n':
-                    writer.append(BACKSLASH);
-                    writer.append('n');
-                    break;
-                case '\r':
-                    writer.append(BACKSLASH);
-                    writer.append('r');
-                    break;
-                case '\t':
-                    writer.append(BACKSLASH);
-                    writer.append('t');
-                    break;
-                default:
-                    writer.append(c);
+    @Throws(IOException::class)
+    override fun append(c: Char): Appendable {
+        when (c) {
+            BACKSLASH -> {
+                writer.append(BACKSLASH)
+                writer.append(BACKSLASH)
             }
-        return this;
+
+            DOUBLE_QUOTE -> {
+                writer.append(BACKSLASH)
+                writer.append(DOUBLE_QUOTE)
+            }
+
+            '\b' -> {
+                writer.append(BACKSLASH)
+                writer.append('b')
+            }
+
+            '\f' -> {
+                writer.append(BACKSLASH)
+                writer.append('f')
+            }
+
+            '\n' -> {
+                writer.append(BACKSLASH)
+                writer.append('n')
+            }
+
+            '\r' -> {
+                writer.append(BACKSLASH)
+                writer.append('r')
+            }
+
+            '\t' -> {
+                writer.append(BACKSLASH)
+                writer.append('t')
+            }
+
+            else -> writer.append(c)
+        }
+        return this
     }
 
-    @NotNull
-    public Appendable original() {
-        return writer;
+    fun original(): Appendable {
+        return writer
+    }
+
+    companion object {
+        private const val BACKSLASH = '\\'
+        const val DOUBLE_QUOTE: Char = '"'
     }
 }

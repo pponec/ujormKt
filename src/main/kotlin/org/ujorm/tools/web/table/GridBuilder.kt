@@ -13,287 +13,276 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.table;
+package org.ujorm.tools.web.table
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.web.Element;
-import org.ujorm.tools.web.Html;
-import org.ujorm.tools.web.ao.Column;
-import org.ujorm.tools.web.ao.HttpParameter;
-import org.ujorm.tools.web.ao.Injector;
-import org.ujorm.tools.web.ao.WebUtils;
-import org.ujorm.tools.xml.ApiElement;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.web.Element
+import org.ujorm.tools.web.Html
+import org.ujorm.tools.web.ao.Column
+import org.ujorm.tools.web.ao.HttpParameter
+import org.ujorm.tools.web.ao.Injector
+import org.ujorm.tools.web.ao.WebUtils
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.config.HtmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.util.concurrent.atomic.AtomicLong
+import java.util.function.Function
+import java.util.logging.Logger
+import java.util.stream.Stream
 
 /**
  * Build a content of a HTML page for a sortable data grid.
  *
  * @author Pavel Ponec
  */
-public class GridBuilder<D> {
+class GridBuilder<D>(
+    /** Table builder config  */
+    protected val config: GridBuilderConfig<*>
+) {
+    /** Columns  */
+    protected val columns: MutableList<ColumnModel<D?, *>> = ArrayList()
 
-    /** Logger */
-    private static final Logger LOGGER = Logger.getLogger(GridBuilder.class.getName());
+    /** An order of sorted column whete a negavive value means a descending direction  */
+    private var sortedColumn = -1
 
-    /** Columns */
-    protected final List<ColumnModel<D,?>> columns = new ArrayList<>();
-    /** Table builder config */
-    protected final GridBuilderConfig config;
-    /** An order of sorted column whete a negavive value means a descending direction */
-    private int sortedColumn = -1;
-    /** Is the table sortable */
-    private Boolean isSortable;
-
-    public GridBuilder(@NotNull CharSequence title) {
-        this((HtmlConfig) HtmlConfig.ofDefault().setTitle(title).setNiceFormat());
-    }
-
-    public GridBuilder(@NotNull HtmlConfig config) {
-        this(GridBuilderConfig.of(config));
-    }
-
-    public GridBuilder(@NotNull GridBuilderConfig config) {
-        this.config = config;
-    }
-
-    @NotNull
-    public <V> GridBuilder<D> add(Function<D,V> column) {
-        return addInternal(column, "Column-" + (columns.size() + 1), null);
-    }
-
-    @NotNull
-    public <V> GridBuilder<D> add(Function<D,V> column, CharSequence title) {
-        return addInternal(column, title, null);
-    }
-
-    @NotNull
-    public <V> GridBuilder<D> add(Function<D,V> column, Injector title) {
-        return addInternal(column, title, null);
-    }
-
-    @NotNull
-    public <V> GridBuilder<D> add(Function<D,V> column, CharSequence title, @Nullable HttpParameter param) {
-        return addInternal(column, title, param);
-    }
-
-    @NotNull
-    public <V> GridBuilder<D> add(Function<D,V> column, Injector title, @Nullable HttpParameter param) {
-        return addInternal(column, title, param);
-    }
-
-    @NotNull
-    public GridBuilder<D> addColumn(@NotNull final Column<D> column, @NotNull final CharSequence title) {
-        return addInternal(column, title, null);
-    }
-
-    @NotNull
-    public GridBuilder<D> addColumn(@NotNull final Column<D> column, @NotNull final Injector title) {
-        return addInternal(column, title, null);
-    }
-
-    /** Add new column for a row counting */
-    @NotNull
-    public GridBuilder<D> addOrder(@NotNull final CharSequence title) {
-        final String textRight = "text-right";
-        return addColumn(new Column<D>() {
-            final AtomicLong order = new AtomicLong();
-            @Override
-            public void write(final Element e, final D row) {
-                e.setClass(Html.A_CLASS, textRight).addText(apply(row), '.');
+    /** Is the table sortable  */
+    var isSortable: Boolean? = null
+        /** Returns the true in case the table is sortable.
+         *
+         * NOTE: Calculated result is cached, call the method on a final model only!
+         */
+        get() {
+            if (field == null) {
+                field = isSortableCalculated
             }
-            @Override
-            public Object apply(D t) {
-                return order.incrementAndGet();
+            return field
+        }
+        private set
+
+    constructor(title: CharSequence) : this(
+        HtmlConfig.ofDefault().setTitle(title).setNiceFormat<DefaultXmlConfig>() as HtmlConfig
+    )
+
+    constructor(config: HtmlConfig) : this(GridBuilderConfig.Companion.of(config))
+
+    fun <V> add(column: Function<D?, V>): GridBuilder<D> {
+        return addInternal<V>(column, "Column-" + (columns.size + 1), null)
+    }
+
+    fun <V> add(column: Function<D?, V>, title: CharSequence): GridBuilder<D> {
+        return addInternal<V>(column, title, null)
+    }
+
+    fun <V> add(column: Function<D?, V>, title: Injector): GridBuilder<D> {
+        return addInternal<V>(column, title, null)
+    }
+
+    fun <V> add(column: Function<D?, V>, title: CharSequence, param: HttpParameter?): GridBuilder<D> {
+        return addInternal<V>(column, title, param)
+    }
+
+    fun <V> add(column: Function<D?, V>, title: Injector, param: HttpParameter?): GridBuilder<D> {
+        return addInternal<V>(column, title, param)
+    }
+
+    fun addColumn(column: Column<D?>, title: CharSequence): GridBuilder<D> {
+        return addInternal(column, title, null)
+    }
+
+    fun addColumn(column: Column<D?>, title: Injector): GridBuilder<D> {
+        return addInternal(column, title, null)
+    }
+
+    /** Add new column for a row counting  */
+    fun addOrder(title: CharSequence): GridBuilder<D> {
+        val textRight = "text-right"
+        return addColumn(object : Column<D> {
+            val order: AtomicLong = AtomicLong()
+            override fun write(e: Element, row: D) {
+                e.setClass(Html.Companion.A_CLASS, textRight).addText(apply(row), '.')
             }
-        }, e -> e.setClass(Html.A_CLASS, textRight).addText(title));
+
+            override fun apply(t: D): Any {
+                return order.incrementAndGet()
+            }
+        },
+            Injector { e: Element -> e.setClass(Html.Companion.A_CLASS, textRight).addText(title) })
     }
 
-    @NotNull
-    protected <V> GridBuilder<D> addInternal(
-            @NotNull final Function<D,V> column,
-            @NotNull final CharSequence title,
-            @Nullable final HttpParameter param) {
-        columns.add(new ColumnModel(columns.size(), column, title, param));
-        return this;
+    protected fun <V> addInternal(
+        column: Function<D?, V?>,
+        title: CharSequence,
+        param: HttpParameter?
+    ): GridBuilder<D> {
+        columns.add(ColumnModel<Any?, Any?>(columns.size, column, title, param))
+        return this
     }
 
-    /** Get column model by index */
-    public ColumnModel<D,?> getColumn(int index) {
-        return columns.get(index);
+    /** Get column model by index  */
+    fun getColumn(index: Int): ColumnModel<D?, *> {
+        return columns[index]
     }
 
-    /** Returns a count of columns */
-    public int getColumnSize() {
-        return columns.size();
-    }
+    val columnSize: Int
+        /** Returns a count of columns  */
+        get() = columns.size
 
-    /**
-     * Add a sortable indicator to the last column model
-     * @return
-     */
-    @NotNull
-    public <V> GridBuilder<D> sortable() {
-        return sortable(Direction.NONE);
-    }
     /**
      * Add a sortable indicator to the last column model
      * @param ascending Ascending or descending direction of the sort
      * @return
      */
-    @NotNull
-    public <V> GridBuilder<D> sortable(@Nullable final boolean ascending) {
-        return sortable(ascending ? Direction.ASC : Direction.DESC);
+    fun <V> sortable(ascending: Boolean): GridBuilder<D> {
+        return sortable<Any>(if (ascending) Direction.ASC else Direction.DESC)
     }
 
     /**
      * Add a sortable indicator to the last column model
-     * @param direction The {@code null} value shows an unused sorting action.
+     * @param direction The `null` value shows an unused sorting action.
      * @return
      */
-    @NotNull
-    public <V> GridBuilder<D> sortable(@NotNull final Direction direction) {
-        Assert.notNull(direction, "direction");
-        Assert.hasLength(columns, "No column is available");
-        columns.get(columns.size() - 1).setSortable(direction);
-        return this;
+    /**
+     * Add a sortable indicator to the last column model
+     * @return
+     */
+    @JvmOverloads
+    fun <V> sortable(direction: Direction = Direction.NONE): GridBuilder<D> {
+        Assert.notNull(direction, "direction")
+        Assert.hasLength(columns, "No column is available")
+        columns[columns.size - 1].setSortable(direction)
+        return this
     }
 
-    /** Get sorted column or a stub of the sorted column was not found */
-    @NotNull
-    public ColumnModel<D,?> getSortedColumn() {
-        return (sortedColumn >= 0 && sortedColumn < getColumnSize())
-                ? getColumn(sortedColumn)
-                : ColumnModel.ofStub();
+    /** Get sorted column or a stub of the sorted column was not found  */
+    fun getSortedColumn(): ColumnModel<D?, *> {
+        return if ((sortedColumn >= 0 && sortedColumn < columnSize))
+            getColumn(sortedColumn)
+        else
+            ColumnModel.Companion.ofStub<D, Any>()
     }
 
-//    public GridBuilder<D> setEmbeddedIcons(boolean embeddedIcons) throws IllegalStateException {
-//        if (config instanceof ReportBuilderConfigImpl) {
-//            ((ReportBuilderConfigImpl)config).setEmbeddedIcons(embeddedIcons);
-//        } else {
-//            throw new IllegalStateException("Configuration must be type of: " + ReportBuilderConfigImpl.class);
-//        }
-//        return this;
-//    }
-
-    /** Build the HTML page including a table */
-    public void build(
-            @NotNull final ApiElement parent,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource) {
-        printTable(Element.of(parent), resource);
+    //    public GridBuilder<D> setEmbeddedIcons(boolean embeddedIcons) throws IllegalStateException {
+    //        if (config instanceof ReportBuilderConfigImpl) {
+    //            ((ReportBuilderConfigImpl)config).setEmbeddedIcons(embeddedIcons);
+    //        } else {
+    //            throw new IllegalStateException("Configuration must be type of: " + ReportBuilderConfigImpl.class);
+    //        }
+    //        return this;
+    //    }
+    /** Build the HTML page including a table  */
+    fun build(
+        parent: ApiElement<*>,
+        resource: Function<GridBuilder<D>?, Stream<D>>
+    ) {
+        printTable(Element.Companion.of(parent), resource)
     }
 
-    /** Build the HTML page including a table */
-    public void build(
-            @NotNull final ApiElement parent,
-            @NotNull final ColumnModel sortedColumn,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource) {
-
+    /** Build the HTML page including a table  */
+    fun build(
+        parent: ApiElement<*>,
+        sortedColumn: ColumnModel<*, *>,
+        resource: Function<GridBuilder<D>?, Stream<D>>
+    ) {
         // An original code: setSort(ColumnModel.ofCode(config.getSortRequestParam().of(input)));
-        setSort(Assert.notNull(sortedColumn, "sortedColumn"));
-        printTable(Element.of(parent), resource);
+
+        setSort(Assert.notNull(sortedColumn, "sortedColumn"))
+        printTable(Element.Companion.of(parent), resource)
     }
 
-    /** Mark a column as sorted */
-    protected void setSort(@NotNull final ColumnModel sort) {
-        this.sortedColumn = sort.getIndex();
+    /** Mark a column as sorted  */
+    protected fun setSort(sort: ColumnModel<*, *>) {
+        this.sortedColumn = sort.index
         if (sortedColumn >= 0) {
-            for (int i = 0, max = columns.size(); i < max; i++) {
-                final ColumnModel cm = columns.get(i);
-                if (cm.isSortable()) {
-                    cm.setDirection(sort.getIndex() == i ? sort.getDirection() : Direction.NONE);
+            var i = 0
+            val max = columns.size
+            while (i < max) {
+                val cm: ColumnModel<*, *> = columns[i]
+                if (cm.isSortable) {
+                    cm.direction = if (sort.index == i) sort.direction else Direction.NONE
                 }
+                i++
             }
         }
     }
 
     /**
      * Print table
-     * @param parent If a name of the element is a {@code "table"} or an empty text
-     *    then do not create new table element.
+     * @param parent If a name of the element is a `"table"` or an empty text
+     * then do not create new table element.
      * @param resource Data source
      */
-    protected void printTable(
-            @NotNull final Element parent,
-            @NotNull final Function<GridBuilder<D>, Stream<D>> resource
+    protected fun printTable(
+        parent: Element,
+        resource: Function<GridBuilder<D>?, Stream<D>>
     ) {
-        final String elementName = parent.getName();
-        final Element table = (Check.isEmpty(elementName) || Html.TABLE.equals(elementName))
-                ? parent
-                : parent.addTable();
-        final Element headerRow = table.addElement(Html.THEAD).addElement(Html.TR);
-        for (ColumnModel<D,?> col : columns) {
-            final boolean columnSortable = col.isSortable();
-            final Object value = col.getTitle();
-            final Element th = headerRow.addElement(Html.TH);
-            final Element thLink = columnSortable ? th.addSubmitButton(
-                        config.getSortable(),
-                        config.getSortableDirection(col.getDirection()))
-                    .setAttribute(Html.A_NAME, this.config.getSortRequestParam())
-                    .setAttribute(Html.A_VALUE, col.toCode(true))
-                    : th;
-            if (value instanceof Injector) {
-                ((Injector)value).write(thLink);
+        val elementName = parent.name
+        val table = if ((Check.isEmpty(elementName) || Html.Companion.TABLE == elementName))
+            parent
+        else
+            parent.addTable()
+        val headerRow = table.addElement(Html.Companion.THEAD).addElement(Html.Companion.TR)
+        for (col in columns) {
+            val columnSortable = col.isSortable
+            val value: Any = col.title
+            val th = headerRow.addElement(Html.Companion.TH)
+            val thLink = if (columnSortable)
+                th.addSubmitButton(
+                    config.sortable,
+                    config.getSortableDirection(col.direction)
+                )
+                    .setAttribute(Html.Companion.A_NAME, config.sortRequestParam)
+                    .setAttribute(Html.Companion.A_VALUE, col.toCode(true))
+            else
+                th
+            if (value is Injector) {
+                value.write(thLink)
             } else {
-                thLink.addText(value);
+                thLink.addText(value)
             }
-            if (columnSortable && config.isEmbeddedIcons()) {
-                InputStream img = config.getInnerSortableImageToStream(col.getDirection());
+            if (columnSortable && config.isEmbeddedIcons) {
+                val img = config.getInnerSortableImageToStream(col.direction)
                 if (img != null) {
-                    thLink.addImage(img, col.getDirection().toString());
+                    thLink.addImage(img, col.direction.toString())
                 }
             }
         }
-        try (Element tBody = table.addElement(Html.TBODY)) {
-            final Object cols = columns.stream().map(t -> t.getColumn());
-            final boolean hasRenderer = WebUtils.isType(Column.class, cols);
-            resource.apply(this).forEach(value -> {
-                final Element rowElement = tBody.addElement(Html.TR);
-                for (ColumnModel<D, ?> col : columns) {
-                    final Function<D, ?> attribute = col.getColumn();
-                    final Element td = rowElement.addElement(Html.TD);
-                    if (hasRenderer && attribute instanceof Column) {
-                        ((Column)attribute).write(td, value);
+        table.addElement(Html.Companion.TBODY).use { tBody ->
+            val cols: Any = columns.stream().map { t: ColumnModel<D?, *> -> t.column }
+            val hasRenderer = WebUtils.isType(Column::class.java, cols)
+            resource.apply(this).forEach { value: D ->
+                val rowElement = tBody.addElement(Html.Companion.TR)
+                for (col in columns) {
+                    val attribute = col.column
+                    val td = rowElement.addElement(Html.Companion.TD)
+                    if (hasRenderer && attribute is Column<*>) {
+                        (attribute as Column<*>).write(td, value)
                     } else {
-                        td.addText(attribute.apply(value));
+                        td.addText(attribute.apply(value))
                     }
                 }
-            });
-        }
-    }
-
-    /** Returns the true in case the table is sortable.
-     *
-     * NOTE: Calculated result is cached, call the method on a final model only!
-     */
-    public final boolean isSortable() {
-        if (isSortable == null) {
-            isSortable = isSortableCalculated();
-        }
-        return isSortable;
-    }
-
-    /** Calculate if the table has an sortable column */
-    public boolean isSortableCalculated() {
-        for (ColumnModel<D, ?> column : columns) {
-            if (column.isSortable()) {
-                return true;
             }
         }
-        return false;
     }
 
-    /** Returns all table columns in a stream */
-    public Stream<ColumnModel<D,?>> getColumns() {
-        return columns.stream();
+    val isSortableCalculated: Boolean
+        /** Calculate if the table has an sortable column  */
+        get() {
+            for (column in columns) {
+                if (column.isSortable) {
+                    return true
+                }
+            }
+            return false
+        }
+
+    /** Returns all table columns in a stream  */
+    fun getColumns(): Stream<ColumnModel<D?, *>> {
+        return columns.stream()
+    }
+
+    companion object {
+        /** Logger  */
+        private val LOGGER: Logger = Logger.getLogger(GridBuilder::class.java.name)
     }
 }

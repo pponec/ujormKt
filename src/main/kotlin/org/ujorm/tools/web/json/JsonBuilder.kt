@@ -13,50 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.web.json;
+package org.ujorm.tools.web.json
 
-import java.io.Closeable;
-import java.io.IOException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.web.HtmlElement;
-import org.ujorm.tools.web.ao.ObjectProvider;
-import org.ujorm.tools.web.request.RContext;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.web.HtmlElement
+import org.ujorm.tools.web.ao.ObjectProvider
+import org.ujorm.tools.web.request.RContext
+import org.ujorm.tools.xml.config.HtmlConfig
+import java.io.Closeable
+import java.io.IOException
 
 /**
  * Simple JSON writer for object type of key-value.
  *
  * @author Pavel Ponec
  */
-public class JsonBuilder implements Closeable {
+class JsonBuilder protected constructor(
+    /** An original writer  */
+    private val writer: Appendable,
+    /** HTML config  */
+    private val config: HtmlConfig = HtmlConfig.ofEmptyElement()
+) :
+    Closeable {
+    /** JSON writer with character escaping  */
+    private val jsonWriter = JsonWriter(writer)
 
-    private static final char DOUBLE_QUOTE = JsonWriter.DOUBLE_QUOTE;
+    /** Parameter counter  */
+    private var paramCounter = 0
 
-    /** An original writer */
-    @NotNull
-    private final Appendable writer;
-    /** JSON writer with character escaping */
-    @NotNull
-    private final JsonWriter jsonWriter;
-    /** HTML config */
-    private final HtmlConfig config;
-    /** Parameter counter */
-    private int paramCounter = 0;
-    /** Dummy selector to run a JavaScript */
-    private final String JAVACRIPT_DUMMY_SELECTOR = "";
+    /** Dummy selector to run a JavaScript  */
+    private val JAVACRIPT_DUMMY_SELECTOR = ""
 
-    /** Constructor with a default HTML config */
-    protected JsonBuilder(@NotNull final Appendable writer) {
-        this(writer, HtmlConfig.ofEmptyElement());
-    }
-
-    /** Common constructor */
-    protected JsonBuilder(@NotNull final Appendable writer, HtmlConfig config) {
-        this.writer = writer;
-        this.jsonWriter = new JsonWriter(writer);
-        this.config = config;
-    }
+    /** Common constructor  */
 
     /** Write the value for a CSS ID selector
      *
@@ -64,11 +51,13 @@ public class JsonBuilder implements Closeable {
      * @param values The text array to join.
      * @throws IOException
      */
-    public JsonBuilder writeId(
-            @NotNull final CharSequence elementId,
-            @Nullable final CharSequence... values) throws IOException {
-        writePrefix(SelectorType.ID.prefix, elementId, values);
-        return this;
+    @Throws(IOException::class)
+    fun writeId(
+        elementId: CharSequence,
+        vararg values: CharSequence?
+    ): JsonBuilder {
+        writePrefix(SelectorType.ID.prefix, elementId, *values)
+        return this
     }
 
 
@@ -78,11 +67,13 @@ public class JsonBuilder implements Closeable {
      * @param values The text array to join.
      * @throws IOException
      */
-    public JsonBuilder writeClass(
-            @NotNull final CharSequence elementId,
-            @Nullable final CharSequence... values) throws IOException {
-        writePrefix(SelectorType.CLASS.prefix, elementId, values);
-        return this;
+    @Throws(IOException::class)
+    fun writeClass(
+        elementId: CharSequence,
+        vararg values: CharSequence?
+    ): JsonBuilder {
+        writePrefix(SelectorType.CLASS.prefix, elementId, *values)
+        return this
     }
 
     /** Write a key-value
@@ -91,11 +82,13 @@ public class JsonBuilder implements Closeable {
      * @param values The text array to join.
      * @throws IOException
      */
-    public JsonBuilder write(
-            @NotNull final CharSequence key,
-            @Nullable final CharSequence... values) throws IOException {
-        writePrefix(SelectorType.INCLUDED.prefix, key, values);
-        return this;
+    @Throws(IOException::class)
+    fun write(
+        key: CharSequence,
+        vararg values: CharSequence?
+    ): JsonBuilder {
+        writePrefix(SelectorType.INCLUDED.prefix, key, *values)
+        return this
     }
 
     /** Write a key-value with a prefix
@@ -104,54 +97,59 @@ public class JsonBuilder implements Closeable {
      * @param values The text array to join.
      * @throws IOException
      */
-    public JsonBuilder writePrefix(
-            @NotNull final String keyPrefix,
-            @NotNull final CharSequence key,
-            @Nullable final CharSequence... values) throws IOException {
-        writeKey(keyPrefix, key);
+    @Throws(IOException::class)
+    fun writePrefix(
+        keyPrefix: String,
+        key: CharSequence,
+        vararg values: CharSequence?
+    ): JsonBuilder {
+        writeKey(keyPrefix, key)
         if (values == null) {
-            writer.append("null");
+            writer.append("null")
         } else {
-            writer.append(DOUBLE_QUOTE);
-            for (CharSequence value : values) {
-                jsonWriter.append(value);
+            writer.append(DOUBLE_QUOTE)
+            for (value in values) {
+                jsonWriter.append(value)
             }
         }
-        writer.append(DOUBLE_QUOTE);
-        return this;
+        writer.append(DOUBLE_QUOTE)
+        return this
     }
 
     /** Write a Javascript to a call.
      * The response can contain only one Javascript code,
      * so this method can be called only once per request.
      */
-    public JsonBuilder writeJs(@Nullable final CharSequence... javascript) throws IOException {
-        return write(JAVACRIPT_DUMMY_SELECTOR, javascript);
+    @Throws(IOException::class)
+    fun writeJs(vararg javascript: CharSequence?): JsonBuilder {
+        return write(JAVACRIPT_DUMMY_SELECTOR, *javascript)
     }
 
-    /** Write a JSON property */
-    private void writeKey(final String keyPrefix, final CharSequence key) throws IOException {
-        writer.append(paramCounter++ == 0 ? '{' : ',');
-        writer.append(DOUBLE_QUOTE);
-        jsonWriter.append(keyPrefix);
-        jsonWriter.append(key);
-        writer.append(DOUBLE_QUOTE);
-        writer.append(':');
+    /** Write a JSON property  */
+    @Throws(IOException::class)
+    private fun writeKey(keyPrefix: String, key: CharSequence) {
+        writer.append(if (paramCounter++ == 0) '{' else ',')
+        writer.append(DOUBLE_QUOTE)
+        jsonWriter.append(keyPrefix)
+        jsonWriter.append(key)
+        writer.append(DOUBLE_QUOTE)
+        writer.append(':')
     }
+
 
     // --- VALUE PROVIDER ---
-
-
     /** Write the value for a CSS ID selector
      *
      * @param elementId ID selector
      * @param valueProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeId(
-            @NotNull final CharSequence elementId,
-            @NotNull final ValueProvider valueProvider) throws IOException {
-        return write(SelectorType.ID.prefix, elementId, valueProvider);
+    @Throws(IOException::class)
+    fun writeId(
+        elementId: CharSequence,
+        valueProvider: ValueProvider
+    ): JsonBuilder {
+        return write(SelectorType.ID.prefix, elementId, valueProvider)
     }
 
 
@@ -161,10 +159,12 @@ public class JsonBuilder implements Closeable {
      * @param valueProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeClass(
-            @NotNull final CharSequence elementId,
-            @NotNull final ValueProvider valueProvider) throws IOException {
-        return write(SelectorType.CLASS.prefix, elementId, valueProvider);
+    @Throws(IOException::class)
+    fun writeClass(
+        elementId: CharSequence,
+        valueProvider: ValueProvider
+    ): JsonBuilder {
+        return write(SelectorType.CLASS.prefix, elementId, valueProvider)
     }
 
     /** Write a key-value
@@ -173,10 +173,12 @@ public class JsonBuilder implements Closeable {
      * @param valueProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder write(
-            @NotNull final CharSequence key,
-            @NotNull final ValueProvider valueProvider) throws IOException {
-        return write(SelectorType.INCLUDED.prefix, key, valueProvider);
+    @Throws(IOException::class)
+    fun write(
+        key: CharSequence,
+        valueProvider: ValueProvider
+    ): JsonBuilder {
+        return write(SelectorType.INCLUDED.prefix, key, valueProvider)
     }
 
     /**
@@ -186,41 +188,42 @@ public class JsonBuilder implements Closeable {
      * @param valueProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder write(
-            @NotNull final String keyPrefix,
-            @NotNull final CharSequence key,
-            @NotNull final ValueProvider valueProvider)
-            throws IOException {
-
-        writeKey(keyPrefix, key);
-        writer.append(DOUBLE_QUOTE);
-        try (HtmlElement root = HtmlElement.of(jsonWriter, config)) {
-            valueProvider.accept(root.original());
+    @Throws(IOException::class)
+    fun write(
+        keyPrefix: String,
+        key: CharSequence,
+        valueProvider: ValueProvider
+    ): JsonBuilder {
+        writeKey(keyPrefix, key)
+        writer.append(DOUBLE_QUOTE)
+        HtmlElement.Companion.of(jsonWriter, config).use { root ->
+            valueProvider.accept(root.original())
         }
-        writer.append(DOUBLE_QUOTE);
-        return this;
+        writer.append(DOUBLE_QUOTE)
+        return this
     }
 
-    @Override
-    public void close() throws IOException {
+    @Throws(IOException::class)
+    override fun close() {
         if (paramCounter == 0) {
-            writer.append('{');
+            writer.append('{')
         }
-        writer.append('}');
+        writer.append('}')
     }
 
     // --- OBJECT PROVIER ---
-
     /** An experimental feature: write the value for a CSS ID selector
      *
      * @param elementId ID selector
      * @param objectProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeIdObj(
-            @NotNull final CharSequence elementId,
-            @NotNull final ObjectProvider objectProvider) throws IOException {
-        return writeObj(SelectorType.ID.prefix, elementId, objectProvider);
+    @Throws(IOException::class)
+    fun writeIdObj(
+        elementId: CharSequence,
+        objectProvider: ObjectProvider
+    ): JsonBuilder {
+        return writeObj(SelectorType.ID.prefix, elementId, objectProvider)
     }
 
 
@@ -230,10 +233,12 @@ public class JsonBuilder implements Closeable {
      * @param objectProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeClassObj(
-            @NotNull final CharSequence elementId,
-            @NotNull final ObjectProvider objectProvider) throws IOException {
-        return writeObj(SelectorType.CLASS.prefix, elementId, objectProvider);
+    @Throws(IOException::class)
+    fun writeClassObj(
+        elementId: CharSequence,
+        objectProvider: ObjectProvider
+    ): JsonBuilder {
+        return writeObj(SelectorType.CLASS.prefix, elementId, objectProvider)
     }
 
     /** An experimental feature: write a key-object value
@@ -242,10 +247,12 @@ public class JsonBuilder implements Closeable {
      * @param objectProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeObj(
-            @NotNull final CharSequence key,
-            @NotNull final ObjectProvider objectProvider) throws IOException {
-        return writeObj(SelectorType.INCLUDED.prefix, key, objectProvider);
+    @Throws(IOException::class)
+    fun writeObj(
+        key: CharSequence,
+        objectProvider: ObjectProvider
+    ): JsonBuilder {
+        return writeObj(SelectorType.INCLUDED.prefix, key, objectProvider)
     }
 
     /**
@@ -256,66 +263,58 @@ public class JsonBuilder implements Closeable {
      * @param objectProvider A value provider
      * @throws IOException
      */
-    public JsonBuilder writeObj(
-            @NotNull final String keyPrefix,
-            @NotNull final CharSequence key,
-            @NotNull final ObjectProvider objectProvider)
-            throws IOException {
-
-        writeKey(keyPrefix, key);
-        objectProvider.accept(this);
-        writer.append(DOUBLE_QUOTE);
-        return this;
+    @Throws(IOException::class)
+    fun writeObj(
+        keyPrefix: String,
+        key: CharSequence,
+        objectProvider: ObjectProvider
+    ): JsonBuilder {
+        writeKey(keyPrefix, key)
+        objectProvider.accept(this)
+        writer.append(DOUBLE_QUOTE)
+        return this
     }
 
-    // --- UTILS ---
-
-    /** An object factory */
-    @NotNull
-    public static final JsonBuilder of(
-            @NotNull final RContext context,
-            @NotNull final HtmlConfig config) {
-        return of(context.writer(), config);
-    }
-
-    /** An object factory */
-    @NotNull
-    public static final JsonBuilder of(@NotNull final RContext context) {
-        return of(context.writer());
-    }
-
-    /** An object factory */
-    @NotNull
-    public static final JsonBuilder of(@NotNull final Appendable writer) {
-        return new JsonBuilder(writer);
-    }
-
-    /** An object factory. The MAIN factory method. */
-    @NotNull
-    public static final JsonBuilder of(
-            @NotNull final Appendable writer,
-            @NotNull final HtmlConfig config) {
-        return new JsonBuilder(writer, config);
-    }
-
-    /** CSS selector types */
-    public enum SelectorType {
-        /** CSS selector by ID */
+    /** CSS selector types  */
+    enum class SelectorType(val prefix: String) {
+        /** CSS selector by ID  */
         ID("#"),
-        /** CSS selector by CLASS */
+
+        /** CSS selector by CLASS  */
         CLASS("."),
-        /** CSS selector is included */
-        INCLUDED("");
 
-        final String prefix;
+        /** CSS selector is included  */
+        INCLUDED("")
+    }
 
-        SelectorType(@NotNull String prefix) {
-            this.prefix = prefix;
+    companion object {
+        private val DOUBLE_QUOTE: Char = JsonWriter.Companion.DOUBLE_QUOTE
+
+        // --- UTILS ---
+        /** An object factory  */
+        fun of(
+            context: RContext,
+            config: HtmlConfig
+        ): JsonBuilder {
+            return of(context.writer(), config)
         }
 
-        @NotNull
-        public String getPrefix() {
-            return prefix;
+        /** An object factory  */
+        fun of(context: RContext): JsonBuilder {
+            return of(context.writer())
+        }
+
+        /** An object factory  */
+        fun of(writer: Appendable): JsonBuilder {
+            return JsonBuilder(writer)
+        }
+
+        /** An object factory. The MAIN factory method.  */
+        fun of(
+            writer: Appendable,
+            config: HtmlConfig
+        ): JsonBuilder {
+            return JsonBuilder(writer, config)
         }
     }
 }

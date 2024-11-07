@@ -1,81 +1,63 @@
-package org.ujorm.tools.web.request;
+package org.ujorm.tools.web.request
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.web.ao.Reflections;
+import org.ujorm.tools.web.ao.Reflections
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
-
-/** Servlet request context */
-public class RContext {
-    public static final Charset CHARSET = StandardCharsets.UTF_8;
-
-    private final URequest uRequest;
-    private final Appendable writer;
-
-    public RContext(URequest uRequest, Appendable writer) {
-        this.uRequest = uRequest;
-        this.writer = writer;
+/** Servlet request context  */
+class RContext @JvmOverloads constructor(
+    private val uRequest: URequest = URequestImpl.Companion.of(),
+    private val writer: Appendable? = StringBuilder()
+) {
+    fun request(): URequest {
+        return uRequest
     }
 
-    public RContext(URequest uRequest) {
-        this(uRequest, new StringBuilder());
+    fun writer(): Appendable {
+        return writer!!
     }
 
-    public RContext() {
-        this(URequestImpl.of(), new StringBuilder());
+    /** Returns the last parameter, or the null value.  */
+    fun getParameter(key: String): String? {
+        return getParameter(key, null)
     }
 
-    public URequest request() {
-        return uRequest;
-    }
+    val parameterNames: Set<String?>
+        /** Returns the parameter names  */
+        get() = uRequest.parameterNames
 
-    public Appendable writer() {
-        return writer;
-    }
-
-    /** Returns the last parameter, or the null value. */
-    public String getParameter(@NotNull String key) {
-        return getParameter(key, null);
-    }
-
-    /** Returns the parameter names */
-    public Set<String> getParameterNames() {
-        return uRequest.getParameterNames();
-    }
-
-    /** Returns the last parameter */
-    public String getParameter(@NotNull String key, String defaultValue) {
-        final URequest uRequest = request();
+    /** Returns the last parameter  */
+    fun getParameter(key: String, defaultValue: String?): String? {
+        val uRequest = request()
         if (uRequest != null) {
-            String[] params = uRequest.getParameters(key);
-            return params.length > 0 ? params[params.length - 1] : defaultValue;
+            val params = uRequest.getParameters(key)
+            return if (params.size > 0) params[params.size - 1] else defaultValue
         }
-        return defaultValue;
+        return defaultValue
     }
 
-    /** HTTP Servlet Factory */
-    public static RContext ofServletResponse(Object httpServletResponse) {
-        return ofServlet(null, httpServletResponse);
-    }
+    companion object {
+        val CHARSET: Charset = StandardCharsets.UTF_8
 
-    /** HTTP Servlet Factory */
-    public static RContext ofServlet(@Nullable Object httpServletRequest, @NotNull Object httpServletResponse) {
-        Reflections.setCharacterEncoding(httpServletResponse, CHARSET.name());
-        final Appendable writer = Reflections.getServletWriter(httpServletResponse);
-        final URequest ureq = httpServletRequest != null ? URequest.ofRequest(httpServletRequest) : URequestImpl.of();
-        return new RContext(ureq, writer);
-    }
+        /** HTTP Servlet Factory  */
+        fun ofServletResponse(httpServletResponse: Any): RContext {
+            return ofServlet(null, httpServletResponse)
+        }
 
-    /** UContext from a map */
-    public static RContext of(ManyMap map) {
-        return new RContext(URequestImpl.ofMap(map), new StringBuilder());
-    }
+        /** HTTP Servlet Factory  */
+        fun ofServlet(httpServletRequest: Any?, httpServletResponse: Any): RContext {
+            Reflections.setCharacterEncoding(httpServletResponse, CHARSET.name())
+            val writer: Appendable? = Reflections.getServletWriter(httpServletResponse)
+            val ureq: URequest =
+                if (httpServletRequest != null) URequest.Companion.ofRequest(httpServletRequest) else URequestImpl.Companion.of()
+            return RContext(ureq, writer)
+        }
 
-    /** UContext from a map */
-    public static RContext of() {
-        return of (new ManyMap());
+        /** UContext from a map  */
+        /** UContext from a map  */
+        @JvmOverloads
+        fun of(map: ManyMap = ManyMap()): RContext {
+            return RContext(URequestImpl.Companion.ofMap(map), StringBuilder())
+        }
     }
 }
