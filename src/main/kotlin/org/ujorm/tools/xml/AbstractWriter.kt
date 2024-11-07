@@ -14,127 +14,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml;
+package org.ujorm.tools.xml
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.msg.MsgFormatter;
-import org.ujorm.tools.xml.config.Formatter;
-import org.ujorm.tools.xml.config.XmlConfig;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.msg.MsgFormatter
+import org.ujorm.tools.xml.config.XmlConfig
+import java.io.IOException
+import java.nio.charset.Charset
 
 /**
  * A generic writer
  * @author Pavel Ponec
  */
-public abstract class AbstractWriter {
+abstract class AbstractWriter(out: Appendable, config: XmlConfig) {
+    /** For internal usage only  */
+    /** Output  */
+    val writer: Appendable = Assert.notNull(out, "out")
 
-    /** Default XML declaration */
-    public static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    /** XML configuration  */
+    protected val config: XmlConfig =
+        Assert.notNull(config, "config")
 
-    /** Default DOCTYPE of HTML-5 */
-    public static final String HTML_DOCTYPE = "<!DOCTYPE html>";
+    /** Value formatter  */
+    private val formatter = config.formatter
 
-    /** A special XML character */
-    public static final char XML_GT = '>';
-    /** A special XML character */
-    public static final char XML_LT = '<';
-    /** A special XML character */
-    public static final char XML_AMPERSAND = '&';
-    /** A special XML character */
-    public static final char XML_APOSTROPHE = '\'';
-    /** A special XML character */
-    public static final char XML_2QUOT = '"';
-    /** A special XML character */
-    public static final char SPACE = ' ';
-    /** Non-breaking space character */
-    public static final char NBSP = '\u00A0';
-    /** A forward slash character */
-    public static final char FORWARD_SLASH = '/';
-    /** A CDATA beg markup sequence */
-    public static final String CDATA_BEG = "<![CDATA[";
-    /** A CDATA end markup sequence */
-    public static final String CDATA_END = "]]>";
-    /** A comment beg sequence */
-    public static final String COMMENT_BEG = "<!--";
-    /** A comment end sequence */
-    public static final String COMMENT_END = "-->";
+    /** An indentation request  */
+    protected val indentationEnabled: Boolean = Check.hasLength(config.indentation)
 
-    /** Common formatter */
-    public static final MsgFormatter FORMATTER = new MsgFormatter(){};
+    /** Get Writer to escape HTML characters.  */
+    val writerEscaped: Appendable = object : Appendable {
+        private val attribute = false
 
-    /** Output */
-    @NotNull
-    protected final Appendable out;
+        @Throws(IOException::class)
+        override fun append(value: CharSequence): Appendable {
+            write(value, attribute)
+            return this
+        }
 
-    /** XML configuration */
-    @NotNull
-    protected final XmlConfig config;
+        @Throws(IOException::class)
+        override fun append(value: CharSequence, start: Int, end: Int): Appendable {
+            write(value, start, end, attribute)
+            return this
+        }
 
-    /** Value formatter */
-    @NotNull
-    private final Formatter formatter;
-
-    /** An indentation request */
-    protected final boolean indentationEnabled;
-
-    @NotNull
-    private final Appendable writerEscaped = new Appendable() {
-            private final boolean attribute = false;
-
-            @NotNull
-            @Override
-            public Appendable append(@NotNull final CharSequence value) throws IOException {
-                write(value, attribute);
-                return this;
-            }
-
-            @NotNull
-            @Override
-            public Appendable append(@NotNull final CharSequence value, int start, int end) throws IOException {
-                write(value, start, end, attribute);
-                return this;
-            }
-
-            @NotNull
-            @Override
-            public Appendable append(final char value) throws IOException {
-                write(value, attribute);
-                return this;
-            }
-        };
-
-    /**
-     * A writer constructor
-     * @param out A writer
-     * @param config XML configuration
-     */
-    public AbstractWriter(@NotNull final Appendable out, @NotNull final XmlConfig config) {
-        this.out = Assert.notNull(out, "out");
-        this.config = Assert.notNull(config, "config");
-        this.indentationEnabled = Check.hasLength(config.getIndentation());
-        this.formatter = config.getFormatter();
+        @Throws(IOException::class)
+        override fun append(value: Char): Appendable {
+            write(value, attribute)
+            return this
+        }
     }
 
     /** Write escaped value to the output
      * @param text A value to write
      * @param attribute Write an attribute value
      */
-    public final void write(@NotNull final CharSequence text, final boolean attribute) throws IOException {
-        write(text, 0, text.length(), attribute);
+    @Throws(IOException::class)
+    fun write(text: CharSequence, attribute: Boolean) {
+        write(text, 0, text.length, attribute)
     }
 
     /** Write escaped value to the output
      * @param text A value to write
      * @param attribute Write an attribute value
      */
-    void write(@NotNull final CharSequence text, final int from, final int max, final boolean attribute) throws IOException {
-        for (int i = from; i < max; i++) {
-            write(text.charAt(i), attribute);
+    @Throws(IOException::class)
+    fun write(text: CharSequence, from: Int, max: Int, attribute: Boolean) {
+        for (i in from until max) {
+            write(text[i], attribute)
         }
     }
 
@@ -144,60 +91,50 @@ public abstract class AbstractWriter {
      * @param attribute Is it a text to attribute?
      * @throws IOException
      */
-    private void write(final char c, final boolean attribute) throws IOException {
-        switch (c) {
-            case XML_LT:
-                out.append(XML_AMPERSAND).append("lt;");
-                break;
-            case XML_GT:
-                out.append(XML_AMPERSAND).append("gt;");
-                break;
-            case XML_AMPERSAND:
-                out.append(XML_AMPERSAND).append("amp;");
-                break;
-            case XML_2QUOT:
-                if (attribute) {
-                    out.append(XML_AMPERSAND).append("quot;");
+    @Throws(IOException::class)
+    private fun write(c: Char, attribute: Boolean) {
+        when (c) {
+            XML_LT -> writer.append(XML_AMPERSAND).append("lt;")
+            XML_GT -> writer.append(XML_AMPERSAND).append("gt;")
+            XML_AMPERSAND -> writer.append(XML_AMPERSAND).append("amp;")
+            XML_2QUOT -> if (attribute) {
+                writer.append(XML_AMPERSAND).append("quot;")
+            } else {
+                writer.append(c)
+            }
+
+            XML_APOSTROPHE -> if (true) {
+                writer.append(c)
+            } else {
+                writer.append(XML_AMPERSAND).append("apos;")
+            }
+
+            SPACE -> writer.append(c)
+            NBSP -> writer.append(XML_AMPERSAND).append("#160;")
+            else -> {
+                if (c.code > 32) {
+                    writer.append(c)
                 } else {
-                    out.append(c);
-                }
-                break;
-            case XML_APOSTROPHE:
-                if (true) {
-                    out.append(c);
-                } else {
-                    out.append(XML_AMPERSAND).append("apos;");
-                }
-                break;
-            case SPACE:
-                out.append(c);
-                break;
-            case NBSP:
-                out.append(XML_AMPERSAND).append("#160;");
-                break;
-            default: {
-                if (c > 32) {
-                    out.append(c);
-                } else {
-                    out.append(XML_AMPERSAND).append("#");
-                    out.append(Integer.toString(c));
-                    out.append(";");
+                    writer.append(XML_AMPERSAND).append("#")
+                    writer.append(c.toString())
+                    writer.append(";")
                 }
             }
         }
     }
 
     /** Write escaped value to the output
-     * @param value A value to write, where the {@code null} value is ignored silently.
+     * @param value A value to write, where the `null` value is ignored silently.
      * @param element The element
-     * @param attributeName A name of the XML attribute of {@code null} value for a XML text.
+     * @param attributeName A name of the XML attribute of `null` value for a XML text.
      */
-    public void writeValue(
-            @Nullable final Object value,
-            @NotNull final ApiElement element,
-            @Nullable final String attributeName
-    ) throws IOException {
-        write(formatter.format(value, element, attributeName), attributeName != null);
+    @Throws(IOException::class)
+    fun writeValue(
+        value: Any?,
+        element: ApiElement<*>,
+        attributeName: String?
+    ) {
+        write(formatter.format(value, element, attributeName), attributeName != null)
     }
 
     /**
@@ -205,67 +142,111 @@ public abstract class AbstractWriter {
      * @param rawValue A raw value to print
      * @param element An original element
      */
-    public final void writeRawValue(@NotNull final CharSequence rawValue, @NotNull final ApiElement element) throws IOException {
-        out.append(rawValue);
+    @Throws(IOException::class)
+    fun writeRawValue(rawValue: CharSequence, element: ApiElement<*>) {
+        writer.append(rawValue)
     }
 
-    /** Write a new line with an offset by the current level */
-    public void writeNewLine(final int level) throws IOException {
-        out.append(config.getNewLine());
+    /** Write a new line with an offset by the current level  */
+    @Throws(IOException::class)
+    fun writeNewLine(level: Int) {
+        writer.append(config.newLine)
         if (indentationEnabled) {
-            for (int i = level; i > 0; i--) {
-                out.append(config.getIndentation());
+            for (i in level downTo 1) {
+                writer.append(config.indentation)
             }
         }
     }
 
-    @Override
-    public String toString() {
-        return out.toString();
+    override fun toString(): String {
+        return writer.toString()
     }
 
-    /** For internal usage only */
-    @NotNull
-    public Appendable getWriter() {
-        return out;
+    companion object {
+        /** Default XML declaration  */
+        const val XML_HEADER: String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+
+        /** Default DOCTYPE of HTML-5  */
+        const val HTML_DOCTYPE: String = "<!DOCTYPE html>"
+
+        /** A special XML character  */
+        const val XML_GT: Char = '>'
+
+        /** A special XML character  */
+        const val XML_LT: Char = '<'
+
+        /** A special XML character  */
+        const val XML_AMPERSAND: Char = '&'
+
+        /** A special XML character  */
+        const val XML_APOSTROPHE: Char = '\''
+
+        /** A special XML character  */
+        const val XML_2QUOT: Char = '"'
+
+        /** A special XML character  */
+        const val SPACE: Char = ' '
+
+        /** Non-breaking space character  */
+        const val NBSP: Char = '\u00A0'
+
+        /** A forward slash character  */
+        const val FORWARD_SLASH: Char = '/'
+
+        /** A CDATA beg markup sequence  */
+        const val CDATA_BEG: String = "<![CDATA["
+
+        /** A CDATA end markup sequence  */
+        const val CDATA_END: String = "]]>"
+
+        /** A comment beg sequence  */
+        const val COMMENT_BEG: String = "<!--"
+
+        /** A comment end sequence  */
+        const val COMMENT_END: String = "-->"
+
+        /** Common formatter  */
+        val FORMATTER: MsgFormatter = object : MsgFormatter() {}
+
+        // ---- STATIC METHOD(s) ---
+        /** Assign a no-cache and an Edge compatibility mode and returns a writer from HttpServletResponse  */
+        @Throws(ReflectiveOperationException::class)
+        fun createWriter(
+            httpServletResponse: Any,
+            charset: Charset,
+            noCache: Boolean
+        ): Appendable {
+            val setEncoding = httpServletResponse.javaClass.getMethod(
+                "setCharacterEncoding",
+                String::class.java
+            )
+            val setHeader = httpServletResponse.javaClass.getMethod(
+                "setHeader",
+                String::class.java,
+                String::class.java
+            )
+            val getWriter = httpServletResponse.javaClass.getMethod("getWriter")
+            setEncoding.invoke(httpServletResponse, charset.toString())
+            setHeader.invoke(httpServletResponse, "Content-Type", "text/html; charset=$charset")
+            if (noCache) {
+                setHeader.invoke(
+                    httpServletResponse,
+                    "Cache-Control",
+                    "no-cache, no-store, must-revalidate"
+                ) // HTTP 1.1
+                setHeader.invoke(httpServletResponse, "Pragma", "no-cache") // HTTP 1.0
+                setHeader.invoke(httpServletResponse, "Expires", "0") // Proxies
+                setHeader.invoke(httpServletResponse, "X-UA-Compatible", "IE=edge") // Proxies
+            }
+            val writer = getWriter.invoke(httpServletResponse) as Appendable
+            return writer
+        } //    IT IS A WRONG IDEA:
+        //    /** Close the an internal writer, if the one is Closeable */
+        //    @Override
+        //    public void close() throws IOException {
+        //        if (this.out instanceof Closeable) {
+        //            ((Closeable) out).close();
+        //        }
+        //    }
     }
-
-    /** Get Writer to escape HTML characters. */
-    @NotNull
-    public Appendable getWriterEscaped() {
-        return writerEscaped;
-    }
-
-    // ---- STATIC METHOD(s) ---
-
-    /** Assign a no-cache and an Edge compatibility mode and returns a writer from HttpServletResponse */
-    @NotNull
-    public static Appendable createWriter(
-            @NotNull final Object httpServletResponse,
-            @NotNull final Charset charset,
-            final boolean noCache
-    ) throws ReflectiveOperationException {
-        final Method setEncoding = httpServletResponse.getClass().getMethod("setCharacterEncoding", String.class);
-        final Method setHeader = httpServletResponse.getClass().getMethod("setHeader", String.class, String.class);
-        final Method getWriter = httpServletResponse.getClass().getMethod("getWriter");
-        setEncoding.invoke(httpServletResponse, charset.toString());
-        setHeader.invoke(httpServletResponse, "Content-Type", "text/html; charset=" + charset);
-        if (noCache) {
-            setHeader.invoke(httpServletResponse, "Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
-            setHeader.invoke(httpServletResponse, "Pragma", "no-cache"); // HTTP 1.0
-            setHeader.invoke(httpServletResponse, "Expires", "0"); // Proxies
-            setHeader.invoke(httpServletResponse, "X-UA-Compatible", "IE=edge"); // Proxies
-        }
-        final Appendable writer = (Appendable) getWriter.invoke(httpServletResponse);
-        return writer;
-    }
-
-//    IT IS A WRONG IDEA:
-//    /** Close the an internal writer, if the one is Closeable */
-//    @Override
-//    public void close() throws IOException {
-//        if (this.out instanceof Closeable) {
-//            ((Closeable) out).close();
-//        }
-//    }
 }

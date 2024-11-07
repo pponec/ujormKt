@@ -14,293 +14,262 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.ujorm.tools.xml.model
 
-package org.ujorm.tools.xml.model;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.xml.AbstractWriter;
-import org.ujorm.tools.xml.ApiElement;
-import org.ujorm.tools.xml.config.XmlConfig;
-import org.ujorm.tools.xml.model.XmlModel.RawEnvelope;
-import static org.ujorm.tools.xml.AbstractWriter.*;
-import static org.ujorm.tools.xml.config.impl.DefaultXmlConfig.REQUIRED_MSG;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.xml.AbstractWriter
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.config.XmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.io.IOException
+import java.io.Serializable
+import java.util.*
 
 /**
- * XML element <strong>model</strong> to rendering a XML file.
+ * XML element **model** to rendering a XML file.
  * The main benefits are:
- * <ul>
- *     <li>secure building well-formed XML documents  by the Java code</li>
- *     <li>a simple API built on a single XmlElement class</li>
- *     <li>creating XML components by a subclass is possible</li>
- *     <li>great performance and small memory footprint</li>
- * </ul>¨
+ *
+ *  * secure building well-formed XML documents  by the Java code
+ *  * a simple API built on a single XmlElement class
+ *  * creating XML components by a subclass is possible
+ *  * great performance and small memory footprint
+ * ¨
  * <h3>How to use the class:</h3>
  * <pre class="pre">
- *  XmlElement root = new XmlElement("root");
- *  root.addElement("childA")
- *          .setAttrib("x", 1)
- *          .setAttrib("y", 2);
- *  root.addElement("childB")
- *          .setAttrib("x", 3)
- *          .setAttrib("y", 4)
- *          .addText("A text message &lt;&\"&gt;");
- *  root.addRawText("\n&lt;rawXml/&gt;\n");
- *  root.addCDATA("A character data &lt;&\"&gt;");
- *  String result = root.toString();
- * </pre>
+ * XmlElement root = new XmlElement("root");
+ * root.addElement("childA")
+ * .setAttrib("x", 1)
+ * .setAttrib("y", 2);
+ * root.addElement("childB")
+ * .setAttrib("x", 3)
+ * .setAttrib("y", 4)
+ * .addText("A text message &lt;&\"&gt;");
+ * root.addRawText("\n&lt;rawXml/&gt;\n");
+ * root.addCDATA("A character data &lt;&\"&gt;");
+ * String result = root.toString();
+</pre> *
  *
  * @since 2.03
  * @author Pavel Ponec
  */
-public class XmlModel implements ApiElement<XmlModel>, Serializable {
+class XmlModel
+/**
+ * @param name The element name must not be special HTML characters.
+ * The `null` value is intended to build a root of AJAX queries.
+ */(
+    /** Element name  */
+    override val name: String
+) : ApiElement<XmlModel>, Serializable {
+    /** Attributes  */
+    var attributes: MutableMap<String, Any>? = null
 
-    /** Element name */
-    @NotNull
-    protected final String name;
+    /** Child elements with a `null` items  */
+    var children: MutableList<Any?>? = null
 
-    /** Attributes */
-    @Nullable
-    protected Map<String, Object> attributes;
-
-    /** Child elements with a {@code null} items */
-    @Nullable
-    protected List<Object> children;
-
-     /**
-     * @param name The element name must not be special HTML characters.
-     * The {@code null} value is intended to build a root of AJAX queries.
-     */
-    public XmlModel(@NotNull final String name) {
-        this.name = name;
+    /** New element with a parent  */
+    constructor(name: String, parent: XmlModel) : this(name) {
+        parent.addChild(this)
     }
 
-    /** New element with a parent */
-    public XmlModel(@NotNull final String name, @NotNull final XmlModel parent) {
-        this(name);
-        parent.addChild(this);
+    override fun getName(): String? {
+        return name
     }
 
-    @Nullable
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    /** Return attributes */
-    @NotNull
-    protected Map<String, Object> getAttribs() {
-        if (attributes == null) {
-            attributes = new LinkedHashMap<>();
+    protected val attribs: Map<String, Any>
+        /** Return attributes  */
+        get() {
+            if (attributes == null) {
+                attributes = LinkedHashMap()
+            }
+            return attributes!!
         }
-        return attributes;
-    }
 
-    /** Add a child entity */
-    @NotNull
-    protected void addChild(@Nullable final Object child) {
+    /** Add a child entity  */
+    protected fun addChild(child: Any?) {
         if (children == null) {
-            children = new ArrayList<>();
+            children = ArrayList()
         }
-        children.add(child);
+        children!!.add(child)
     }
 
     /**
      * Add a child element
      * @param element Add a child element is required. An undefined argument is ignored.
-     * @return The argument type of XmlElement! */
-    @NotNull
-    public final XmlModel addElement(@NotNull final XmlModel element) {
-        addChild(Assert.notNull(element, REQUIRED_MSG, "element"));
-        return element;
+     * @return The argument type of XmlElement!
+     */
+    fun addElement(element: XmlModel): XmlModel {
+        addChild(Assert.notNull<XmlModel, String>(element, DefaultXmlConfig.Companion.REQUIRED_MSG, "element"))
+        return element
     }
 
-    /** Create a new {@link XmlModel} for a required name and add it to children.
+    /** Create a new [XmlModel] for a required name and add it to children.
      * @param name A name of the new XmlElement is required.
      * @return The new XmlElement!
      */
-    @Override @NotNull
-    public XmlModel addElement(@NotNull final String name) {
-        return new XmlModel(name, this);
+    override fun addElement(name: String): XmlModel {
+        return XmlModel(name, this)
     }
 
     /**
      * Set one attribute
      * @param name Required element name
-     * @param value The {@code null} value is ignored. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.dom.XmlElement, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
+     * @param value The `null` value is ignored. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
      * @return The original element
      */
-    @Override @NotNull
-    public final XmlModel setAttribute(@NotNull final String name, @Nullable final Object value) {
-        Assert.hasLength(name, REQUIRED_MSG, "name");
+    override fun setAttribute(name: String, value: Any?): XmlModel {
+        Assert.hasLength<String, String>(name, DefaultXmlConfig.Companion.REQUIRED_MSG, "name")
         if (value != null) {
             if (attributes == null) {
-                attributes = new LinkedHashMap<>();
+                attributes = LinkedHashMap()
             }
-            attributes.put(name, value);
+            attributes!![name] = value
         }
-        return  this;
+        return this
     }
 
     /**
      * Add a text and escape special character
-     * @param value The {@code null} value is allowed. Formatting is performed by the
-     *   {@link XmlWriter#writeValue(java.lang.Object, org.ujorm.tools.dom.XmlElement, java.lang.String, java.io.Writer) }
-     *   method, where the default implementation calls a {@code toString()} only.
-     * @return This instance */
-    @Override @NotNull
-    public final XmlModel addText(@Nullable final Object value) {
-        addChild(value);
-        return  this;
+     * @param value The `null` value is allowed. Formatting is performed by the
+     * [XmlWriter.writeValue]
+     * method, where the default implementation calls a `toString()` only.
+     * @return This instance
+     */
+    override fun addText(value: Any?): XmlModel {
+        addChild(value)
+        return this
     }
 
     /**
      * Message template with hight performance.
      *
-     * @param template Message template where parameters are marked by the {@code {}} symbol
+     * @param template Message template where parameters are marked by the `{}` symbol
      * @param values argument values
      * @return The original builder
      */
-    @Override @NotNull
-    public final XmlModel addTextTemplated(@Nullable final CharSequence template, @NotNull final Object... values) {
+    override fun addTextTemplated(template: CharSequence?, vararg values: Any): XmlModel {
         try {
-            return addText(AbstractWriter.FORMATTER.formatMsg(null, template, values));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            return addText(AbstractWriter.Companion.FORMATTER.formatMsg<Any>(null, template, *values))
+        } catch (e: IOException) {
+            throw IllegalStateException(e)
         }
     }
-
-
 
 
     /** Add an native text with no escaped characters, for example: XML code, JavaScript, CSS styles
-     * @param value The {@code null} value is ignored.
-     * @return This instance */
-    @Override @NotNull
-    public final XmlModel addRawText(@Nullable final Object value) {
-        if (value != null) {
-            addChild(new RawEnvelope(value));
-        }
-        return  this;
-    }
-
-    /**
-     * Add a <strong>comment text</strong>.
-     * The CDATA structure isn't really for HTML at all.
-     * @param comment A comment text must not contain a string {@code -->} .
+     * @param value The `null` value is ignored.
      * @return This instance
      */
-    @Override @NotNull
-    public final XmlModel addComment(@Nullable final CharSequence comment) {
-        if (Check.hasLength(comment)) {
-            Assert.isTrue(!comment.toString().contains(COMMENT_END), "The text contains a forbidden string: " + COMMENT_END);
-            StringBuilder msg = new StringBuilder
-                     ( COMMENT_BEG.length()
-                     + COMMENT_END.length()
-                     + comment.length() + 2);
-            addRawText(msg.append(COMMENT_BEG)
-                    .append(SPACE)
-                    .append(comment)
-                    .append(SPACE)
-                    .append(COMMENT_END));
+    override fun addRawText(value: Any?): XmlModel {
+        if (value != null) {
+            addChild(RawEnvelope(value))
         }
-        return  this;
+        return this
     }
 
     /**
-     * Add a <strong>character data</strong> in {@code CDATA} format to XML only.
+     * Add a **comment text**.
+     * The CDATA structure isn't really for HTML at all.
+     * @param comment A comment text must not contain a string `-->` .
+     * @return This instance
+     */
+    override fun addComment(comment: CharSequence?): XmlModel {
+        if (Check.hasLength(comment)) {
+            Assert.isTrue<String>(
+                !comment.toString().contains(AbstractWriter.Companion.COMMENT_END),
+                "The text contains a forbidden string: " + AbstractWriter.Companion.COMMENT_END
+            )
+            val msg: StringBuilder = StringBuilder(
+                (AbstractWriter.Companion.COMMENT_BEG.length
+                        + AbstractWriter.Companion.COMMENT_END.length
+                        + comment!!.length + 2)
+            )
+            addRawText(
+                msg.append(AbstractWriter.Companion.COMMENT_BEG)
+                    .append(AbstractWriter.Companion.SPACE)
+                    .append(comment)
+                    .append(AbstractWriter.Companion.SPACE)
+                    .append(AbstractWriter.Companion.COMMENT_END)
+            )
+        }
+        return this
+    }
+
+    /**
+     * Add a **character data** in `CDATA` format to XML only.
      * The CDATA structure isn't really for HTML at all.
      * @param charData A text including the final DATA sequence. An empty argument is ignored.
      * @return This instance
      */
-    @Override @NotNull
-    public final XmlModel addCDATA(@Nullable final CharSequence charData) {
+    override fun addCDATA(charData: CharSequence?): XmlModel {
         if (Check.hasLength(charData)) {
-            addRawText(CDATA_BEG);
-            final String text = charData.toString();
-            int i = 0, j;
-            while ((j = text.indexOf(CDATA_END, i)) >= 0) {
-                j += CDATA_END.length();
-                addRawText(text.subSequence(i, j));
-                i = j;
-                addText(CDATA_END);
-                addRawText(CDATA_BEG);
+            addRawText(AbstractWriter.Companion.CDATA_BEG)
+            val text = charData.toString()
+            var i = 0
+            var j: Int
+            while ((text.indexOf(AbstractWriter.Companion.CDATA_END, i).also { j = it }) >= 0) {
+                j += AbstractWriter.Companion.CDATA_END.length
+                addRawText(text.subSequence(i, j))
+                i = j
+                addText(AbstractWriter.Companion.CDATA_END)
+                addRawText(AbstractWriter.Companion.CDATA_BEG)
             }
-            addRawText(i == 0 ? text : text.substring(i));
-            addRawText(CDATA_END);
+            addRawText(if (i == 0) text else text.substring(i))
+            addRawText(AbstractWriter.Companion.CDATA_END)
         }
-        return  this;
+        return this
     }
 
-    /** Get an unmodifiable map of attributes */
-    @NotNull
-    public Map<String, Object> getAttributes() {
-        return attributes != null
-            ? Collections.unmodifiableMap(attributes)
-            : Collections.emptyMap();
+    /** Get an unmodifiable map of attributes  */
+    fun getAttributes(): Map<String, Any> {
+        return if (attributes != null)
+            Collections.unmodifiableMap(attributes)
+        else emptyMap()
     }
 
-    /** Get an unmodifiable list of children */
-    @NotNull
-    public List<Object> getChildren() {
-        return children != null
-            ? Collections.unmodifiableList(children)
-            : Collections.emptyList();
+    /** Get an unmodifiable list of children  */
+    fun getChildren(): List<Any?> {
+        return if (children != null)
+            Collections.unmodifiableList(children)
+        else emptyList<Any>()
     }
 
-    /** An empty method */
-    @Override
-    public final void close() {
+    /** An empty method  */
+    override fun close() {
     }
 
-    /** Render the XML code including header */
-    @NotNull
-    @Override
-    public String toString() {
+    /** Render the XML code including header  */
+    override fun toString(): String {
         try {
-            final XmlConfig config = XmlConfig.ofDefault();
-            final XmlWriter writer = new XmlWriter(new StringBuilder(512)
-                    .append(AbstractWriter.XML_HEADER)
-                    .append(config.getNewLine()));
-            return toWriter(0, writer).toString();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            val config: XmlConfig = XmlConfig.Companion.ofDefault()
+            val writer = XmlWriter(
+                StringBuilder(512)
+                    .append(AbstractWriter.Companion.XML_HEADER)
+                    .append(config.newLine)
+            )
+            return toWriter(0, writer).toString()
+        } catch (e: IOException) {
+            throw IllegalStateException(e)
         }
     }
 
-    /** Render the XML code without header */
-    @NotNull
-    public XmlWriter toWriter(final int level, @NotNull final XmlWriter out) throws IOException {
-        return out.write(level, this);
+    /** Render the XML code without header  */
+    @Throws(IOException::class)
+    fun toWriter(level: Int, out: XmlWriter): XmlWriter {
+        return out.write(level, this)
     }
 
     // -------- Inner class --------
-
-    /** Raw XML code envelope */
-    protected static final class RawEnvelope {
-        /** XML content */
-        @NotNull
-        private final Object body;
-
-        public RawEnvelope(@NotNull final Object body) {
-            this.body = body;
-        }
-
-        /** Get the body */
-        @NotNull
-        public Object get() {
-            return body;
+    /** Raw XML code envelope  */
+    class RawEnvelope(
+        /** XML content  */
+        private val body: Any
+    ) {
+        /** Get the body  */
+        fun get(): Any {
+            return body
         }
     }
 }

@@ -280,12 +280,12 @@ public class HtmlElement implements ApiElement<Element>, Html {
         if (root.internalElement instanceof XmlModel) {
             final XmlModel xmlElement = (XmlModel) root.internalElement;
             try {
-                final CharSequence doctype = config.getDoctype();
+                final CharSequence doctype = config.doctype;
                 final XmlWriter xmlWriter = new XmlWriter(writer
                         .append(doctype)
-                        .append(doctype.length() == 0 ? "" : config.getNewLine())
-                        , config.getIndentation());
-                xmlElement.toWriter(config.getFirstLevel() + 1, xmlWriter);
+                        .append(doctype.length() == 0 ? "" : config.newLine)
+                        , config.indentation);
+                xmlElement.toWriter(config.firstLevel + 1, xmlWriter);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -300,7 +300,7 @@ public class HtmlElement implements ApiElement<Element>, Html {
 
     /** Get title of configuration */
     public CharSequence getTitle() {
-        return getConfig().getTitle();
+        return getConfig().title;
     }
 
     // ------- Static methods ----------
@@ -315,21 +315,21 @@ public class HtmlElement implements ApiElement<Element>, Html {
         //config.setNiceFormat();
         //config.setCssLinks(cssLinks);
 
-        final ApiElement root = config.isDocumentObjectModel()
-                ? new XmlModel(config.getRootElementName())
-                : new XmlBuilder(config.getRootElementName(), new XmlPrinter(writer, config), config.getFirstLevel());
+        final ApiElement root = config.isDocumentObjectModel
+                ? new XmlModel(config.rootElementName)
+                : new XmlBuilder(config.rootElementName, new XmlPrinter(writer, config), config.firstLevel);
         final HtmlElement result = new HtmlElement(root, config, writer);
-        if (config.isHtmlHeaderRequest()) {
-            config.getLanguage().ifPresent(lang -> result.setAttribute(A_LANG, lang));
-            result.getHead().addElement(Html.META).setAttribute(A_CHARSET, config.getCharset());
-            result.getHead().addElement(Html.TITLE).addText(config.getTitle());
-            result.addCssLinks(config.getCssLinks());
-            config.getHeaderInjector().write(result.getHead());
+        if (config.isHtmlHeaderRequest) {
+            config.language.ifPresent(lang -> result.setAttribute(A_LANG, lang));
+            result.getHead().addElement(Html.META).setAttribute(A_CHARSET, config.charset);
+            result.getHead().addElement(Html.TITLE).addText(config.title);
+            result.addCssLinks(config.cssLinks);
+            config.headerInjector.write(result.getHead());
 
             // A deprecated solution:
-            final CharSequence rawHeaderText = config.getRawHeaderText();
+            final CharSequence rawHeaderText = config.rawHeaderText;
             if (Check.hasLength(rawHeaderText)) {
-                result.getHead().addRawText(config.getNewLine());
+                result.getHead().addRawText(config.newLine);
                 result.getHead().addRawText(rawHeaderText);
             }
         }

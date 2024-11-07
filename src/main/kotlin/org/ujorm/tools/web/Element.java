@@ -78,7 +78,7 @@ public final class Element implements ApiElement<Element>, Html {
     @NotNull
     @Override
     public String getName() {
-        return internalElement.getName();
+        return internalElement.name;
     }
 
     /**

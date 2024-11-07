@@ -14,48 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.ujorm.tools.xml.builder
 
-package org.ujorm.tools.xml.builder;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.xml.AbstractWriter;
-import org.ujorm.tools.xml.config.HtmlConfig;
-import org.ujorm.tools.xml.config.XmlConfig;
-import org.ujorm.tools.xml.config.impl.DefaultHtmlConfig;
-import org.ujorm.tools.xml.config.impl.DefaultXmlConfig;
+import org.ujorm.tools.xml.AbstractWriter
+import org.ujorm.tools.xml.config.HtmlConfig
+import org.ujorm.tools.xml.config.XmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultHtmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.io.IOException
+import java.nio.charset.Charset
 
 /**
  * If you need special formatting, overwrite responsible methods.
  * @see XmlBuilder
+ *
  * @since 1.88
  * @author Pavel Ponec
  */
-public class XmlPrinter extends AbstractWriter {
-
-    /** Default constructor a zero offset */
-    public XmlPrinter() {
-        this(new StringBuilder(512));
-    }
-
-    /** Writer constructor with a zero offset */
-    public XmlPrinter(@NotNull final Appendable out) {
-        this(out, XmlConfig.ofDefault());
-    }
-
+class XmlPrinter @JvmOverloads constructor(
+    out: Appendable = StringBuilder(512),
+    config: XmlConfig? = XmlConfig.Companion.ofDefault()
+) :
+    AbstractWriter(out, config!!) {
     /**
      * A writer constructor
      * @param out A writer
      * @param config A configuration object
      */
-    public <T> XmlPrinter(@NotNull final Appendable out, @Nullable final XmlConfig config) {
-        super(out, config);
+    /** Writer constructor with a zero offset  */
+    /** Default constructor a zero offset  */
+    init {
         try {
-            out.append(config.getDoctype());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            out.append(config.getDoctype())
+        } catch (e: IOException) {
+            throw IllegalStateException(e)
         }
     }
 
@@ -64,188 +56,193 @@ public class XmlPrinter extends AbstractWriter {
      * @param rawValue A raw value to print
      * @param element An original element
      */
-    protected void writeRawValue(@NotNull final Object rawValue, @NotNull final XmlBuilder element) throws IOException {
-        out.append(rawValue.toString());
+    @Throws(IOException::class)
+    fun writeRawValue(rawValue: Any, element: XmlBuilder) {
+        out.append(rawValue.toString())
     }
 
-    void writeAttrib(@NotNull String name, Object data, XmlBuilder owner) throws IOException {
-        if (owner.getName() != XmlBuilder.HIDDEN_NAME) {
-            out.append(SPACE);
-            out.append(name);
-            out.append('=');
-            out.append(XML_2QUOT);
-            writeValue(data, owner, name);
-            out.append(XML_2QUOT);
+    @Throws(IOException::class)
+    fun writeAttrib(name: String, data: Any?, owner: XmlBuilder) {
+        if (owner.getName() !== XmlBuilder.Companion.HIDDEN_NAME) {
+            out.append(AbstractWriter.Companion.SPACE)
+            out.append(name)
+            out.append('=')
+            out.append(AbstractWriter.Companion.XML_2QUOT)
+            writeValue(data, owner, name)
+            out.append(AbstractWriter.Companion.XML_2QUOT)
         }
     }
 
-    void writeRawText(Object rawText) throws IOException {
-        out.append(String.valueOf(rawText));
+    @Throws(IOException::class)
+    fun writeRawText(rawText: Any) {
+        out.append(rawText.toString())
     }
 
-    /** Open the Node */
-    void writeBeg(XmlBuilder element, final boolean lastText) throws IOException {
-        final CharSequence name = element.getName();
-        if (name != XmlBuilder.HIDDEN_NAME) {
+    /** Open the Node  */
+    @Throws(IOException::class)
+    fun writeBeg(element: XmlBuilder, lastText: Boolean) {
+        val name: CharSequence = element.getName()
+        if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
             if (!lastText) {
-                writeNewLine(element.getLevel());
+                writeNewLine(element.level)
             }
-            out.append(XML_LT);
-            out.append(name);
+            out.append(AbstractWriter.Companion.XML_LT)
+            out.append(name)
         }
     }
 
-    /** Middle closing the Node */
-    void writeMid(XmlBuilder element) throws IOException {
-        if (element.getName() != XmlBuilder.HIDDEN_NAME) {
-            out.append(XML_GT);
+    /** Middle closing the Node  */
+    @Throws(IOException::class)
+    fun writeMid(element: XmlBuilder) {
+        if (element.getName() !== XmlBuilder.Companion.HIDDEN_NAME) {
+            out.append(AbstractWriter.Companion.XML_GT)
         }
     }
 
-    /** Close the Node */
-    void writeEnd(XmlBuilder element) throws IOException {
-        final String name = element.getName();
-        final boolean pairElement = config.pairElement(element);
-        final boolean filled = element.isFilled();
-        if (name != XmlBuilder.HIDDEN_NAME) {
+    /** Close the Node  */
+    @Throws(IOException::class)
+    fun writeEnd(element: XmlBuilder) {
+        val name = element.getName()
+        val pairElement = config.pairElement(element)
+        val filled = element.isFilled
+        if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
             if (filled || pairElement) {
-                if (indentationEnabled && !element.isLastText()) {
+                if (indentationEnabled && !element.isLastText) {
                     if (pairElement && !filled) {
-                        out.append(XML_GT);
+                        out.append(AbstractWriter.Companion.XML_GT)
                     } else {
-                        writeNewLine(element.getLevel());
+                        writeNewLine(element.level)
                     }
                 } else if (!filled) {
-                    out.append(XML_GT);
+                    out.append(AbstractWriter.Companion.XML_GT)
                 }
-                out.append(XML_LT);
-                out.append(FORWARD_SLASH);
-                out.append(name);
-                out.append(XML_GT);
+                out.append(AbstractWriter.Companion.XML_LT)
+                out.append(AbstractWriter.Companion.FORWARD_SLASH)
+                out.append(name)
+                out.append(AbstractWriter.Companion.XML_GT)
             } else {
-                out.append(FORWARD_SLASH);
-                out.append(XML_GT);
+                out.append(AbstractWriter.Companion.FORWARD_SLASH)
+                out.append(AbstractWriter.Companion.XML_GT)
             }
         }
     }
 
-    @Override @NotNull
-    public String toString() {
-        final String result = out.toString();
-        return result != null
-             ? result
-             : String.valueOf(result);
+    override fun toString(): String {
+        val result = out.toString()
+        return result ?: result.toString()
     }
 
     // ------- FACTORY METHODS -------
-
-    /** Create any element */
-    public XmlBuilder createElement(@NotNull final String name) throws IOException {
-        return new XmlBuilder(name, this);
+    /** Create any element  */
+    @Throws(IOException::class)
+    fun createElement(name: String): XmlBuilder {
+        return XmlBuilder(name, this)
     }
 
-    // ------- STATIC METHODS -------
+    companion object {
+        /** Create a new instance with a formatted output.
+         * The result provides a method [.toString]
+         * @return New instance of the XmlPrinter
+         */
+        fun forNiceXml(): XmlPrinter {
+            val config: DefaultXmlConfig = XmlConfig.Companion.ofDefault()
+            config.setNiceFormat<DefaultXmlConfig>()
+            return forXml(null, config)
+        }
 
-    /** Create a new instance including a XML_HEADER.
-     * The result provides a method {@link #toString() }
-     */
-    public static XmlPrinter forXml() {
-        return forXml(null, XmlConfig.ofDefault());
-    }
+        /** A basic XmlPrinter factory method.
+         * The result provides a method [.toString]
+         * @return New instance of the XmlPrinter
+         */
+        // ------- STATIC METHODS -------
+        /** Create a new instance including a XML_HEADER.
+         * The result provides a method [.toString]
+         */
+        @JvmOverloads
+        fun forXml(
+            out: Appendable? = null,
+            config: XmlConfig = XmlConfig.Companion.ofDefault()
+        ): XmlPrinter {
+            return XmlPrinter(out ?: StringBuilder(512), config)
+        }
 
-    /** Create a new instance with a formatted output.
-     * The result provides a method {@link #toString() }
-     * @return New instance of the XmlPrinter
-     */
-    public static XmlPrinter forNiceXml() {
-        DefaultXmlConfig config = XmlConfig.ofDefault();
-        config.setNiceFormat();
-        return forXml(null, config);
-    }
+        // --- HTML ---
+        /** Create a new instance including a DOCTYPE.
+         * The result provides a method [.toString]
+         */
+        fun forHtml(): XmlPrinter {
+            return forXml(null, HtmlConfig.Companion.ofDefault())
+        }
 
-    /** A basic XmlPrinter factory method.
-     * The result provides a method {@link #toString() }
-     * @return New instance of the XmlPrinter
-     */
-    public static XmlPrinter forXml(
-            @Nullable final Appendable out,
-            @NotNull final XmlConfig config
-    ) {
-        return new XmlPrinter(out != null ? out : new StringBuilder(512), config);
-    }
+        /** Create a new instance including a DOCTYPE  */
+        fun forHtml(out: Appendable?): XmlPrinter {
+            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            return forXml(out, config)
+        }
 
-    // --- HTML ---
+        /** Create a new instance including a DOCTYPE  */
+        fun forNiceHtml(out: Appendable?): XmlPrinter {
+            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            config.setNiceFormat<DefaultXmlConfig>()
+            return forHtml<Any>(out, config)
+        }
 
-    /** Create a new instance including a DOCTYPE.
-     * The result provides a method {@link #toString() }
-     */
-    public static XmlPrinter forHtml() {
-        return forXml(null, HtmlConfig.ofDefault());
-    }
+        /** Create XmlPrinter for UTF-8  */
+        @Throws(IOException::class)
+        fun forHtml(httpServletResponse: Any): XmlPrinter {
+            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            return forHtml(httpServletResponse, config)
+        }
 
-    /** Create a new instance including a DOCTYPE */
-    public static XmlPrinter forHtml(final Appendable out) {
-        DefaultHtmlConfig config = HtmlConfig.ofDefault();
-        return forXml(out, config);
-    }
+        /** Create XmlPrinter for UTF-8  */
+        @Throws(IOException::class)
+        fun forNiceHtml(httpServletResponse: Any): XmlPrinter {
+            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            config.setNiceFormat<DefaultXmlConfig>()
+            return forHtml(httpServletResponse, config)
+        }
 
-    /** Create a new instance including a DOCTYPE */
-    public static XmlPrinter forNiceHtml(final Appendable out) {
-        DefaultHtmlConfig config = HtmlConfig.ofDefault();
-        config.setNiceFormat();
-        return forHtml(out, config);
-    }
+        /** Create XmlPrinter for UTF-8  */
+        fun <T> forHtml(
+            out: Appendable?,
+            config: HtmlConfig
+        ): XmlPrinter {
+            return XmlPrinter(out ?: StringBuilder(512), config)
+        }
 
-    /** Create XmlPrinter for UTF-8 */
-    public static XmlPrinter forHtml(@NotNull final Object httpServletResponse) throws IOException {
-        DefaultHtmlConfig config = HtmlConfig.ofDefault();
-        return forHtml(httpServletResponse, config);
-    }
+        /** Create XmlPrinter for UTF-8  */
+        @Throws(IOException::class)
+        fun forHtml(
+            httpServletResponse: Any,
+            charset: Charset,
+            indentationSpace: String,
+            noCache: Boolean
+        ): XmlPrinter {
+            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            config.setCharset(charset)
+            config.setIndentationSpace(indentationSpace)
+            config.setCacheAllowed(!noCache)
+            return forHtml(httpServletResponse, config)
+        }
 
-    /** Create XmlPrinter for UTF-8 */
-    public static XmlPrinter forNiceHtml(@NotNull final Object httpServletResponse) throws IOException {
-        DefaultHtmlConfig config = HtmlConfig.ofDefault();
-        config.setNiceFormat();
-        return forHtml(httpServletResponse, config);
-    }
-
-    /** Create XmlPrinter for UTF-8 */
-    public static <T> XmlPrinter forHtml(
-            @Nullable final Appendable out,
-            @NotNull final HtmlConfig config
-    ) {
-        return new XmlPrinter(out != null ? out : new StringBuilder(512), config);
-    }
-
-    /** Create XmlPrinter for UTF-8 */
-    public static XmlPrinter forHtml(
-            @NotNull final Object httpServletResponse,
-            @NotNull final Charset charset,
-            @NotNull final String indentationSpace,
-            final boolean noCache
-    ) throws IOException {
-        final DefaultHtmlConfig config = HtmlConfig.ofDefault();
-        config.setCharset(charset);
-        config.setIndentationSpace(indentationSpace);
-        config.setCacheAllowed(!noCache);
-        return forHtml(httpServletResponse, config);
-    }
-
-    /** Create XmlPrinter for UTF-8.
-     * The basic HTML factory.
-     */
-    public static XmlPrinter forHtml(
-            @NotNull final Object httpServletResponse,
-            @NotNull final HtmlConfig config
-    ) throws IOException {
-        try {
-            final Appendable writer = createWriter(
+        /** Create XmlPrinter for UTF-8.
+         * The basic HTML factory.
+         */
+        @Throws(IOException::class)
+        fun forHtml(
+            httpServletResponse: Any,
+            config: HtmlConfig
+        ): XmlPrinter {
+            try {
+                val writer: Appendable = AbstractWriter.Companion.createWriter(
                     httpServletResponse,
-                    config.getCharset(),
-                    config.isCacheAllowed());
-            return new XmlPrinter(writer, config);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalArgumentException("Response must be type of HttpServletResponse", e);
+                    config.charset,
+                    config.isCacheAllowed
+                )
+                return XmlPrinter(writer, config)
+            } catch (e: ReflectiveOperationException) {
+                throw IllegalArgumentException("Response must be type of HttpServletResponse", e)
+            }
         }
     }
 }

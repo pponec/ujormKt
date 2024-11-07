@@ -14,136 +14,128 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config;
+package org.ujorm.tools.xml.config
 
-import java.util.Optional;
-import java.util.Set;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.xml.ApiElement;
-import org.ujorm.tools.xml.config.impl.DefaultHtmlConfig;
-import static org.ujorm.tools.xml.config.impl.DefaultXmlConfig.*;
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.config.impl.DefaultHtmlConfig
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.util.*
 
 /**
  * Configuraion of HtmlPage
  * @author Pavel Ponec
  */
-public interface HtmlConfig extends XmlConfig {
+interface HtmlConfig : XmlConfig {
+    /** Title is a required element by HTML 5  */
+    @JvmField
+    val title: CharSequence
 
-    /** Title is a required element by HTML 5 */
-    @NotNull
-    CharSequence getTitle();
+    /** CSS links of a HTML page  */
+    @JvmField
+    val cssLinks: Array<CharSequence?>
 
-    /** CSS links of a HTML page */
-    @NotNull
-    CharSequence[] getCssLinks();
+    /** Language of a HTML page  */
+    @JvmField
+    val language: Optional<CharSequence>
 
-    /** Language of a HTML page */
-    @NotNull
-    Optional<CharSequence> getLanguage();
+    /** Get a content type where a recommended value is `"text/html"`  */
+    val contentType: String
 
-    /** Get a content type where a recommended value is {@code "text/html"} */
-    @NotNull
-    String getContentType();
+    /** Build a real model or a plain writer with a recommended value `false`  */
+    @JvmField
+    val isDocumentObjectModel: Boolean
 
-    /** Build a real model or a plain writer with a recommended value {@code false} */
-    boolean isDocumentObjectModel();
+    /** A request to generate a minimal HTML header  */
+    @JvmField
+    val isHtmlHeaderRequest: Boolean
 
-    /** A request to generate a minimal HTML header */
-    boolean isHtmlHeaderRequest();
+    @JvmField
+    @get:Deprecated("Use method {@link #getHeaderInjector() }")
+    val rawHeaderText: CharSequence?
 
-    /** A raw text for HTML header
-     * @deprecated Use method {@link #getHeaderInjector() }
-     */
-    @Deprecated
-    @Nullable
-    CharSequence getRawHeaderText();
+    @JvmField
+    val headerInjector: ApiInjector
 
-    @NotNull
-    ApiInjector getHeaderInjector();
+    /** A name of root element  */
+    @JvmField
+    val rootElementName: String
 
-    /** A name of root element */
-    @NotNull
-    String getRootElementName();
+    val unpairElements: Set<String>
 
-    @NotNull
-    Set<String> getUnpairElements();
-
-    @Override
-    default boolean pairElement(@NotNull final ApiElement element) {
-        return !getUnpairElements().contains(element.getName());
+    override fun pairElement(element: ApiElement<*>): Boolean {
+        return !unpairElements.contains(element.name)
     }
 
-    /** Clone the config for an AJAX processing */
-    default DefaultHtmlConfig cloneForAjax() {
-        final DefaultHtmlConfig result = new DefaultHtmlConfig(this);
-        result.setRootElementName(null);
-        result.setNiceFormat();
-        result.setDoctype(EMPTY);
-        result.setHtmlHeader(false);
-        result.setCacheAllowed(false);
-        return result;
+    /** Clone the config for an AJAX processing  */
+    fun cloneForAjax(): DefaultHtmlConfig {
+        val result = DefaultHtmlConfig(this)
+        result.setRootElementName(null)
+        result.setNiceFormat<DefaultXmlConfig>()
+        result.setDoctype(DefaultXmlConfig.Companion.EMPTY)
+        result.setHtmlHeader(false)
+        result.setCacheAllowed(false)
+        return result
     }
 
-    /**
-     * Create a new default config
-     */
-    @NotNull
-    static DefaultHtmlConfig ofDefault() {
-        return new DefaultHtmlConfig();
-    }
+    companion object {
+        /**
+         * Create a new default config
+         */
+        @JvmStatic
+        fun ofDefault(): DefaultHtmlConfig {
+            return DefaultHtmlConfig()
+        }
 
-    /**
-     * No HTML header is generated, no Doctype and no new lines
-     *
-     * @param rootElementName Element name cannot contain special HTML characters. An undefined value ignores the creation of the root element.
-     * @return
-     */
-    @NotNull
-    static DefaultHtmlConfig ofElementName(@Nullable String rootElementName) {
-        return ofElement(rootElementName, true);
-    }
+        /**
+         * No HTML header is generated, no Doctype and no new lines
+         *
+         * @param rootElementName Element name cannot contain special HTML characters. An undefined value ignores the creation of the root element.
+         * @return
+         */
+        fun ofElementName(rootElementName: String?): DefaultHtmlConfig {
+            return ofElement(rootElementName, true)
+        }
 
-    /**
-     * No HTML header is generated, no Doctype and no new lines
-     *
-     * @param rootElementName Element name cannot contain special HTML characters.
-     * @param enabled Disabled root element ignores the creation of the root element.
-     * @return
-     */
-    @NotNull
-    static DefaultHtmlConfig ofElement(@Nullable String rootElementName, boolean enabled) {
-        final DefaultHtmlConfig result = ofDefault();
-        result.setRootElementName(enabled ? rootElementName : null);
-        result.setHtmlHeader(false);
-        result.setDoctype(EMPTY);
-        return result;
-    }
+        /**
+         * No HTML header is generated, no Doctype and no new lines
+         *
+         * @param rootElementName Element name cannot contain special HTML characters.
+         * @param enabled Disabled root element ignores the creation of the root element.
+         * @return
+         */
+        fun ofElement(rootElementName: String?, enabled: Boolean): DefaultHtmlConfig {
+            val result = ofDefault()
+            result.setRootElementName(if (enabled) rootElementName else null)
+            result.setHtmlHeader(false)
+            result.setDoctype(DefaultXmlConfig.Companion.EMPTY)
+            return result
+        }
 
-    /**
-     * Create a configuration for an AJAX response.
-     */
-    @NotNull
-    static DefaultHtmlConfig ofEmptyElement() {
-        final DefaultHtmlConfig result = ofElement(EMPTY, false);
-        result.setHtmlHeader(false);
-        result.setDoctype(EMPTY);
-        result.setNewLine(EMPTY);
-        return result;
-    }
+        /**
+         * Create a configuration for an AJAX response.
+         */
+        @JvmStatic
+        fun ofEmptyElement(): DefaultHtmlConfig {
+            val result = ofElement(DefaultXmlConfig.Companion.EMPTY, false)
+            result.setHtmlHeader(false)
+            result.setDoctype(DefaultXmlConfig.Companion.EMPTY)
+            result.setNewLine(DefaultXmlConfig.Companion.EMPTY)
+            return result
+        }
 
-    /** Clone config form another */
-    static DefaultHtmlConfig of(@NotNull final HtmlConfig htmlConfig) {
-        return new DefaultHtmlConfig(htmlConfig);
-    }
+        /** Clone config form another  */
+        fun of(htmlConfig: HtmlConfig): DefaultHtmlConfig {
+            return DefaultHtmlConfig(htmlConfig)
+        }
 
-    /**
-     * Create a new configuration with a nice format by an HTML title.
-     * @param title If the title is null then create an EMPTY element.
-     */
-    static DefaultHtmlConfig ofTitle(@NotNull String title) {
-        return ofDefault()
-                    .setTitle(title)
-                    .setNiceFormat();
+        /**
+         * Create a new configuration with a nice format by an HTML title.
+         * @param title If the title is null then create an EMPTY element.
+         */
+        fun ofTitle(title: String): DefaultHtmlConfig? {
+            return ofDefault()
+                .setTitle(title)
+                .setNiceFormat()
+        }
     }
 }

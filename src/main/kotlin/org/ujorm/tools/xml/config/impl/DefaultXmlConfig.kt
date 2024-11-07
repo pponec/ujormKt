@@ -14,236 +14,200 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config.impl;
+package org.ujorm.tools.xml.config.impl
 
-import java.nio.charset.Charset;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.Check;
-import org.ujorm.tools.xml.AbstractWriter;
-import org.ujorm.tools.xml.config.Formatter;
-import org.ujorm.tools.xml.config.XmlConfig;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.Check
+import org.ujorm.tools.xml.AbstractWriter
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.config.Formatter
+import org.ujorm.tools.xml.config.XmlConfig
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 /**
  * Configuration of HtmlPage
  * @author Pavel Ponec
  */
-public class DefaultXmlConfig implements XmlConfig {
-
-    /** Default intendation per level */
-    public static final String DEFAULT_INTENDATION = "\t";
-
-    /** Default string or the new line */
-    public static final String DEFAULT_NEW_LINE = "\n";
-
-    /** Default first level of intendation */
-    public static final int DEFAULT_FIRST_LEVEL = Integer.MIN_VALUE + 1;
-
-    /** Assertion message template */
-    public static final String REQUIRED_MSG = "The argument {} is required";
-
-    /** An empty String */
-    public static final String EMPTY = "";
-
-    /** A header declaration of the document or a doctype */
-    @Nullable
-    protected CharSequence doctype;
-
-    /** Charset */
-    @NotNull
-    private Charset charset = UTF_8;
-
-    /** Level of the root element, the value may be negative number */
-    private int firstLevel = DEFAULT_FIRST_LEVEL;
-
-    /** An indentation space for elements of the next level,
-     * where default value is an empty `String` */
-    @NotNull
-    private CharSequence indentation = EMPTY;
-
-    /** A replacement text instead of the {@code null} value */
-    @NotNull
-    private CharSequence defaultValue = EMPTY;
-
-    /** A new line sequence */
-    @NotNull
-    private CharSequence newLine = DEFAULT_NEW_LINE;
-
-    /** Is HTTP cache allowed */
-    private boolean cacheAllowed;
-
-    /** A value formatter where a default implemnetation is:
-     * <code>
-     * {@code Formatter formatter -> value != null ? value.toString() : ""};
-     * </code>
-     */
-    @NotNull
-    private Formatter formatter = (value, element, attribute) -> value != null ? value.toString() : EMPTY;
-
-    public DefaultXmlConfig() {
-    }
-
-    /** Copy attributes from other config */
-    public DefaultXmlConfig(@NotNull final XmlConfig config) {
-        this.doctype = config.getDoctype();
-        this.charset = config.getCharset();
-        this.firstLevel = config.getFirstLevel();
-        this.indentation = config.getIndentation();
-        this.defaultValue = config.getDefaultValue();
-        this.newLine = config.getNewLine();
-        this.cacheAllowed = config.isCacheAllowed();
-        this.formatter = config.getFormatter();
-    }
-
-    /** A header declaration of the document or a doctype */
-    @Override
-    @NotNull
-    public CharSequence getDoctype() {
-        return nonnull(doctype, AbstractWriter.XML_HEADER);
-    }
-
-    @NotNull
-    protected final <T> T nonnull(@Nullable final T value, @NotNull final T defaultValue) {
-        return value != null ? value : defaultValue;
-    }
-
-    /** A header declaration of the document or a doctype */
-    public DefaultXmlConfig setDoctype(@Nullable CharSequence doctype) {
-        this.doctype = doctype;
-        return this;
-    }
+open class DefaultXmlConfig : XmlConfig {
+    /** A header declaration of the document or a doctype  */
+    override var doctype: CharSequence? = null
 
     /**
      * Charset
      * @return the charset
      */
-    @Override
-    @NotNull
-    public Charset getCharset() {
-        return charset;
+    /** Charset  */
+    override var charset: Charset = StandardCharsets.UTF_8
+        private set
+
+    /**
+     * Level of the root element, the value may be negative.
+     * @return the firstLevel
+     */
+    /** Level of the root element, the value may be negative number  */
+    override var firstLevel: Int = DEFAULT_FIRST_LEVEL
+        private set
+
+    /** An indentation space for elements of the next level,
+     * where default value is an empty `String`  */
+    override var indentation: CharSequence = EMPTY
+
+    /** A replacement text instead of the `null` value  */
+    /** A replacement text instead of the `null` value  */
+    override var defaultValue: CharSequence = EMPTY
+        private set
+
+    /** A new line sequence  */
+    /** A new line sequence  */
+    override var newLine: CharSequence = DEFAULT_NEW_LINE
+        private set
+
+    /** Is HTTP cache allowed  */
+    override var isCacheAllowed: Boolean = false
+        private set
+
+    /** A default implementation is: `String.valueOf(value)`  */
+    /** A value formatter where a default implemnetation is:
+     * `
+     * `Formatter formatter -> value != null ? value.toString() : ""`;
+    ` *
+     */
+    override var formatter: Formatter =
+        Formatter { value: Any?, element: ApiElement<*>?, attribute: String? ->
+            value?.toString()
+                ?: EMPTY
+        }
+        private set
+
+    constructor()
+
+    /** Copy attributes from other config  */
+    constructor(config: XmlConfig) {
+        this.doctype = config.doctype
+        this.charset = config.charset
+        this.firstLevel = config.firstLevel
+        this.indentation = config.indentation
+        this.defaultValue = config.defaultValue
+        this.newLine = config.newLine
+        this.isCacheAllowed = config.isCacheAllowed
+        this.formatter = config.formatter
+    }
+
+    /** A header declaration of the document or a doctype  */
+    override fun getDoctype(): CharSequence {
+        return nonnull<CharSequence>(doctype, AbstractWriter.Companion.XML_HEADER)
+    }
+
+    protected fun <T> nonnull(value: T?, defaultValue: T): T {
+        return value ?: defaultValue
+    }
+
+    /** A header declaration of the document or a doctype  */
+    fun setDoctype(doctype: CharSequence?): DefaultXmlConfig {
+        this.doctype = doctype
+        return this
     }
 
     /**
      * Charset
      * @param charset the charset to set
      */
-    public DefaultXmlConfig setCharset(@NotNull final Charset charset) {
-        this.charset = Assert.notNull(charset, REQUIRED_MSG, "charset");
-        return this;
+    fun setCharset(charset: Charset): DefaultXmlConfig {
+        this.charset = Assert.notNull(charset, REQUIRED_MSG, "charset")
+        return this
     }
 
     /**
      * Assign parameters for a nice format of the HTML result
      */
-    public final <T extends DefaultXmlConfig> T setNiceFormat() {
-        setNiceFormat(DEFAULT_INTENDATION);
-        return (T) this;
+    fun <T : DefaultXmlConfig?> setNiceFormat(): T {
+        setNiceFormat<DefaultXmlConfig>(DEFAULT_INTENDATION)
+        return this as T
     }
 
     /**
      * Assign parameters for a nice format of the HTML result
      * @param indentation An empty String is replaced by a default intendation.
      */
-    public final <T extends DefaultXmlConfig> T setNiceFormat(@Nullable final CharSequence indentation) {
-        this.firstLevel = 0;
-        this.indentation = Check.hasLength(indentation) ? indentation : DEFAULT_INTENDATION;
-        this.newLine = DEFAULT_NEW_LINE;
-        return (T) this;
+    fun <T : DefaultXmlConfig?> setNiceFormat(indentation: CharSequence?): T {
+        this.firstLevel = 0
+        this.indentation = if (Check.hasLength(indentation)) indentation!! else DEFAULT_INTENDATION
+        this.newLine = DEFAULT_NEW_LINE
+        return this as T
     }
 
     /**
      * Assign parameters for a compressed format of the HTML result
      */
-    public final DefaultXmlConfig setCompressedFormat() {
-        this.firstLevel = DEFAULT_FIRST_LEVEL;
-        this.indentation = EMPTY;
-        this.newLine = EMPTY;
-        return this;
-    }
-
-    /**
-     * Level of the root element, the value may be negative.
-     * @return the firstLevel
-     */
-    @Override
-    public int getFirstLevel() {
-        return firstLevel;
+    fun setCompressedFormat(): DefaultXmlConfig {
+        this.firstLevel = DEFAULT_FIRST_LEVEL
+        this.indentation = EMPTY
+        this.newLine = EMPTY
+        return this
     }
 
     /**
      * Level of the root element, the value may be negative.
      * @param firstLevel the firstLevel to set
      */
-    public DefaultXmlConfig setFirstLevel(int firstLevel) {
-        this.firstLevel = firstLevel;
-        return this;
+    fun setFirstLevel(firstLevel: Int): DefaultXmlConfig {
+        this.firstLevel = firstLevel
+        return this
     }
 
     /** An indentation space for elements of the next level,
-     * where default value is an empty `String` */
-    @NotNull
-    @Override
-    public CharSequence getIndentation() {
-        return nonnull(indentation, EMPTY);
+     * where default value is an empty `String`  */
+    override fun getIndentation(): CharSequence {
+        return nonnull(indentation, EMPTY)
     }
 
     /** An indentation space for elements of the next level,
-     * where default value is an empty `String` */
-    public DefaultXmlConfig setIndentationSpace(@NotNull CharSequence indentation) {
-        this.indentation = Assert.notNull(indentation, REQUIRED_MSG, "indentation");
-        return this;
+     * where default value is an empty `String`  */
+    fun setIndentationSpace(indentation: CharSequence): DefaultXmlConfig {
+        this.indentation = Assert.notNull(indentation, REQUIRED_MSG, "indentation")
+        return this
     }
 
-    /** A replacement text instead of the {@code null} value */
-    @Override
-    public CharSequence getDefaultValue() {
-        return defaultValue;
-    }
-
-
-    /** A default implementation is: {@code String.valueOf(value)} */
-    @NotNull
-    @Override
-    public Formatter getFormatter() {
-        return formatter;
-    }
 
     // --- SETTERS ---
-
-    /** A replacement text instead of the {@code null} value */
-    public DefaultXmlConfig setDefaultValue(@NotNull String defaultValue) {
-        this.defaultValue = Assert.notNull(defaultValue, "defaultValue");
-        return this;
+    /** A replacement text instead of the `null` value  */
+    fun setDefaultValue(defaultValue: String): DefaultXmlConfig {
+        this.defaultValue = Assert.notNull(defaultValue, "defaultValue")
+        return this
     }
 
-    @Override
-    public boolean isCacheAllowed() {
-        return cacheAllowed;
+    fun setCacheAllowed(cacheAllowed: Boolean): DefaultXmlConfig {
+        this.isCacheAllowed = cacheAllowed
+        return this
     }
 
-    public DefaultXmlConfig setCacheAllowed(boolean cacheAllowed) {
-        this.cacheAllowed = cacheAllowed;
-        return this;
+    /** A new line sequence  */
+    fun setNewLine(newLine: CharSequence): DefaultXmlConfig {
+        this.newLine = Assert.notNull(newLine, "newLine")
+        return this
     }
 
-    /** A new line sequence */
-    @Override
-    public CharSequence getNewLine() {
-        return newLine;
+    /** A default value formatter is implemented by the method `String.valueOf(value)`  */
+    fun setFormatter(formatter: Formatter): DefaultXmlConfig {
+        this.formatter = Assert.notNull(formatter, "formatter")
+        return this
     }
 
-    /** A new line sequence */
-    public DefaultXmlConfig setNewLine(@NotNull final CharSequence newLine) {
-        this.newLine = Assert.notNull(newLine, "newLine");
-        return this;
-    }
+    companion object {
+        /** Default intendation per level  */
+        const val DEFAULT_INTENDATION: String = "\t"
 
-    /** A default value formatter is implemented by the method {@code String.valueOf(value)} */
-    public DefaultXmlConfig setFormatter(@NotNull Formatter formatter) {
-        this.formatter = Assert.notNull(formatter, "formatter");
-        return this;
-    }
+        /** Default string or the new line  */
+        const val DEFAULT_NEW_LINE: String = "\n"
 
+        /** Default first level of intendation  */
+        const val DEFAULT_FIRST_LEVEL: Int = Int.MIN_VALUE + 1
+
+        /** Assertion message template  */
+        const val REQUIRED_MSG: String = "The argument {} is required"
+
+        /** An empty String  */
+        const val EMPTY: String = ""
+    }
 }

@@ -14,234 +14,190 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config.impl;
+package org.ujorm.tools.xml.config.impl
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.Assert;
-import org.ujorm.tools.web.Html;
-import org.ujorm.tools.xml.AbstractWriter;
-import org.ujorm.tools.xml.builder.XmlBuilder;
-import org.ujorm.tools.xml.config.ApiInjector;
-import org.ujorm.tools.xml.config.HtmlConfig;
+import org.ujorm.tools.Assert
+import org.ujorm.tools.web.Html
+import org.ujorm.tools.xml.AbstractWriter
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.builder.XmlBuilder
+import org.ujorm.tools.xml.config.ApiInjector
+import org.ujorm.tools.xml.config.HtmlConfig
+import java.util.*
 
 /**
  * Configuraion of HtmlPage
  * @author Pavel Ponec
  */
-public class DefaultHtmlConfig extends DefaultXmlConfig implements HtmlConfig {
+class DefaultHtmlConfig : DefaultXmlConfig, HtmlConfig {
+    /** Title  */
+    override var title: CharSequence = "Demo"
+        private set
 
-    /** Title */
-    @NotNull
-    private CharSequence title = "Demo";
+    /** Css links with a required order  */
+    override var cssLinks: Array<CharSequence?> = arrayOfNulls(0)
+        private set
 
-    /** Css links with a required order */
-    @NotNull
-    private CharSequence[] cssLinks = new CharSequence[0];
+    /** Language of the HTML page  */
+    override var language: CharSequence = "en"
 
-    /** Language of the HTML page */
-    @NotNull
-    private CharSequence language = "en";
+    /** Application content type  */
+    override var contentType: String = "text/html"
+        private set
 
-    /** Application content type */
-    @NotNull
-    private String contentType = "text/html";
+    /** Build a real model or a plain writer, the default value is `false`  */
+    /** Build a real model or a plain writer  */
+    override var isDocumentObjectModel: Boolean = false
+        private set
 
-    /** Build a real model or a plain writer */
-    private boolean buildDom = false;
+    /** A request to generate a minimal HTML header  */
+    /** A request to generate a minimal HTML header  */
+    override var isHtmlHeaderRequest: Boolean = true
+        private set
 
-    /** A request to generate a minimal HTML header */
-    private boolean htmlHeaderRequest = true;
+    /** A raw text for HTML header  */
+    /** Raw text to insert to each HTML header  */
+    @Deprecated("")
+    override var rawHeaderText: CharSequence? = null
+        private set
 
-    /** Raw text to insert to each HTML header */
-    @Deprecated
-    @Nullable
-    private CharSequence rawHeaderText = null;
+    /** Return a header injector  */
+    /** Header injector  */
+    override var headerInjector: ApiInjector =
+        ApiInjector { e: ApiElement<*>? -> }
+        private set
 
-    /** Header injector */
-    @NotNull
-    private ApiInjector headerInjector = e -> {};
+    /** A name of root element  */
+    override var rootElementName: String? = XmlBuilder.Companion.HTML
 
-    /** A name of root element */
-    private String rootElementName = XmlBuilder.HTML;
+    /** Unpair HTML element names  */
+    override var unpairElements: Set<String> = object : HashSet<String?>() {
+        init {
+            add("area")
+            add("base")
+            add(Html.BR)
+            add("col")
+            add("embed")
+            add(Html.HR)
+            add(Html.IMAGE)
+            add(Html.INPUT)
+            add("keygen")
+            add(Html.LINK)
+            add(Html.META)
+            add("param")
+            // add(Html.SCRIPT); The script is umpair elemnt commonly
+            add("source")
+            add(Html.STYLE)
+            add("track")
+        }
+    }
+        /** Set Unpair element names  */
+        set(unpairElements) {
+            field = Assert.notNull<Set<String>, String>(
+                unpairElements,
+                DefaultXmlConfig.Companion.REQUIRED_MSG,
+                "unpairElements"
+            )
+        }
 
-    /** Unpair HTML element names */
-    private Set<String> unpairElements = new HashSet<String>() {{
-        add("area");
-        add("base");
-        add(Html.BR);
-        add("col");
-        add("embed");
-        add(Html.HR);
-        add(Html.IMAGE);
-        add(Html.INPUT);
-        add("keygen");
-        add(Html.LINK);
-        add(Html.META);
-        add("param");
-        // add(Html.SCRIPT); The script is umpair elemnt commonly
-        add("source");
-        add(Html.STYLE);
-        add("track");
-    }};
+    constructor()
 
-    public DefaultHtmlConfig() {
+    constructor(htmlConfig: HtmlConfig) : super(htmlConfig) {
+        this.title = htmlConfig.title
+        this.cssLinks = htmlConfig.cssLinks
+        this.language = htmlConfig.language.orElse(null)
+        this.contentType = htmlConfig.contentType
+        this.isDocumentObjectModel = htmlConfig.isDocumentObjectModel
+        this.isHtmlHeaderRequest = htmlConfig.isDocumentObjectModel
+        this.rawHeaderText = htmlConfig.rawHeaderText
+        this.headerInjector = htmlConfig.headerInjector
+        this.rootElementName = htmlConfig.rootElementName
     }
 
-    public DefaultHtmlConfig(@NotNull final HtmlConfig htmlConfig) {
-        super(htmlConfig);
-        this.title = htmlConfig.getTitle();
-        this.cssLinks = htmlConfig.getCssLinks();
-        this.language = htmlConfig.getLanguage().orElse(null);
-        this.contentType = htmlConfig.getContentType();
-        this.buildDom = htmlConfig.isDocumentObjectModel();
-        this.htmlHeaderRequest = htmlConfig.isDocumentObjectModel();
-        this.rawHeaderText = htmlConfig.getRawHeaderText();
-        this.headerInjector = htmlConfig.getHeaderInjector();
-        this.rootElementName = htmlConfig.getRootElementName();
+    override fun getDoctype(): CharSequence {
+        return nonnull<CharSequence>(doctype, AbstractWriter.Companion.HTML_DOCTYPE)
     }
 
-    @Override
-    @NotNull
-    public CharSequence getDoctype() {
-        return nonnull(doctype, AbstractWriter.HTML_DOCTYPE);
+    override fun getLanguage(): Optional<CharSequence> {
+        return Optional.ofNullable(language)
     }
 
-    @NotNull
-    @Override
-    public CharSequence getTitle() {
-        return title;
-    }
-
-    @Override
-    public CharSequence[] getCssLinks() {
-        return cssLinks;
-    }
-
-    @Override
-    @NotNull
-    public Optional<CharSequence> getLanguage() {
-        return Optional.ofNullable(language);
-    }
-
-    @Override
-    @NotNull
-    public String getContentType() {
-        return contentType;
-    }
-
-    /** Build a real model or a plain writer, the default value is {@code false} */
-    @Override
-    public boolean isDocumentObjectModel() {
-        return buildDom;
-    }
-
-    /** A request to generate a minimal HTML header */
-    @Override
-    public boolean isHtmlHeaderRequest() {
-        return htmlHeaderRequest;
-    }
-
-    /** A raw text for HTML header */
-    @Override
-    public CharSequence getRawHeaderText() {
-        return rawHeaderText;
-    }
-
-    /** Return a header injector */
-    @Override
-    @NotNull
-    public ApiInjector getHeaderInjector() {
-        return headerInjector;
-    }
-
-    /** A name of root element */
-    @Override
-    @NotNull
-    public String getRootElementName() {
-        return rootElementName;
-    }
-
-    public Set<String> getUnpairElements() {
-        return unpairElements;
+    /** A name of root element  */
+    override fun getRootElementName(): String {
+        return rootElementName!!
     }
 
     // --- SETTERS ---
-
-    /** Title is a required element by HTML 5 */
-    public DefaultHtmlConfig setTitle(@NotNull CharSequence title) {
-        this.title = Assert.notNull(title, "title");
-        return this;
+    /** Title is a required element by HTML 5  */
+    fun setTitle(title: CharSequence): DefaultHtmlConfig {
+        this.title = Assert.notNull(title, "title")
+        return this
     }
 
-    public DefaultHtmlConfig setCssLinks(@NotNull CharSequence... cssLinks) {
-        this.cssLinks = Assert.notNull(cssLinks, REQUIRED_MSG, "cssLinks");
-        return this;
+    fun setCssLinks(vararg cssLinks: CharSequence): DefaultHtmlConfig {
+        this.cssLinks =
+            Assert.notNull<Array<CharSequence?>, String>(cssLinks, DefaultXmlConfig.Companion.REQUIRED_MSG, "cssLinks")
+        return this
     }
 
-    public DefaultHtmlConfig setLanguage(@NotNull CharSequence language) {
-        this.language = language;
-        return this;
+    fun setLanguage(language: CharSequence): DefaultHtmlConfig {
+        this.language = language
+        return this
     }
 
-    public DefaultHtmlConfig setContentType(@NotNull String contentType) {
-        this.contentType = Assert.notNull(contentType, REQUIRED_MSG, "contentType");
-        return this;
+    fun setContentType(contentType: String): DefaultHtmlConfig {
+        this.contentType =
+            Assert.notNull<String, String>(contentType, DefaultXmlConfig.Companion.REQUIRED_MSG, "contentType")
+        return this
     }
 
-    /** Build a real model or a plain writer, the default value is {@code false}.
-     * @deprecated Use the method {@link #setDocumentObjectModel(boolean) }.
+    /** Build a real model or a plain writer, the default value is `false`.
      */
-    @Deprecated
-    public void setDom(final boolean buildDom) {
-        setDocumentObjectModel(buildDom);
+    @Deprecated("Use the method {@link #setDocumentObjectModel(boolean) }.")
+    fun setDom(buildDom: Boolean) {
+        setDocumentObjectModel(buildDom)
     }
 
-    /** Build a real model or a plain writer, the default value is {@code false} */
-    public DefaultHtmlConfig setDocumentObjectModel(final boolean buildDom) {
-        this.buildDom = buildDom;
-        return this;
+    /** Build a real model or a plain writer, the default value is `false`  */
+    fun setDocumentObjectModel(buildDom: Boolean): DefaultHtmlConfig {
+        this.isDocumentObjectModel = buildDom
+        return this
     }
 
-    /** A request to generate a minimal HTML header */
-    public DefaultHtmlConfig setHtmlHeader(boolean htmlHeaderRequest) {
-        this.htmlHeaderRequest = htmlHeaderRequest;
-        return this;
+    /** A request to generate a minimal HTML header  */
+    fun setHtmlHeader(htmlHeaderRequest: Boolean): DefaultHtmlConfig {
+        this.isHtmlHeaderRequest = htmlHeaderRequest
+        return this
     }
 
     /** The element name must not be special HTML characters.
-     * The {@code null} value is intended to build a root of AJAX queries.
+     * The `null` value is intended to build a root of AJAX queries.
      */
-    public DefaultHtmlConfig setRootElementName(@Nullable String rootElementName) {
-        this.rootElementName = rootElementName != null
-                ? rootElementName
-                : XmlBuilder.HIDDEN_NAME;
-        return this;
-    }
-
-    /** Set Unpair element names */
-    public void setUnpairElements(@NotNull Set<String> unpairElements) {
-        this.unpairElements = Assert.notNull(unpairElements, REQUIRED_MSG, "unpairElements");
+    fun setRootElementName(rootElementName: String?): DefaultHtmlConfig {
+        this.rootElementName = rootElementName
+            ?: XmlBuilder.Companion.HIDDEN_NAME
+        return this
     }
 
     /**
-     * Use the {@link #setHeaderInjector(org.ujorm.tools.xml.config.ApiInjector) } method rather.
+     * Use the [.setHeaderInjector] method rather.
      * @param rawHeaderText
      * @return
-     * @deprecated
      */
-    @Deprecated
-    public DefaultHtmlConfig setRawHedaderCode(@Nullable String rawHeaderText) {
-        this.rawHeaderText = Assert.notNull(rawHeaderText, REQUIRED_MSG, "rawHeaderText");
-        return this;
+    @Deprecated("")
+    fun setRawHedaderCode(rawHeaderText: String?): DefaultHtmlConfig {
+        this.rawHeaderText =
+            Assert.notNull<String, String>(rawHeaderText, DefaultXmlConfig.Companion.REQUIRED_MSG, "rawHeaderText")
+        return this
     }
 
-    /** Assign a new header injector */
-    public DefaultHtmlConfig setHeaderInjector(@NotNull ApiInjector headerInjector) {
-        this.headerInjector = Assert.notNull(headerInjector, REQUIRED_MSG, "headerInjector");
-        return this;
+    /** Assign a new header injector  */
+    fun setHeaderInjector(headerInjector: ApiInjector): DefaultHtmlConfig {
+        this.headerInjector = Assert.notNull<ApiInjector, String>(
+            headerInjector,
+            DefaultXmlConfig.Companion.REQUIRED_MSG,
+            "headerInjector"
+        )
+        return this
     }
 }

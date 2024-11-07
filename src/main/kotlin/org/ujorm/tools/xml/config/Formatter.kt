@@ -14,18 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config;
+package org.ujorm.tools.xml.config
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.xml.ApiElement;
+import org.ujorm.tools.xml.ApiElement
 
 /**
  * A value formatter.
  * @author Pavel Ponec
  */
-public interface Formatter {
-
+interface Formatter {
     /**
      * Format an objet value to a string ouptut, special characters will be escaped later.
      * @param value A data value
@@ -33,7 +30,5 @@ public interface Formatter {
      * @param attributeName A name of the attribute, if any.
      * @return A target non-nnul sequence is required.
      */
-    @NotNull
-    CharSequence format(@Nullable Object value, @NotNull ApiElement element, @Nullable String attributeName);
-
+    fun format(value: Any?, element: ApiElement<*>, attributeName: String?): CharSequence
 }

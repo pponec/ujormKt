@@ -77,7 +77,7 @@ public class ReportBuilder<D> {
     protected Injector htmlHeader = e -> {};
     /** Print a config title by default */
     @NotNull
-    protected Injector header = e -> e.addHeading(ReportBuilder.this.config.getConfig().getTitle());
+    protected Injector header = e -> e.addHeading(ReportBuilder.this.config.getConfig().title);
     /** Print an empty text by default */
     @NotNull
     protected Injector footer = e -> e.addText("");

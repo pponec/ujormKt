@@ -14,83 +14,82 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config;
+package org.ujorm.tools.xml.config
 
-import java.nio.charset.Charset;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.ujorm.tools.xml.ApiElement;
-import org.ujorm.tools.xml.config.impl.DefaultXmlConfig;
+import org.ujorm.tools.xml.ApiElement
+import org.ujorm.tools.xml.config.impl.DefaultXmlConfig
+import java.nio.charset.Charset
 
 /**
  * Configuraion of HtmlPage
  * @author Pavel Ponec
  */
-public interface XmlConfig {
-
-    /** Doctype */
-    @NotNull
-    CharSequence getDoctype();
+interface XmlConfig {
+    /** Doctype  */
+    @JvmField
+    val doctype: CharSequence
 
     /**
      * Charset
      * @return the charset
      */
-    @NotNull
-    Charset getCharset();
+    @JvmField
+    val charset: Charset
 
     /**
      * Level of the root element, the value may be negative.
      * @return the firstLevel
      */
-    int getFirstLevel();
+    @JvmField
+    val firstLevel: Int
 
     /**
      * New line
      * @return the newLine
      */
-    CharSequence getIndentation();
+    @JvmField
+    val indentation: CharSequence
 
-    /** A replacement text instead of the {@code null} value */
-    @NotNull
-    CharSequence getDefaultValue();
+    /** A replacement text instead of the `null` value  */
+    val defaultValue: CharSequence
 
-    /** A new line sequence */
-    @NotNull
-    CharSequence getNewLine();
+    /** A new line sequence  */
+    @JvmField
+    val newLine: CharSequence
 
     /**
      * HTTP cache is allowed
      * @return
      */
-    boolean isCacheAllowed();
+    val isCacheAllowed: Boolean
 
     /**
      * Get a value formatter
      */
-    @NotNull
-    Formatter getFormatter();
+    val formatter: Formatter
 
-    /** The pair element for termination is required. */
-    default boolean pairElement(@NotNull ApiElement element) {
-        return false;
+    /** The pair element for termination is required.  */
+    fun pairElement(element: ApiElement<*>): Boolean {
+        return false
     }
 
-    /**
-     * Create a new default config
-     * @return
-     */
-    static DefaultXmlConfig ofDefault() {
-        return new DefaultXmlConfig();
-    }
+    companion object {
+        /**
+         * Create a new default config
+         * @return
+         */
+        fun ofDefault(): DefaultXmlConfig {
+            return DefaultXmlConfig()
+        }
 
-    /**
-     * Create a new default config
-     * @return
-     */
-    static DefaultXmlConfig ofDoctype(@Nullable final String doctype) {
-        final DefaultXmlConfig result = new DefaultXmlConfig();
-        result.setDoctype(doctype);
-        return result;
+        /**
+         * Create a new default config
+         * @return
+         */
+        fun ofDoctype(doctype: String?): DefaultXmlConfig {
+            val result = DefaultXmlConfig()
+            result.setDoctype(doctype)
+            return result
+        }
     }
 }

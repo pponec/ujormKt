@@ -355,7 +355,7 @@ public class ReportBuilderConfigImpl<D> implements ReportBuilderConfig<D> {
     protected BiConsumer<Element,Boolean> inlineCssWriter() {
         return (Element element, Boolean sortable) -> {
             final ReportBuilderConfig conf = this;
-            final CharSequence newLine = conf.getConfig().getNewLine();
+            final CharSequence newLine = conf.getConfig().newLine;
             try (Element css = element.addElement(Html.STYLE)) {
                 css.addRawText(newLine, "body { margin: 10px;}");
                 css.addRawText(newLine, ".", conf.getSubtitleCss(), " {font-size: 10px; color: silver;}");

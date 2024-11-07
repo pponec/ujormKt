@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ujorm.tools.xml.config;
+package org.ujorm.tools.xml.config
 
-import org.jetbrains.annotations.NotNull;
-import org.ujorm.tools.xml.ApiElement;
+import org.ujorm.tools.xml.ApiElement
 
 /**
  * An common element writer
  * @author Pavel Ponec
  */
-@FunctionalInterface
-public interface ApiInjector {
-
-
+fun interface ApiInjector {
     /**
      * Performs an operation on the argument element.
      *
      * @param element An element to write
      */
-    void write(@NotNull ApiElement element);
+    fun write(element: ApiElement<*>)
 }
