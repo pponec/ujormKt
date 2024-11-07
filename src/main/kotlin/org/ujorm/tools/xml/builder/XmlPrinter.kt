@@ -33,9 +33,9 @@ import java.nio.charset.Charset
  */
 class XmlPrinter @JvmOverloads constructor(
     out: Appendable = StringBuilder(512),
-    config: XmlConfig = XmlConfig.Companion.ofDefault()
+    config: XmlConfig = XmlConfig.ofDefault()
 ) :
-    AbstractWriter(out, config!!) {
+    AbstractWriter(out, config) {
     /**
      * A writer constructor
      * @param out A writer
@@ -64,12 +64,12 @@ class XmlPrinter @JvmOverloads constructor(
     @Throws(IOException::class)
     fun writeAttrib(name: String, data: Any?, owner: XmlBuilder) {
         if (owner.name !== XmlBuilder.HIDDEN_NAME) {
-            writer.append(AbstractWriter.SPACE)
+            writer.append(SPACE)
             writer.append(name)
             writer.append('=')
-            writer.append(AbstractWriter.Companion.XML_2QUOT)
+            writer.append(XML_2QUOT)
             writeValue(data, owner, name)
-            writer.append(AbstractWriter.Companion.XML_2QUOT)
+            writer.append(XML_2QUOT)
         }
     }
 
@@ -82,11 +82,11 @@ class XmlPrinter @JvmOverloads constructor(
     @Throws(IOException::class)
     fun writeBeg(element: XmlBuilder, lastText: Boolean) {
         val name: CharSequence = element.name
-        if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
+        if (name !== XmlBuilder.HIDDEN_NAME) {
             if (!lastText) {
                 writeNewLine(element.level)
             }
-            writer.append(AbstractWriter.Companion.XML_LT)
+            writer.append()
             writer.append(name)
         }
     }
@@ -94,8 +94,8 @@ class XmlPrinter @JvmOverloads constructor(
     /** Middle closing the Node  */
     @Throws(IOException::class)
     fun writeMid(element: XmlBuilder) {
-        if (element.name !== XmlBuilder.Companion.HIDDEN_NAME) {
-            writer.append(AbstractWriter.Companion.XML_GT)
+        if (element.name !== XmlBuilder.HIDDEN_NAME) {
+            writer.append(XML_GT)
         }
     }
 
@@ -105,31 +105,30 @@ class XmlPrinter @JvmOverloads constructor(
         val name = element.name
         val pairElement = config.pairElement(element)
         val filled = element.isFilled
-        if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
+        if (name !== XmlBuilder.HIDDEN_NAME) {
             if (filled || pairElement) {
                 if (indentationEnabled && !element.isLastText) {
                     if (pairElement && !filled) {
-                        writer.append(AbstractWriter.Companion.XML_GT)
+                        writer.append(XML_GT)
                     } else {
                         writeNewLine(element.level)
                     }
                 } else if (!filled) {
-                    writer.append(AbstractWriter.Companion.XML_GT)
+                    writer.append(XML_GT)
                 }
-                writer.append(AbstractWriter.Companion.XML_LT)
-                writer.append(AbstractWriter.Companion.FORWARD_SLASH)
+                writer.append(XML_LT)
+                writer.append(FORWARD_SLASH)
                 writer.append(name)
-                writer.append(AbstractWriter.Companion.XML_GT)
+                writer.append(XML_GT)
             } else {
-                writer.append(AbstractWriter.Companion.FORWARD_SLASH)
-                writer.append(AbstractWriter.Companion.XML_GT)
+                writer.append(FORWARD_SLASH)
+                writer.append(XML_GT)
             }
         }
     }
 
     override fun toString(): String {
-        val result = writer.toString()
-        return result ?: result.toString()
+        return writer.toString()
     }
 
     // ------- FACTORY METHODS -------
@@ -145,7 +144,7 @@ class XmlPrinter @JvmOverloads constructor(
          * @return New instance of the XmlPrinter
          */
         fun forNiceXml(): XmlPrinter {
-            val config: DefaultXmlConfig = XmlConfig.Companion.ofDefault()
+            val config: DefaultXmlConfig = XmlConfig.ofDefault()
             config.setNiceFormat<DefaultXmlConfig>()
             return forXml(null, config)
         }
@@ -161,7 +160,7 @@ class XmlPrinter @JvmOverloads constructor(
         @JvmOverloads
         fun forXml(
             out: Appendable? = null,
-            config: XmlConfig = XmlConfig.Companion.ofDefault()
+            config: XmlConfig = XmlConfig.ofDefault()
         ): XmlPrinter {
             return XmlPrinter(out ?: StringBuilder(512), config)
         }
@@ -203,7 +202,7 @@ class XmlPrinter @JvmOverloads constructor(
         }
 
         /** Create XmlPrinter for UTF-8  */
-        fun <T> forHtml(
+        private fun <T> forHtml(
             out: Appendable?,
             config: HtmlConfig
         ): XmlPrinter {
@@ -218,7 +217,7 @@ class XmlPrinter @JvmOverloads constructor(
             indentationSpace: String,
             noCache: Boolean
         ): XmlPrinter {
-            val config: DefaultHtmlConfig = HtmlConfig.Companion.ofDefault()
+            val config: DefaultHtmlConfig = HtmlConfig.ofDefault()
             config.setCharset(charset)
             config.setIndentationSpace(indentationSpace)
             config.setCacheAllowed(!noCache)
@@ -234,7 +233,7 @@ class XmlPrinter @JvmOverloads constructor(
             config: HtmlConfig
         ): XmlPrinter {
             try {
-                val writer: Appendable = AbstractWriter.Companion.createWriter(
+                val writer: Appendable = createWriter(
                     httpServletResponse,
                     config.charset,
                     config.isCacheAllowed
