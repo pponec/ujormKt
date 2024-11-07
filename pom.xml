@@ -21,6 +21,13 @@
 
     <dependencies>
 
+        <!-- TEMPORARY -->
+        <dependency>
+            <groupId>org.ujorm</groupId>
+            <artifactId>ujo-web</artifactId>
+            <version>2.26</version>
+        </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
