@@ -27,14 +27,10 @@ import java.nio.charset.Charset
  * A generic writer
  * @author Pavel Ponec
  */
-abstract class AbstractWriter(out: Appendable, config: XmlConfig) {
-    /** For internal usage only  */
-    /** Output  */
-    val writer: Appendable = Assert.notNull(out, "out")
-
-    /** XML configuration  */
-    protected val config: XmlConfig =
-        Assert.notNull(config, "config")
+abstract class AbstractWriter(
+    var writer: Appendable,
+    var config: XmlConfig
+) {
 
     /** Value formatter  */
     private val formatter = config.formatter

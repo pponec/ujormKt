@@ -33,7 +33,7 @@ import java.nio.charset.Charset
  */
 class XmlPrinter @JvmOverloads constructor(
     out: Appendable = StringBuilder(512),
-    config: XmlConfig? = XmlConfig.Companion.ofDefault()
+    config: XmlConfig = XmlConfig.Companion.ofDefault()
 ) :
     AbstractWriter(out, config!!) {
     /**
@@ -45,7 +45,7 @@ class XmlPrinter @JvmOverloads constructor(
     /** Default constructor a zero offset  */
     init {
         try {
-            out.append(config.getDoctype())
+            writer.append(config.doctype)
         } catch (e: IOException) {
             throw IllegalStateException(e)
         }
@@ -58,77 +58,77 @@ class XmlPrinter @JvmOverloads constructor(
      */
     @Throws(IOException::class)
     fun writeRawValue(rawValue: Any, element: XmlBuilder) {
-        out.append(rawValue.toString())
+        writer.append(rawValue.toString())
     }
 
     @Throws(IOException::class)
     fun writeAttrib(name: String, data: Any?, owner: XmlBuilder) {
-        if (owner.getName() !== XmlBuilder.Companion.HIDDEN_NAME) {
-            out.append(AbstractWriter.Companion.SPACE)
-            out.append(name)
-            out.append('=')
-            out.append(AbstractWriter.Companion.XML_2QUOT)
+        if (owner.name !== XmlBuilder.HIDDEN_NAME) {
+            writer.append(AbstractWriter.SPACE)
+            writer.append(name)
+            writer.append('=')
+            writer.append(AbstractWriter.Companion.XML_2QUOT)
             writeValue(data, owner, name)
-            out.append(AbstractWriter.Companion.XML_2QUOT)
+            writer.append(AbstractWriter.Companion.XML_2QUOT)
         }
     }
 
     @Throws(IOException::class)
     fun writeRawText(rawText: Any) {
-        out.append(rawText.toString())
+        writer.append(rawText.toString())
     }
 
     /** Open the Node  */
     @Throws(IOException::class)
     fun writeBeg(element: XmlBuilder, lastText: Boolean) {
-        val name: CharSequence = element.getName()
+        val name: CharSequence = element.name
         if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
             if (!lastText) {
                 writeNewLine(element.level)
             }
-            out.append(AbstractWriter.Companion.XML_LT)
-            out.append(name)
+            writer.append(AbstractWriter.Companion.XML_LT)
+            writer.append(name)
         }
     }
 
     /** Middle closing the Node  */
     @Throws(IOException::class)
     fun writeMid(element: XmlBuilder) {
-        if (element.getName() !== XmlBuilder.Companion.HIDDEN_NAME) {
-            out.append(AbstractWriter.Companion.XML_GT)
+        if (element.name !== XmlBuilder.Companion.HIDDEN_NAME) {
+            writer.append(AbstractWriter.Companion.XML_GT)
         }
     }
 
     /** Close the Node  */
     @Throws(IOException::class)
     fun writeEnd(element: XmlBuilder) {
-        val name = element.getName()
+        val name = element.name
         val pairElement = config.pairElement(element)
         val filled = element.isFilled
         if (name !== XmlBuilder.Companion.HIDDEN_NAME) {
             if (filled || pairElement) {
                 if (indentationEnabled && !element.isLastText) {
                     if (pairElement && !filled) {
-                        out.append(AbstractWriter.Companion.XML_GT)
+                        writer.append(AbstractWriter.Companion.XML_GT)
                     } else {
                         writeNewLine(element.level)
                     }
                 } else if (!filled) {
-                    out.append(AbstractWriter.Companion.XML_GT)
+                    writer.append(AbstractWriter.Companion.XML_GT)
                 }
-                out.append(AbstractWriter.Companion.XML_LT)
-                out.append(AbstractWriter.Companion.FORWARD_SLASH)
-                out.append(name)
-                out.append(AbstractWriter.Companion.XML_GT)
+                writer.append(AbstractWriter.Companion.XML_LT)
+                writer.append(AbstractWriter.Companion.FORWARD_SLASH)
+                writer.append(name)
+                writer.append(AbstractWriter.Companion.XML_GT)
             } else {
-                out.append(AbstractWriter.Companion.FORWARD_SLASH)
-                out.append(AbstractWriter.Companion.XML_GT)
+                writer.append(AbstractWriter.Companion.FORWARD_SLASH)
+                writer.append(AbstractWriter.Companion.XML_GT)
             }
         }
     }
 
     override fun toString(): String {
-        val result = out.toString()
+        val result = writer.toString()
         return result ?: result.toString()
     }
 
